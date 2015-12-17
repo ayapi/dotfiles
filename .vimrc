@@ -287,14 +287,35 @@ inoremap <silent> <S-tab> <C-o><<<C-g>u
 
 
 " <Esc> ---------------------------
-" after search    : clear highlight
 " completion mode : close popup
+" snip mode       : clear markers
+" after search    : clear highlight
+" exists sub-pane : close sub-pane
+" 
+" sub-pane means,
+" 'Location List', 'Scratch Preview'
 " ---------------------------------
 
-" by default, completion popup automatically close on leaving insert-mode
-noremap <silent> <Esc> :silent nohlsearch<CR>i
-inoremap <silent> <Esc> <C-o>:silent nohlsearch<CR>
+function! VariousClear() abort
+  if pumvisible()
+    return "\<C-e>"
+  elseif neosnippet#expandable_or_jumpable()
+    return "\<C-o>:NeoSnippetClearMarkers\<CR>"
+  else
+    return "\<C-o>:silent nohlsearch\<CR>\<C-o>:silent lclose\<CR>\<C-o>:silent pclose\<CR>"
+  endif
+endfunction
 
+noremap <silent> <Esc> :silent nohlsearch<CR>:silent lclose<CR>:silent pclose<CR>i
+inoremap <silent><expr> <Esc> VariousClear()
+
+
+" below code doesnt work
+" maybe caused by vim's select-mode default behavior,
+" <Esc> key captured for 'leaving select-mode'
+" so i cant map <Esc> in select-mode
+
+" snoremap <silent> <Esc> <C-g>vi<C-r>=VariousClear()
 
 
 " [Move cursor by display lines when wrapping]
@@ -408,7 +429,7 @@ noremap <C-l> <C-v>=i<C-g>u
 " <C-_> means `ctrl+/`
 nmap <C-_> <Plug>(caw:i:toggle)
 vmap <C-_> <Plug>(caw:i:toggle)
-imap <C-_> <Esc><Plug>(caw:i:toggle)i
+inoremap <C-_> <C-o>:execute "normal \<Plug>(caw:i:toggle)"<CR>
 
 " [new tab]
 noremap <C-n> <C-c>:tabnew<CR>
