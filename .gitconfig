@@ -12,3 +12,5 @@
   keepBackup = false
 [mergetool "hrdiff"]
   cmd = hrdiff \"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+[github]
+	user = ayapi
