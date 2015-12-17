@@ -357,10 +357,7 @@ inoremap <silent> <C-h> <C-o>:execute "normal! db"<CR>
 " when hit <Home> & cursor on and after 2 (like 1), cursor will go to 2.
 " when hit <Home> & cursor in range 2-3, cursor will go to 3.
 " ---------------------------------
-function! GetGoHomeCmd() range abort
-  " echomsg "indent: " . string(indent('.')) . ", col:" . string(col('.'))
-  " echomsg indent('.') >= col('.') - 1 ? "g0" : "g^"
-  " return "g0"
+function! GetGoHomeCmd() abort
   return indent('.') >= col('.') - 1 ? "g0" : "g^"
 endfunction
 
