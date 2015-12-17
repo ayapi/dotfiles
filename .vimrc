@@ -348,6 +348,22 @@ inoremap <silent> <C-Del> <C-o>:execute "normal! de"<CR>
 noremap <silent> <C-h> db
 inoremap <silent> <C-h> <C-o>:execute "normal! db"<CR>
 
+
+" <Home> --------------------------
+"     console.log('ayp')
+" ^   ^        ^
+" 3   2        1
+" 
+" when hit <Home> & cursor on and after 2 (like 1), cursor will go to 2.
+" when hit <Home> & cursor in range 2-3, cursor will go to 3.
+" ---------------------------------
+function! GetGoHomeCmd() range abort
+  " echomsg "indent: " . string(indent('.')) . ", col:" . string(col('.'))
+  " echomsg indent('.') >= col('.') - 1 ? "g0" : "g^"
+  " return "g0"
+  return indent('.') >= col('.') - 1 ? "g0" : "g^"
+endfunction
+
 " [Move cursor by display lines when wrapping]
 " http://vim.wikia.com/wiki/Move_cursor_by_display_lines_when_wrapping
 " http://stackoverflow.com/questions/18678332/gvim-make-s-up-s-down-move-in-screen-lines
@@ -357,42 +373,43 @@ inoremap <silent> <C-h> <C-o>:execute "normal! db"<CR>
 nnoremap <silent> <Down> gj
 nnoremap <silent> <Up> gk
 if has('nvim')
-  nnoremap <silent> <Home> g0
+  nnoremap <silent><expr> <Home> GetGoHomeCmd()
   nnoremap <silent> <End> g$
 else
-  nnoremap <silent> <kHome> g0
+  nnoremap <silent><expr> <kHome> GetGoHomeCmd()
   nnoremap <silent> <kEnd> g$
 endif
 inoremap <silent> <expr> <Down>  pumvisible() ? "\<Down>" : "\<C-o>gj"
 inoremap <silent> <expr> <Up>    pumvisible() ? "\<Up>" : "\<C-o>gk"
 if has('nvim')
-  call IMapWithClosePopup("<Home>",  "\\<C-o>g0")
-  call IMapWithClosePopup("<End>",   "\\<C-o>g$")
+  call IMapWithClosePopup("<Home>", "\\<C-o>:execute printf(\\\"normal! %s\\\", GetGoHomeCmd())\\<CR>")
+  call IMapWithClosePopup("<End>",  "\\<C-o>g$")
 else
-  call IMapWithClosePopup("<kHome>", "\\<C-o>g0")
-  call IMapWithClosePopup("<kEnd>",  "\\<C-o>g$")
+  call IMapWithClosePopup("<kHome>","\\<C-o>:execute printf(\\\"normal! %s\\\", GetGoHomeCmd())\\<CR>")
+  call IMapWithClosePopup("<kEnd>", "\\<C-o>g$")
 endif
 
 " when entering select-mode
 call IMapWithClosePopup("<S-Down>", "\\<C-o>vgj\\<C-g>")
 call IMapWithClosePopup("<S-Up>",   "\\<C-o>vgk\\<C-g>")
-call IMapWithClosePopup("<S-Home>", "\\<C-o>vg0\\<C-g>")
+
+call IMapWithClosePopup("<S-Home>", "\\<C-o>:execute printf(\\\"normal! v%s<C-g>\\\", GetGoHomeCmd())\\<CR>")
 call IMapWithClosePopup("<S-End>",  "\\<C-o>vg$\\<C-g>")
 
 " while select-mode
 snoremap <silent> <S-Down> <C-O>gj
 snoremap <silent> <S-Up> <C-O>gk
-snoremap <silent> <S-Home> <C-O>g0
+snoremap <silent><expr> <S-Home> "\<C-o>".GetGoHomeCmd()
 snoremap <silent> <S-End> <C-O>g$
 
 " when leaving select-mode
 snoremap <silent> <Down> <C-G>vgj<Esc>i
 snoremap <silent> <Up> <C-G>vgk<Esc>i
 if has('nvim')
-  snoremap <silent> <Home> <C-G>vg0<Esc>i
+  snoremap <silent><expr> <Home> "\<C-G>v".GetGoHomeCmd()."\<Esc>i"
   snoremap <silent> <End> <C-G>vg$<Esc>i
 else
-  snoremap <silent> <kHome> <C-G>vg0<Esc>i
+  snoremap <silent><expr> <kHome> "\<C-G>v".GetGoHomeCmd()."\<Esc>i"
   snoremap <silent> <kEnd> <C-G>vg$<Esc>i
 endif
 
