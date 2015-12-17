@@ -318,11 +318,31 @@ inoremap <silent><expr> <Esc> VariousClear()
 " snoremap <silent> <Esc> <C-g>vi<C-r>=VariousClear()
 
 
+set virtualedit=onemore
+
+" [move cursor word-by-word]
+" general move
+noremap <silent> <C-Right> el
+noremap <silent> <C-Left> b
+inoremap <silent> <C-Right> <C-o>e<C-o>l
+inoremap <silent> <C-Left> <C-o>b
+
+" when entering select-mode
+inoremap <silent> <C-S-Right> <C-o>ve<C-g>
+inoremap <silent> <C-S-Left> <C-o>vb<C-g>
+
+" while select-mode
+snoremap <silent> <C-S-Right> <C-o>e
+snoremap <silent> <C-S-Left> <C-o>b
+
+" when leaving select-mode
+snoremap <silent> <C-Right> <C-g>ve
+snoremap <silent> <C-Left> <C-g>vb
+
 " [Move cursor by display lines when wrapping]
 " http://vim.wikia.com/wiki/Move_cursor_by_display_lines_when_wrapping
 " http://stackoverflow.com/questions/18678332/gvim-make-s-up-s-down-move-in-screen-lines
 " http://stackoverflow.com/questions/3676388/cursor-positioning-when-entering-insert-mode
-set virtualedit=onemore
 
 " general move
 nnoremap <silent> <Down> gj
