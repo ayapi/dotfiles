@@ -339,6 +339,15 @@ snoremap <silent> <C-S-Left> <C-o>b
 snoremap <silent> <C-Right> <C-g>ve
 snoremap <silent> <C-Left> <C-g>vb
 
+" [delete word]
+noremap <silent> <C-Del> de
+inoremap <silent> <C-Del> <C-o>:execute "normal! de"<CR>
+
+" [delete backward word]
+" <C-BS> is <C-h> in urxvt
+noremap <silent> <C-h> db
+inoremap <silent> <C-h> <C-o>:execute "normal! db"<CR>
+
 " [Move cursor by display lines when wrapping]
 " http://vim.wikia.com/wiki/Move_cursor_by_display_lines_when_wrapping
 " http://stackoverflow.com/questions/18678332/gvim-make-s-up-s-down-move-in-screen-lines
