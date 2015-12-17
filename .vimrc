@@ -186,7 +186,7 @@ let g:neosnippet#snippets_directory += ["~/.vim/snippets"]
 " ------------------------------------
 set ttimeout
 set ttimeoutlen=10
-" set timeoutlen=100
+set timeoutlen=100
 
 set t_ku=[A
 set t_kd=[B
@@ -455,50 +455,45 @@ noremap [6;6~ <C-c>:tabmove +1<CR>
 inoremap [6;6~ <C-o>:tabmove +1<CR>
 nnoremap [6;6~ :tabmove +1<CR>
 
-noremap <C-p> <Nop>
-inoremap <C-p> <Nop>
+" [enter pane-mode]
+let g:submode_always_show_submode = 1
+let g:submode_timeoutlen = 1000
+call submode#enter_with('pane', 'i', '', '<C-p>')
+call submode#enter_with('pane', 'n', '', '<C-p>')
 
-" [new pane]
-noremap <C-p>\| <C-c>:vnew<CR><C-w>Li
-inoremap <C-p>\| <Esc>:vnew<CR><C-w>Li
-nnoremap <C-p>\| :vnew<CR><C-w>Li
-noremap <C-p>= <C-c>:new<CR><C-w>Ji
-inoremap <C-p>= <Esc>:new<CR><C-w>Ji
-nnoremap <C-p>= :new<CR><C-w>Ji
+" [resize pane]
+call submode#map('pane', 'i', '', '>', '<C-o><C-w>>')
+call submode#map('pane', 'i', '', '<', '<C-o><C-w><')
+call submode#map('pane', 'i', '', '+', '<C-o><C-w>+')
+call submode#map('pane', 'i', '', '-', '<C-o><C-w>-')
+call submode#map('pane', 'n', '', '>', '<C-w>>i')
+call submode#map('pane', 'n', '', '<', '<C-w><i')
+call submode#map('pane', 'n', '', '+', '<C-w>+i')
+call submode#map('pane', 'n', '', '-', '<C-w>-i')
+
+" [select(focus) pane]
+call submode#map('pane', 'i', '', '<Tab>', '<C-o><C-w>p')
+call submode#map('pane', 'n', '', '<Tab>', '<C-w>pi')
+
+" [move pane]
+call submode#map('pane', 'i', '', '<Left>', '<C-o><C-w>H')
+call submode#map('pane', 'i', '', '<Right>', '<C-o><C-w>L')
+call submode#map('pane', 'i', '', '<Up>', '<C-o><C-w>K')
+call submode#map('pane', 'i', '', '<Down>', '<C-o><C-w>J')
+call submode#map('pane', 'n', '', '<Left>', '<C-w>Hi')
+call submode#map('pane', 'n', '', '<Right>', '<C-w>Li')
+call submode#map('pane', 'n', '', '<Up>', '<C-w>Ki')
+call submode#map('pane', 'n', '', '<Down>', '<C-w>Ji')
+
+" [split pane w/ new file]
+call submode#map('pane', 'i', '', '\|', '<Esc>:vnew<CR><C-w>Li')
+call submode#map('pane', 'i', '', '=', '<Esc>:new<CR><C-w>Ji')
+call submode#map('pane', 'n', '', '\|', ':vnew<CR><C-w>Li')
+call submode#map('pane', 'n', '', '=', ':new<CR><C-w>Ji')
 
 " [close pane]
-noremap <C-p>x <C-c>:confirm quit<CR>
-inoremap <C-p>x <C-o>:confirm quit<CR>
-nnoremap <C-p>x :confirm quit<CR>
-
-" [pane manipulation]
-call submode#enter_with('winsize', 'i', '', '<C-p>>', '<C-o><C-w>>')
-call submode#enter_with('winsize', 'i', '', '<C-p><', '<C-o><C-w><')
-call submode#enter_with('winsize', 'i', '', '<C-p>+', '<C-o><C-w>-')
-call submode#enter_with('winsize', 'i', '', '<C-p>-', '<C-o><C-w>+')
-call submode#enter_with('winsize', 'i', '', '<C-p><Tab>', '<C-o><C-w>p')
-call submode#enter_with('winsize', 'i', '', '<C-p><Left>', '<C-o><C-w>H')
-call submode#enter_with('winsize', 'i', '', '<C-p><Right>', '<C-o><C-w>L')
-call submode#enter_with('winsize', 'i', '', '<C-p><Up>', '<C-o><C-w>K')
-call submode#enter_with('winsize', 'i', '', '<C-p><Down>', '<C-o><C-w>J')
-call submode#enter_with('winsize', 'n', '', '<C-p>>', '<C-w>>')
-call submode#enter_with('winsize', 'n', '', '<C-p><', '<C-w><')
-call submode#enter_with('winsize', 'n', '', '<C-p>+', '<C-w>-')
-call submode#enter_with('winsize', 'n', '', '<C-p>-', '<C-w>+')
-call submode#enter_with('winsize', 'n', '', '<C-p><Tab>', '<C-w>p')
-call submode#enter_with('winsize', 'n', '', '<C-p><Left>', '<C-w>H')
-call submode#enter_with('winsize', 'n', '', '<C-p><Right>', '<C-w>L')
-call submode#enter_with('winsize', 'n', '', '<C-p><Up>', '<C-w>K')
-call submode#enter_with('winsize', 'n', '', '<C-p><Down>', '<C-w>J')
-call submode#map('winsize', 'n', '', '>', '<C-w>>')
-call submode#map('winsize', 'n', '', '<', '<C-w><')
-call submode#map('winsize', 'n', '', '+', '<C-w>-')
-call submode#map('winsize', 'n', '', '-', '<C-w>+')
-call submode#map('winsize', 'n', '', '<Tab>', '<C-w>p')
-call submode#map('winsize', 'n', '', '<Left>', '<C-w>H')
-call submode#map('winsize', 'n', '', '<Right>', '<C-w>L')
-call submode#map('winsize', 'n', '', '<Up>', '<C-w>K')
-call submode#map('winsize', 'n', '', '<Down>', '<C-w>J')
+call submode#map('pane', 'i', '', 'x', '<C-o>:confirm quit<CR>')
+call submode#map('pane', 'n', '', 'x', ':confirm quit<CR>')
 
 " [diff(merge-tool) mode]
 function! MergeFromTop()
