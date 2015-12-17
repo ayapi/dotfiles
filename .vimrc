@@ -230,9 +230,6 @@ endfor
 inoremap <silent> <expr> <BS> '<BS><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
 
 " [close completion popup menu]
-" i want to use <ESC>, but i have delay issue
-inoremap <silent> <expr> <Del>   pumvisible() ? "\<C-e>" : "\<Del>"
-
 " single quote
 inoremap <silent> <expr> ' "<C-g>u\'<C-r>=pumvisible() ? \"\<lt>C-e>\" : \"\"<CR>"
 
@@ -287,6 +284,16 @@ noremap <silent> <tab> <C-v>>gvvi<C-g>u
 " [deindent]
 noremap  <silent> <S-tab> <C-v><gvv$i<C-g>u
 inoremap <silent> <S-tab> <C-o><<<C-g>u
+
+
+" <Esc> ---------------------------
+" after search    : clear highlight
+" completion mode : close popup
+" ---------------------------------
+
+" by default, completion popup automatically close on leaving insert-mode
+noremap <silent> <Esc> :silent nohlsearch<CR>i
+inoremap <silent> <Esc> <C-o>:silent nohlsearch<CR>
 
 
 
