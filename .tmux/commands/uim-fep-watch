@@ -1,0 +1,9 @@
+#! /bin/zsh
+
+tmux set-option -g status-left-length 80
+uim-fep-tick | \
+while read line ; do
+  #echo "$line"
+  tmux set-option -g status-left $line
+  sleep 0.1
+done

@@ -1,0 +1,10 @@
+#!/bin/zsh
+
+eval $(tmux showenv -s UIM_FEP_SETMODE_FILES)
+#tmux display-message $UIM_FEP_SETMODE_FILES
+
+for f in $(echo "$UIM_FEP_SETMODE_FILES" | sed -e 's/:/\n/g'); do
+  echo 0 > $f
+done
+
+tmux send-keys $1

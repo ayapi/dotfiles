@@ -1,0 +1,339 @@
+Xcursor.size: 16
+
+! terminal colours
+*foreground:#CCCCCC
+*background:#000000
+
+!black darkgray
+*color0:    #1B1D1E
+*color8:    #808080
+!darkred red
+*color1:    #FF0044
+*color9:    #F92672
+!darkgreen green
+*color2:    #A6E22E
+*color10:   #A6E22E
+!darkyellow yellow
+*color3:    #f4bf75
+*color11:   #E6DB74
+!darkblue blue
+*color4:    #266C98
+*color12:   #7070F0
+!darkmagenta magenta
+*color5:    #AC0CB1
+*color13:   #D63AE1
+!darkcyan cyan
+*color6:    #AE81FF
+*color14:   #66D9EF
+!gray white
+*color7:    #CCCCCC
+*color15:   #F8F8F2
+
+xterm*locale: true
+xterm*utf8: 1
+
+
+xterm*faceName: MSGothicEx:pixelsize=12:antialias=false
+!xterm*faceName: GohuFont:size=11:antialias=false
+xterm*faceNameDoublesize: MSGothicEx:pixelsize=12:antialias=false
+!xterm*faceSize: 9
+xterm*allowBoldFonts: false
+
+
+Xft.rgba: none
+!Xft.hintstyle: hintnone
+!Xft.dpi: 96
+
+URxvt*imLocale: ja_JP.UTF-8
+URxvt*perl-ext-common: default
+
+URxvt*letterSpace: 0
+URxvt*lineSpace: 2
+URxvt*cursorBlink: true
+
+
+URxvt*font: \
+xft:MSGothicEx:pixelsize=12:antialias=false
+
+!URxvt*font: \
+xft:SHG30MEx:pixelsize=12:antialias=false
+
+!URxvt*font: \
+xft:Terminess Powerline:pixelsize=12:antialias=false, \
+xft:MSGothic:pixelsize=12:antialias=false
+
+!URxvt*boldFont: \
+xft:Terminess Powerline:pixelsize=12:antialias=false, \
+xft:MSGothic:pixelsize=12:antialias=false
+
+!URxvt*italicFont: \
+xft:Terminess Powerline:pixelsize=12:antialias=false, \
+xft:MSGothic:pixelsize=12:antialias=false
+
+!URxvt*boldItalicFont: \
+xft:Terminess Powerline:pixelsize=12:antialias=false, \
+xft:MSGothic:pixelsize=12:antialias=false
+
+
+
+! URxvt.keysym.Zenkaku_Hankaku: \033[64;5~
+URxvt.keysym.Zenkaku_Hankaku: \033[21~
+
+URxvt.keysym.Mod3-Left:    \033<Mod3-Left>
+URxvt.keysym.Mod3-Right:    \033<Mod3-Right>
+URxvt.keysym.Shift-Mod3-Left: \033<Shift-Mod3-Left>
+URxvt.keysym.Shift-Mod3-Right: \033<Shift-Mod3-Right>
+
+URxvt.keysym.Control-Return: \033\015
+
+URxvt.keysym.Control-Tab                : \033[27;5;9~
+URxvt.keysym.Control-Shift-ISO_Left_Tab : \033[27;6;9~
+URxvt.keysym.Mod3-Tab                   : \033[27;3;9~
+
+URxvt.keysym.Control-Shift-S  : \033[24~
+
+URxvt.keysym.Home             : \033[1~
+URxvt.keysym.End              : \033[4~
+!URxvt.keysym.S-Page_Up : captured by terminal for scrolling
+!URxvt.keysym.S-Page_Down : captured by terminal for scrolling
+URxvt.keysym.S-Up             : \033[1;2A
+URxvt.keysym.S-Down           : \033[1;2B
+URxvt.keysym.S-Right          : \033[1;2C
+URxvt.keysym.S-Left           : \033[1;2D
+URxvt.keysym.S-Home           : \033[1;2H
+URxvt.keysym.S-End            : \033[1;2F
+URxvt.keysym.M-Up             : \033[1;3A
+URxvt.keysym.M-Down           : \033[1;3B
+URxvt.keysym.M-Right          : \033[1;3C
+URxvt.keysym.M-Left           : \033[1;3D
+URxvt.keysym.M-Page_Up        : \033[5;3~
+URxvt.keysym.M-Page_Down      : \033[6;3~
+URxvt.keysym.M-Home           : \033[1;3H
+URxvt.keysym.M-End            : \033[1;3F
+URxvt.keysym.M-S-Up           : \033[1;4A
+URxvt.keysym.M-S-Down         : \033[1;4B
+URxvt.keysym.M-S-Right        : \033[1;4C
+URxvt.keysym.M-S-Left         : \033[1;4D
+URxvt.keysym.M-S-Home         : \033[1;4H
+URxvt.keysym.M-S-End          : \033[1;4F
+URxvt.keysym.C-Up             : \033[1;5A
+URxvt.keysym.C-Down           : \033[1;5B
+URxvt.keysym.C-Right          : \033[1;5C
+URxvt.keysym.C-Left           : \033[1;5D
+URxvt.keysym.C-Page_Up        : \033[5;5~
+URxvt.keysym.C-Page_Down      : \033[6;5~
+URxvt.keysym.C-Home           : \033[1;5H
+URxvt.keysym.C-End            : \033[1;5F
+URxvt.keysym.C-S-Up           : \033[1;6A
+URxvt.keysym.C-S-Down         : \033[1;6B
+URxvt.keysym.C-S-Right        : \033[1;6C
+URxvt.keysym.C-S-Left         : \033[1;6D
+URxvt.keysym.C-S-Home         : \033[1;6H
+URxvt.keysym.C-S-End          : \033[1;6F
+URxvt.keysym.C-S-Page_Up      : \033[5;6~
+URxvt.keysym.C-S-Page_Down    : \033[6;6~
+URxvt.keysym.M-C-Up           : \033[1;7A
+URxvt.keysym.M-C-Down         : \033[1;7B
+URxvt.keysym.M-C-Right        : \033[1;7C
+URxvt.keysym.M-C-Left         : \033[1;7D
+URxvt.keysym.M-C-Page_Up      : \033[5;7~
+URxvt.keysym.M-C-Page_Down    : \033[6;7~
+URxvt.keysym.M-C-Home         : \033[1;7H
+URxvt.keysym.M-C-End          : \033[1;7F
+URxvt.keysym.M-C-S-Up         : \033[1;8A
+URxvt.keysym.M-C-S-Down       : \033[1;8B
+URxvt.keysym.M-C-S-Right      : \033[1;8C
+URxvt.keysym.M-C-S-Left       : \033[1;8D
+URxvt.keysym.M-C-S-Home       : \033[1;8H
+URxvt.keysym.M-C-S-End        : \033[1;8F
+
+URxvt.keysym.F1 : \033OP
+URxvt.keysym.F2 : \033OQ
+URxvt.keysym.F3 : \033OR
+URxvt.keysym.F4 : \033OS
+URxvt.keysym.S-F1 : \033[1;2P
+URxvt.keysym.S-F2 : \033[1;2Q
+URxvt.keysym.S-F3 : \033[1;2R
+URxvt.keysym.S-F4 : \033[1;2S
+URxvt.keysym.S-F5 : \033[15;2~
+URxvt.keysym.S-F6 : \033[17;2~
+URxvt.keysym.S-F7 : \033[18;2~
+URxvt.keysym.S-F8 : \033[19;2~
+URxvt.keysym.S-F9 : \033[20;2~
+URxvt.keysym.S-F10 : \033[21;2~
+URxvt.keysym.S-F11 : \033[23;2~
+URxvt.keysym.S-F12 : \033[24;2~
+URxvt.keysym.C-F1 : \033[1;5P
+URxvt.keysym.C-F2 : \033[1;5Q
+URxvt.keysym.C-F3 : \033[1;5R
+URxvt.keysym.C-F4 : \033[1;5S
+URxvt.keysym.C-F5 : \033[15;5~
+URxvt.keysym.C-F6 : \033[17;5~
+URxvt.keysym.C-F7 : \033[18;5~
+URxvt.keysym.C-F8 : \033[19;5~
+URxvt.keysym.C-F9 : \033[20;5~
+URxvt.keysym.C-F10 : \033[21;5~
+URxvt.keysym.C-F11 : \033[23;5~
+URxvt.keysym.C-F12 : \033[24;5~
+URxvt.keysym.C-S-F1 : \033[1;6P
+URxvt.keysym.C-S-F2 : \033[1;6Q
+URxvt.keysym.C-S-F3 : \033[1;6R
+URxvt.keysym.C-S-F4 : \033[1;6S
+URxvt.keysym.C-S-F5 : \033[15;6~
+URxvt.keysym.C-S-F6 : \033[17;6~
+URxvt.keysym.C-S-F7 : \033[18;6~
+URxvt.keysym.C-S-F8 : \033[19;6~
+URxvt.keysym.C-S-F9 : \033[20;6~
+URxvt.keysym.C-S-F10 : \033[21;6~
+URxvt.keysym.C-S-F11 : \033[23;6~
+URxvt.keysym.C-S-F12 : \033[24;6~
+URxvt.keysym.M-F1 : \033[1;3P
+URxvt.keysym.M-F2 : \033[1;3Q
+URxvt.keysym.M-F3 : \033[1;3R
+URxvt.keysym.M-F4 : \033[1;3S
+URxvt.keysym.M-F5 : \033[15;3~
+URxvt.keysym.M-F6 : \033[17;3~
+URxvt.keysym.M-F7 : \033[18;3~
+URxvt.keysym.M-F8 : \033[19;3~
+URxvt.keysym.M-F9 : \033[20;3~
+URxvt.keysym.M-F10 : \033[21;3~
+URxvt.keysym.M-F11 : \033[23;3~
+URxvt.keysym.M-F12 : \033[24;3~
+URxvt.keysym.M-S-F1: \033[1;4P
+URxvt.keysym.M-S-F2: \033[1;4Q
+URxvt.keysym.M-S-F3: \033[1;4R
+
+URxvt.keysym.Menu: \033[17;5~
+
+
+URxvt*iso14755: False
+URxvt*iso14755_52: False
+
+! URxvt*termName:                       string
+! URxvt*geometry:                       geometry
+! URxvt*chdir:                          string
+URxvt*reverseVideo:                   false
+! URxvt*loginShell:                     boolean
+! URxvt*multiClickTime:                 number
+URxvt*jumpScroll:                     true
+URxvt*skipScroll:                     true
+! URxvt*pastableTabs:                   boolean
+! URxvt*scrollstyle:                    mode
+URxvt*scrollBar:                      false
+! URxvt*scrollBar_right:                boolean
+! URxvt*scrollBar_floating:             boolean
+! URxvt*scrollBar_align:                mode
+! URxvt*thickness:                      number
+URxvt*scrollTtyOutput:                false
+! URxvt*scrollTtyKeypress:              boolean
+URxvt*scrollWithBuffer:               false
+URxvt*inheritPixmap:                  false
+! URxvt*transparent:                    true
+! URxvt*tintColor:                      #dddddd
+! URxvt*shading:                        90
+! URxvt*blurRadius:                     HxV
+! URxvt*fading:                         number
+! URxvt*fadeColor:                      color
+! URxvt*utmpInhibit:                    boolean
+! URxvt*urgentOnBell:                   boolean
+! URxvt*visualBell:                     boolean
+! URxvt*mapAlert:                       boolean
+URxvt*meta8:                          false
+! URxvt*mouseWheelScrollPage:           boolean
+! URxvt*tripleclickwords:               boolean
+! URxvt*insecure:                       boolean
+! URxvt*cursorUnderline:                boolean
+! URxvt*cursorBlink:                    boolean
+! URxvt*pointerBlank:                   boolean
+URxvt*background:                     [85]#000000
+! URxvt*foreground:                     color
+! URxvt*color0:                         color
+! URxvt*color1:                         color
+! URxvt*color2:                         color
+! URxvt*color3:                         color
+! URxvt*color4:                         color
+! URxvt*color5:                         color
+! URxvt*color6:                         color
+! URxvt*color7:                         color
+! URxvt*color8:                         color
+! URxvt*color9:                         color
+! URxvt*color10:                        color
+! URxvt*color11:                        color
+! URxvt*color12:                        color
+! URxvt*color13:                        color
+! URxvt*color14:                        color
+! URxvt*color15:                        color
+! URxvt*colorBD:                        color
+! URxvt*colorIT:                        color
+! URxvt*colorUL:                        color
+! URxvt*colorRV:                        color
+! URxvt*underlineColor:                 color
+! URxvt*scrollColor:                    color
+! URxvt*troughColor:                    color
+URxvt*highlightColor:                 [75]#333333
+! URxvt*highlightTextColor:             color
+! URxvt*cursorColor:                    color
+! URxvt*cursorColor2:                   color
+! URxvt*pointerColor:                   color
+! URxvt*pointerColor2:                  color
+! URxvt*borderColor:                    color
+URxvt*iconFile:                       /usr/share/icons/HighContrast/48x48/apps/utilities-terminal.png
+! URxvt*font:                           fontname
+! URxvt*boldFont:                       fontname
+! URxvt*italicFont:                     fontname
+! URxvt*boldItalicFont:                 fontname
+! URxvt*intensityStyles:                boolean
+! URxvt*title:                          string
+! URxvt*iconName:                       string
+! URxvt*saveLines:                      number
+URxvt*buffered:                       false
+URxvt*depth:                          32
+! URxvt*visual:                         number
+! URxvt*transient-for:                  windowid
+! URxvt*override-redirect:              boolean
+! URxvt*hold:                           boolean
+! URxvt*externalBorder:                 number
+! URxvt*internalBorder:                 number
+! URxvt*borderLess:                     boolean
+! URxvt*lineSpace:                      number
+! URxvt*letterSpace:                    number
+! URxvt*skipBuiltinGlyphs:              boolean
+! URxvt*pointerBlankDelay:              number
+! URxvt*backspacekey:                   string
+! URxvt*deletekey:                      string
+! URxvt*print-pipe:                     string
+! URxvt*modifier:                       modifier
+! URxvt*cutchars:                       string
+! URxvt*answerbackString:               string
+! URxvt*secondaryScreen:                boolean
+! URxvt*secondaryScroll:                boolean
+! URxvt*perl-lib:                       string
+! URxvt*perl-eval:                      perl-eval
+! URxvt*perl-ext-common:                string
+! URxvt*perl-ext:                       string
+! URxvt*iso14755:                       boolean
+! URxvt*iso14755_52:                    boolean
+! URxvt*xrm:                            string
+! URxvt*keysym.sym:                     keysym
+! URxvt*background.border:              boolean
+! URxvt*background.expr:                string
+! URxvt*background.interval:            seconds
+! URxvt*bell-command:                   string
+! URxvt*kuake.hotkey:                   string
+! URxvt*matcher.button:                 string
+! URxvt*matcher.launcher:               string
+! URxvt*matcher.launcher.*:             string
+! URxvt*matcher.pattern.*:              string
+! URxvt*matcher.rend.*:                 string
+! URxvt*remote-clipboard.fetch:         string
+! URxvt*remote-clipboard.store:         string
+! URxvt*searchable-scrollback:          string
+! URxvt*selection-autotransform.*:      string
+! URxvt*selection-pastebin.cmd:         string
+! URxvt*selection-pastebin.url:         string
+! URxvt*selection.pattern-0:            string
+! URxvt*tab-bg:                         colour
+! URxvt*tab-fg:                         colour
+! URxvt*tabbar-bg:                      colour
+! URxvt*tabbar-fg:                      colour
+! URxvt*url-launcher:                   string

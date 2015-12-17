@@ -1,0 +1,11 @@
+#!/bin/zsh
+
+ID=$(tmux display -p "#I")
+eval $(tmux showenv -s TMUX_SELECTION)
+#tmux display-message $TMUX_SELECTION
+if [ $TMUX_SELECTION -eq 1 ] ; then
+  tmux setenv TMUX_SELECTION 0
+  tmux send-keys x
+  tmux display-message "selection cancel"
+fi
+tmux send-keys $1

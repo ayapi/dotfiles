@@ -1,0 +1,14 @@
+[user]
+	email = colors.aya@gmail.com
+	name = ayapi
+[core]
+  quotepath = false
+	editor = nvim
+[merge]
+  tool = hrdiff
+  conflictstyle = diff3
+[mergetool]
+  prompt = false
+  keepBackup = false
+[mergetool "hrdiff"]
+  cmd = hrdiff \"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"

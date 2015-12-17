@@ -1,0 +1,9 @@
+#!/bin/zsh
+
+if which xsel > /dev/null 2>&1
+then
+  cat - | xsel -ib
+else
+  tmux set-buffer $(cat -)
+fi
+exit 0
