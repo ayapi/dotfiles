@@ -423,6 +423,17 @@ endif
 " inoremap <silent> <expr> <PageDown> pumvisible() ? "\<PageDown>" : "\<C-o>\<C-d>"
 " inoremap <silent> <expr> <PageUp>   pumvisible() ? "\<PageUp>"   : "\<C-o>\<C-u>"
 
+" [scroll up/down]
+" on 1st page, <PageUp> should move cursor to 1st line.
+" on last page, <PageDown> should move cursor to last line,
+" and it shouldnt show after eof (`~` lines).
+" ref. http://vimrc-dissection.blogspot.se/2009/02/fixing-pageup-and-pagedown.html
+set scrolloff=3
+noremap <silent> <PageUp> 1000<C-u>
+noremap <silent> <PageDown> 1000<C-d>
+call IMapWithClosePopup("<PageUp>",    "\\<C-o>1000<C-u>")
+call IMapWithClosePopup("<PageDown>",  "\\<C-o>1000<C-d>")
+
 " [cut/copy/paste]
 " Prevent Vim from clearing the clipboard on exit
 " http://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
