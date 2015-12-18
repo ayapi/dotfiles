@@ -53,6 +53,7 @@ NeoBundle 'airblade/vim-gitgutter'
 " color scheme
 NeoBundle 'tomasr/molokai'
 
+NeoBundle 'alunny/pegjs-vim'
 "NeoBundle 'vim-pandoc/vim-pandoc'
 "NeoBundle 'vim-pandoc/vim-pandoc-syntax'
 
@@ -64,6 +65,8 @@ filetype plugin indent on
 " If there are uninstalled bundles found on startup,
 " this will conveniently prompt you to install them.
 NeoBundleCheck
+
+autocmd BufNewFile,BufReadPost *.pegjs set filetype=pegjs
 
 " ------------------------------------
 " appearance
