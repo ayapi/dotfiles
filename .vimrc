@@ -46,7 +46,8 @@ NeoBundle 'kana/vim-submode'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/unite-outline'
 NeoBundle 'Shougo/neomru.vim'
-NeoBundle "tyru/caw.vim.git"
+NeoBundle 'tyru/caw.vim.git'
+NeoBundle 'airblade/vim-gitgutter'
 " NeoBundle 'vheon/vim-cursormode'
 
 " color scheme
@@ -73,6 +74,7 @@ set novisualbell
 set t_vb=
 set nospell
 set lazyredraw
+set updatetime=500
 
 " syntax highlight
 set t_Co=256
@@ -86,7 +88,12 @@ highlight MatchParen cterm=none ctermbg=236 ctermfg=255
 
 " gutter
 set number
+set numberwidth=1
 highlight LineNr ctermbg=none
+let g:gitgutter_realtime = 1
+let g:gitgutter_eager = 1
+let g:gitgutter_sign_column_always = 1
+let g:gitgutter_max_signs = 9999
 set cursorline
 highlight cursorline cterm=none ctermbg=none ctermfg=none
 highlight cursorlinenr ctermfg=white ctermbg=none
