@@ -30,3 +30,6 @@ function! VimScriptOmniComplete(findstart, base)
 endfunction
 
 set omnifunc=VimScriptOmniComplete
+
+setlocal keywordprg=:help
+

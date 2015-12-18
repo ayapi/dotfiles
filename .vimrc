@@ -474,6 +474,10 @@ nmap <C-_> <Plug>(caw:i:toggle)
 vmap <C-_> <Plug>(caw:i:toggle)
 inoremap <C-_> <C-o>:execute "normal \<Plug>(caw:i:toggle)"<CR>
 
+" [open document/help for the word under cursor]
+noremap  <silent> <F2> K
+inoremap <silent> <F2> <C-o>K
+
 " [new tab]
 noremap <C-n> <C-c>:tabnew<CR>
 inoremap <C-n> <C-o>:tabnew<CR>
