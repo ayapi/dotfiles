@@ -431,8 +431,8 @@ endif
 set scrolloff=3
 noremap <silent> <PageUp> 1000<C-u>
 noremap <silent> <PageDown> 1000<C-d>
-call IMapWithClosePopup("<PageUp>",    "\\<C-o>1000<C-u>")
-call IMapWithClosePopup("<PageDown>",  "\\<C-o>1000<C-d>")
+inoremap <silent><expr> <PageUp> pumvisible() ? "\<PageUp>" : "\<C-o>1000\<C-u>"
+inoremap <silent><expr> <PageDown> pumvisible() ? "\<PageDown>" : "\<C-o>1000\<C-d>"
 
 " [cut/copy/paste]
 " Prevent Vim from clearing the clipboard on exit
