@@ -260,15 +260,8 @@ function! IMapWithClosePopup(before, after, ...)
   exec "inoremap ".silent."<expr> ".a:before." pumvisible() ? \"\\<C-e>".a:after."\" : \"".a:after."\""
 endfunction
 
-" [accept item in completion popup menu & expand snippet immediately]
-function! ExpandSnip()
-  if neosnippet#expandable()
-    call feedkeys("\<Plug>(neosnippet_expand)")
-  endif
-  return ""
-endfunction
-
-inoremap <silent><expr> <CR>  pumvisible() ? "\<C-y>\<C-r>=ExpandSnip()\<CR>" : "\<CR>"
+" [accept item in completion popup menu, without expand snippet]
+inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
 
 
 " <Tab> ---------------------------
@@ -276,6 +269,13 @@ inoremap <silent><expr> <CR>  pumvisible() ? "\<C-y>\<C-r>=ExpandSnip()\<CR>" : 
 " completion mode : accept item
 " other modes     : indent
 " ---------------------------------
+
+function! ExpandSnip()
+  if neosnippet#expandable()
+    call feedkeys("\<Plug>(neosnippet_expand)")
+  endif
+  return ""
+endfunction
 
 function! JumpSnipOrTab()
   if neosnippet#expandable_or_jumpable()
