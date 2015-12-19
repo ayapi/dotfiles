@@ -255,6 +255,7 @@ function uim_off() {
 add-zsh-hook preexec uim_off
 
 
+alias ls='ls -a --group-directories-first --color=auto'
 alias vim='/usr/bin/nvim'
 alias ovim='/usr/bin/vim'
 alias vimdiff='nvim -d'
