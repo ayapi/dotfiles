@@ -139,6 +139,25 @@ highlight DiffDelete  ctermfg=197 ctermbg=237
 highlight DiffChange  ctermfg=222 ctermbg=237
 highlight DiffText    ctermfg=16  ctermbg=222
 
+
+" ------------------------------------
+" Resume from Hold Event Hook(experimental)
+" ------------------------------------
+let g:cursor_holded = 0
+function! OnCursorMove() abort
+  if g:cursor_holded == 0
+    return
+  endif
+  let g:cursor_holded = 0
+  call gitgutter#all()
+endfunction
+augroup pseudo_focus
+  autocmd!
+  autocmd CursorHold,CursorHoldI * :let g:cursor_holded = 1
+  autocmd CursorMoved,CursorMovedI * :call OnCursorMove()
+augroup END
+
+
 " ------------------------------------
 " Auto Completion Popup
 " ------------------------------------
