@@ -191,6 +191,7 @@ let g:neosnippet#snippets_directory = []
 let g:neosnippet#snippets_directory += ["~/.vim/snippets"]
 let g:neosnippet#scope_aliases = {}
 let g:neosnippet#scope_aliases['vim'] = 'vim,vim-functions'
+let g:neosnippet#disable_runtime_snippets = {'_' : 1}
 
 " ------------------------------------
 " keybinds
