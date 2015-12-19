@@ -189,7 +189,8 @@ set omnifunc=syntaxcomplete#Complete
 set completefunc=MixComplete
 let g:neosnippet#snippets_directory = []
 let g:neosnippet#snippets_directory += ["~/.vim/snippets"]
-
+let g:neosnippet#scope_aliases = {}
+let g:neosnippet#scope_aliases['vim'] = 'vim,vim-functions'
 
 " ------------------------------------
 " keybinds
