@@ -445,12 +445,6 @@ inoremap <silent><expr> <PageDown> pumvisible() ? "\<PageDown>" : "\<C-o>1000\<C
 " http://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
 autocmd VimLeave * call system("xsel -ib", getreg('+'))
 
-" [delete selection]
-" i remap it for performance.
-" already defined <Del> in behave:mswin, 
-" but it freezes vim ui for about few seconds after <Del> key
-vnoremap <Del> d
-
 " [save]
 call IMapWithClosePopup("<C-s>", "\\<C-o>:update\\<CR>")
 
