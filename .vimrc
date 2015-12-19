@@ -445,6 +445,10 @@ inoremap <silent><expr> <PageDown> pumvisible() ? "\<PageDown>" : "\<C-o>1000\<C
 " http://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
 autocmd VimLeave * call system("xsel -ib", getreg('+'))
 
+" paste in select-mode, force back to insert-mode
+" ref. $VIMRUNTIME/autoload/paste.vim
+execute 'snoremap <script> <C-v> '. paste#paste_cmd['i']
+
 " [save]
 call IMapWithClosePopup("<C-s>", "\\<C-o>:update\\<CR>")
 
