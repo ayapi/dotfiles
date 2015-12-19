@@ -287,15 +287,33 @@ function! JumpSnipOrTab()
 endfunction
 
 " [accept item in completion popup menu & expand snippet immediately]
-snoremap <silent><expr><Tab> JumpSnipOrTab()
 inoremap <silent><expr><Tab> pumvisible() ? "\<C-y>\<C-r>=ExpandSnip()\<CR>": "\<C-r>=JumpSnipOrTab()\<CR>"
 
-" sometimes indent/deindent are buggy but roughly ok
-" [indent]
-" noremap <silent> <tab> <C-v>>gvvi<C-g>u
 
-" [deindent]
-noremap  <silent> <S-tab> <C-v><gvv$i<C-g>u
+function! IndentOrJump() range abort
+  " <C-v> normal-mode -> visual-mode
+  " gv    restore selection
+  " <C-g> visual-mode -> select-mode
+  execute "normal! \<C-v>gv\<C-g>"
+  
+  if a:firstline != a:lastline
+    " multi-line selection, indent
+    " <C-v> normal-mode -> visual-mode
+    " V     visual-mode -> visual-line-mode
+    " >     right-shift
+    " gv    restore selection
+    " <C-g> visual-line-mode -> select-line-mode
+    execute "normal! \<C-v>V>gv\<C-g>"
+  else
+    call JumpSnipOrTab()
+  endif
+endfunction
+
+" [indent selection lines || jump tabstop from placeholder selection]
+snoremap <silent><Tab> <C-g>:call IndentOrJump()<CR>
+
+" [deindent selection lines]
+snoremap <silent> <S-tab> <C-v>V<gv<C-g>
 inoremap <silent> <S-tab> <C-o><<<C-g>u
 
 
