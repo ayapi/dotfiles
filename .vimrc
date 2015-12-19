@@ -287,11 +287,12 @@ function! JumpSnipOrTab()
 endfunction
 
 " [accept item in completion popup menu & expand snippet immediately]
+snoremap <silent><expr><Tab> JumpSnipOrTab()
 inoremap <silent><expr><Tab> pumvisible() ? "\<C-y>\<C-r>=ExpandSnip()\<CR>": "\<C-r>=JumpSnipOrTab()\<CR>"
 
 " sometimes indent/deindent are buggy but roughly ok
 " [indent]
-noremap <silent> <tab> <C-v>>gvvi<C-g>u
+" noremap <silent> <tab> <C-v>>gvvi<C-g>u
 
 " [deindent]
 noremap  <silent> <S-tab> <C-v><gvv$i<C-g>u
