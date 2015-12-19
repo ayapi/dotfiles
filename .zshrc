@@ -298,3 +298,5 @@ function font-install(){
 }
 alias font-install=font-install
 
+source ~/.zshrc.local
+

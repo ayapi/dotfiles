@@ -1,1 +1,1 @@
-source ~/.zprofile.local
+
