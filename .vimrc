@@ -535,6 +535,21 @@ nmap <C-_> <Plug>(caw:i:toggle)
 vmap <C-_> <Plug>(caw:i:toggle)
 inoremap <C-_> <C-o>:execute "normal \<Plug>(caw:i:toggle)"<CR>
 
+" [jump to line]
+" ref. http://vim.wikia.com/wiki/Jump_to_a_line_number
+" ref. http://vim.wikia.com/wiki/User_input_from_a_script
+function! JumpToLine()
+  call inputsave()
+  let lineno = input('Line Number: ')
+  call inputrestore()
+  execute "normal! ".lineno."G"
+endfunction
+
+noremap  <C-g> <C-c>:call JumpToLine()<CR>
+inoremap <C-g> <C-o>:call JumpToLine()<CR>
+snoremap <C-g> <C-g>v:call JumpToLine()<CR>
+nnoremap <C-g> :call JumpToLine()<CR>
+
 " [open document/help for the word under cursor]
 noremap  <silent> <F2> K
 inoremap <silent> <F2> <C-o>K
