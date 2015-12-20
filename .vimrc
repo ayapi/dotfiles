@@ -151,7 +151,9 @@ function! OnCursorMove() abort
   endif
   let g:cursor_holded = 0
   checktime
-  call gitgutter#all()
+  if &buftype==''
+    call gitgutter#all()
+  endif
 endfunction
 augroup pseudo_focus
   autocmd!
