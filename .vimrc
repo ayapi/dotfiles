@@ -141,14 +141,16 @@ highlight DiffText    ctermfg=16  ctermbg=222
 
 
 " ------------------------------------
-" Resume from Hold Event Hook(experimental)
+" Git cooperation
 " ------------------------------------
+set autoread
 let g:cursor_holded = 0
 function! OnCursorMove() abort
   if g:cursor_holded == 0
     return
   endif
   let g:cursor_holded = 0
+  checktime
   call gitgutter#all()
 endfunction
 augroup pseudo_focus
