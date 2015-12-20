@@ -492,12 +492,25 @@ execute 'snoremap <script> <C-v> '. paste#paste_cmd['i']
 call IMapWithClosePopup("<C-s>", "\\<C-o>:update\\<CR>")
 
 " [save as]
+" ref. http://vim.wikia.com/wiki/User_input_from_a_script
+function! SaveAs()
+  call inputsave()
+  let filename = input('Save As > File Name: ', expand("%"))
+  call inputrestore()
+  if filename == ""
+    echoerr "empty filename, aborted."
+  else
+    execute ":write ".filename
+  endif
+endfunction
+
 " i cant use <C-S-s> caused by terminal's limitation
 " <F12> is `save as` in MS Office family
 " and i use urxvt's keysym <C-S-s> to <F12> in .Xresources
-noremap <F12> <C-c>:w 
-call IMapWithClosePopup("<F12>", "\\<C-o>:w ", 1)
-nnoremap <F12> :w 
+noremap  <F12> <C-c>:call SaveAs()<CR>
+inoremap <F12> <C-o>:call SaveAs()<CR>
+snoremap <F12> <C-g>v:call SaveAs()<CR>
+nnoremap <F12> :call SaveAs()<CR>
 
 " [undo/redo]
 vnoremap <C-z> <C-c>u
