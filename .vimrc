@@ -234,11 +234,11 @@ set t_me=[m(B
 set t_ks=
 set t_ke=
 
+set insertmode
+
 function! SetInitialMode() abort
-  if !&diff && !&readonly && &modifiable
-    setlocal insertmode
-  else
-    setlocal noinsertmode
+  if &diff || &readonly || !&modifiable
+    call feedkeys("\<C-l>", "n")
   endif
 endfunction
 augroup initial_mode
