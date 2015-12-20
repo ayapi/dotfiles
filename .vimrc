@@ -553,7 +553,7 @@ inoremap <C-_> <C-o>:execute "normal \<Plug>(caw:i:toggle)"<CR>
 " ref. http://vim.wikia.com/wiki/User_input_from_a_script
 function! JumpToLine()
   call inputsave()
-  let lineno = input('Line Number: ')
+  let lineno = input('Jump to Line > Number: ')
   call inputrestore()
   execute "normal! ".lineno."G"
 endfunction
