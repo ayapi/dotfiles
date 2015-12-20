@@ -232,9 +232,17 @@ set t_me=[m(B
 set t_ks=
 set t_ke=
 
-if !&diff
-  set insertmode
-endif
+function! SetInitialMode() abort
+  if !&diff && !&readonly && &modifiable
+    setlocal insertmode
+  else
+    setlocal noinsertmode
+  endif
+endfunction
+augroup initial_mode
+  autocmd!
+  autocmd BufReadPost * :call SetInitialMode()
+augroup END
 
 source $VIMRUNTIME/mswin.vim
 let g:unite_enable_start_insert=1
