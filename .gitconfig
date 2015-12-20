@@ -13,4 +13,6 @@
 [mergetool "hrdiff"]
   cmd = hrdiff \"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
 [github]
-	user = ayapi
+  user = ayapi
+[alias]
+graph=log --graph --oneline --decorate=full
