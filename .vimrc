@@ -243,7 +243,7 @@ function! SetInitialMode() abort
 endfunction
 augroup initial_mode
   autocmd!
-  autocmd BufReadPost * :call SetInitialMode()
+  autocmd BufReadPost,BufNewFile * :call SetInitialMode()
 augroup END
 
 source $VIMRUNTIME/mswin.vim
