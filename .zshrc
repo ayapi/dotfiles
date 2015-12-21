@@ -223,6 +223,18 @@ bindkey "^c" cb_copy
 bindkey "^x" cb_cut
 bindkey "^v" cb_paste
 
+# fuzzy completion
+export FZF_DEFAULT_OPTS='
+  --reverse 
+  --ansi 
+  --color fg:252,hl:222,fg+:170,bg+:235,hl+:222 
+  --color info:144,prompt:161,spinner:135,pointer:135,marker:118
+'
+source /etc/profile.d/fzf.zsh
+
+bindkey '^F' fzf-file-widget
+bindkey '^D' fzf-cd-widget
+bindkey '^R' fzf-history-widget
 
 # uim-fep
 if [[ -n "$TMUX" ]]; then
