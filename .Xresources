@@ -85,6 +85,7 @@ URxvt.keysym.Shift-Mod3-Left: \033<Shift-Mod3-Left>
 URxvt.keysym.Shift-Mod3-Right: \033<Shift-Mod3-Right>
 
 URxvt.keysym.Control-Return: \033\015
+URxvt.keysym.Control-Delete: \033[3;5~
 
 URxvt.keysym.Control-Tab                : \033[27;5;9~
 URxvt.keysym.Control-Shift-ISO_Left_Tab : \033[27;6;9~

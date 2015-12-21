@@ -1,3 +1,7 @@
+if [[ -n "$VIM" ]]; then
+  export TERM="rxvt-unicode-256color"
+fi
+
 export TERMINFO=~/.terminfo
 
 ulimit -c unlimited

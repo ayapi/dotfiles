@@ -139,6 +139,11 @@ highlight DiffDelete  ctermfg=197 ctermbg=237
 highlight DiffChange  ctermfg=222 ctermbg=237
 highlight DiffText    ctermfg=16  ctermbg=222
 
+" terminal-mode
+if has('nvim')
+  highlight TermCursor ctermfg=251 ctermbg=0
+  highlight TermCursorNC ctermfg=251 ctermbg=0
+endif
 
 " ------------------------------------
 " Git cooperation
@@ -632,7 +637,7 @@ nnoremap [6;6~ :tabmove +1<CR>
 " [enter pane-mode]
 let g:submode_always_show_submode = 1
 let g:submode_timeoutlen = 1000
-call submode#enter_with('pane', 'i', '', '<C-p>')
+call submode#enter_with('pane', 'i', '', '<C-p>', '<Esc>')
 call submode#enter_with('pane', 'n', '', '<C-p>')
 
 " [resize pane]
@@ -647,23 +652,23 @@ call submode#map('pane', 'n', '', '-', '<C-w>-i')
 
 " [select(focus) pane]
 call submode#map('pane', 'i', '', '<Tab>', '<C-o><C-w>p')
-call submode#map('pane', 'n', '', '<Tab>', '<C-w>pi')
+call submode#map('pane', 'n', '', '<Tab>', '<C-w>p')
 
 " [move pane]
 call submode#map('pane', 'i', '', '<Left>', '<C-o><C-w>H')
 call submode#map('pane', 'i', '', '<Right>', '<C-o><C-w>L')
 call submode#map('pane', 'i', '', '<Up>', '<C-o><C-w>K')
 call submode#map('pane', 'i', '', '<Down>', '<C-o><C-w>J')
-call submode#map('pane', 'n', '', '<Left>', '<C-w>Hi')
-call submode#map('pane', 'n', '', '<Right>', '<C-w>Li')
-call submode#map('pane', 'n', '', '<Up>', '<C-w>Ki')
-call submode#map('pane', 'n', '', '<Down>', '<C-w>Ji')
+call submode#map('pane', 'n', '', '<Left>', '<C-w>H')
+call submode#map('pane', 'n', '', '<Right>', '<C-w>L')
+call submode#map('pane', 'n', '', '<Up>', '<C-w>K')
+call submode#map('pane', 'n', '', '<Down>', '<C-w>J')
 
 " [split pane w/ new file]
-call submode#map('pane', 'i', '', '\|', '<Esc>:vnew<CR><C-w>Li')
-call submode#map('pane', 'i', '', '=', '<Esc>:new<CR><C-w>Ji')
-call submode#map('pane', 'n', '', '\|', ':vnew<CR><C-w>Li')
-call submode#map('pane', 'n', '', '=', ':new<CR><C-w>Ji')
+call submode#map('pane', 'i', '', '\|', '<Esc>:vnew<CR><C-w>L')
+call submode#map('pane', 'i', '', '=', '<Esc>:new<CR><C-w>J')
+call submode#map('pane', 'n', '', '\|', ':vnew<CR><C-w>L')
+call submode#map('pane', 'n', '', '=', ':new<CR><C-w>J')
 
 " [close pane]
 call submode#map('pane', 'i', '', 'x', '<C-o>:confirm quit<CR>')
@@ -699,5 +704,11 @@ if &diff
   nnoremap <silent> <C-S-Up> :call MergeFromBottom()<CR>
   nnoremap <silent> <C-z> u:diffupdate<CR>
   nnoremap <silent> <C-y> <C-R>:diffupdate<CR>
+endif
+
+" [neovim terminal-mode]
+if has('nvim')
+  source .vim/nvim-term-keysym.vim
+  tnoremap <Esc> <C-\><C-n>
 endif
 
