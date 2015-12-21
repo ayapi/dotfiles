@@ -651,8 +651,8 @@ call submode#map('pane', 'n', '', '+', '<C-w>+i')
 call submode#map('pane', 'n', '', '-', '<C-w>-i')
 
 " [select(focus) pane]
-call submode#map('pane', 'i', '', '<Tab>', '<C-o><C-w>p')
-call submode#map('pane', 'n', '', '<Tab>', '<C-w>p')
+call submode#map('pane', 'i', '', '<Tab>', '<C-o><C-w>w')
+call submode#map('pane', 'n', '', '<Tab>', '<C-w>w')
 
 " [move pane]
 call submode#map('pane', 'i', '', '<Left>', '<C-o><C-w>H')
@@ -665,10 +665,12 @@ call submode#map('pane', 'n', '', '<Up>', '<C-w>K')
 call submode#map('pane', 'n', '', '<Down>', '<C-w>J')
 
 " [split pane w/ new file]
-call submode#map('pane', 'i', '', '\|', '<Esc>:vnew<CR><C-w>L')
-call submode#map('pane', 'i', '', '=', '<Esc>:new<CR><C-w>J')
-call submode#map('pane', 'n', '', '\|', ':vnew<CR><C-w>L')
-call submode#map('pane', 'n', '', '=', ':new<CR><C-w>J')
+set splitbelow
+set splitright
+call submode#map('pane', 'i', '', '\|', '<Esc>:vnew<CR>')
+call submode#map('pane', 'i', '', '=', '<Esc>:new<CR>')
+call submode#map('pane', 'n', '', '\|', ':vnew<CR>')
+call submode#map('pane', 'n', '', '=', ':new<CR>')
 
 " [close pane]
 call submode#map('pane', 'i', '', 'x', '<C-o>:confirm quit<CR>')
