@@ -42,10 +42,17 @@ NeoBundle 'davidhalter/jedi-vim', {
   \ }
   \}
 
+NeoBundle 'junegunn/fzf', {
+  \ 'build': {
+  \   'others': '$HOME/.vim/bundle/fzf/install'
+  \   }
+  \ }
+NeoBundle 'junegunn/fzf.vim'
+
 " NeoBundle 'kana/vim-submode'
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/unite-outline'
-NeoBundle 'Shougo/neomru.vim'
+" NeoBundle 'Shougo/unite.vim'
+" NeoBundle 'Shougo/unite-outline'
+" NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'tyru/caw.vim.git'
 NeoBundle 'airblade/vim-gitgutter'
 " NeoBundle 'vheon/vim-cursormode'
@@ -385,11 +392,11 @@ function! VariousClear() abort
   elseif neosnippet#expandable_or_jumpable()
     return "\<C-o>:NeoSnippetClearMarkers\<CR>"
   else
-    return "\<C-o>:silent nohlsearch\<CR>\<C-o>:silent lclose\<CR>\<C-o>:silent pclose\<CR>\<C-o>:silent helpclose\<CR>"
+    return "\<C-o>:silent nohlsearch|:silent lclose|:silent pclose |:silent helpclose\<CR>"
   endif
 endfunction
 
-noremap <silent> <Esc> :silent nohlsearch<CR>:silent lclose<CR>:silent pclose<CR>:silent helpclose<CR>i
+noremap <silent> <Esc> :silent nohlsearch \| lclose \| pclose \| helpclose<CR>
 inoremap <silent><expr> <Esc> VariousClear()
 
 
@@ -596,10 +603,6 @@ inoremap <C-g> <C-o>:call JumpToLine()<CR>
 snoremap <C-g> <C-g>v:call JumpToLine()<CR>
 nnoremap <C-g> :call JumpToLine()<CR>
 
-" [open document/help for the word under cursor]
-noremap  <silent> <F2> K
-inoremap <silent> <F2> <C-o>K
-
 " [new tab]
 noremap <C-n> <C-c>:tabnew<CR>
 inoremap <C-n> <C-o>:tabnew<CR>
@@ -761,7 +764,7 @@ endif
 
 " [neovim terminal-mode]
 if has('nvim')
-  source .vim/nvim-term-keysym.vim
+  source ~/.vim/nvim-term-keysym.vim
   tnoremap <Esc> <C-\><C-n>
   tnoremap <C-l> <C-\><C-n>
 endif
