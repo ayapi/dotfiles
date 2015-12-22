@@ -533,7 +533,7 @@ function! SaveAs()
   if filename == ""
     echoerr "empty filename, aborted."
   else
-    execute ":write ".filename
+    execute ":saveas ".filename
   endif
 endfunction
 
