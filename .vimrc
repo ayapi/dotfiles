@@ -493,13 +493,7 @@ else
   snoremap <silent> <kEnd> <C-G>vg$<Esc>i
 endif
 
-" " [scroll by half page]
-" noremap <silent> <PageDown> <C-d>
-" noremap <silent> <PageUp>   <C-u>
-" inoremap <silent> <expr> <PageDown> pumvisible() ? "\<PageDown>" : "\<C-o>\<C-d>"
-" inoremap <silent> <expr> <PageUp>   pumvisible() ? "\<PageUp>"   : "\<C-o>\<C-u>"
-
-" [scroll up/down]
+" [scroll page up/down]
 " on 1st page, <PageUp> should move cursor to 1st line.
 " on last page, <PageDown> should move cursor to last line,
 " and it shouldnt show after eof (`~` lines).
@@ -509,6 +503,14 @@ noremap <silent> <PageUp> 1000<C-u>
 noremap <silent> <PageDown> 1000<C-d>
 inoremap <silent><expr> <PageUp> pumvisible() ? "\<PageUp>" : "\<C-o>1000\<C-u>"
 inoremap <silent><expr> <PageDown> pumvisible() ? "\<PageDown>" : "\<C-o>1000\<C-d>"
+
+" [scroll viewport up/down]
+" like a mouse wheel, scroll 3 lines.
+" if possible, without change cursor position
+noremap  <silent> <C-Down> 3<C-e>
+inoremap <silent> <C-Down> <C-o>3<C-e>
+noremap  <silent> <C-Up> 3<C-y>
+inoremap <silent> <C-Up> <C-o>3<C-y>
 
 " [cut/copy/paste]
 " Prevent Vim from clearing the clipboard on exit
