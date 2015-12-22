@@ -225,6 +225,30 @@ let g:neosnippet#scope_aliases = {}
 let g:neosnippet#scope_aliases['vim'] = 'vim,vim-functions'
 let g:neosnippet#disable_runtime_snippets = {'_' : 1}
 
+
+" ------------------------------------
+" Auto Mode Change
+" ------------------------------------
+" ref. http://stackoverflow.com/questions/6593299/change-from-insert-to-normal-mode-when-switching-to-another-tab
+
+set insertmode
+
+augroup mode_select
+  autocmd!
+  autocmd BufReadPost,BufNewFile,BufEnter * call ModeSelectBufEnter()
+augroup END
+
+function! ModeSelectBufEnter()
+  if !&diff && !&readonly && &modifiable
+    set insertmode
+    startinsert
+  else
+    set noinsertmode
+    stopinsert
+  endif
+endfunction
+
+
 " ------------------------------------
 " keybinds
 " ------------------------------------
@@ -242,18 +266,6 @@ set t_me=[m(B
 
 set t_ks=
 set t_ke=
-
-set insertmode
-
-function! SetInitialMode() abort
-  if &diff || &readonly || !&modifiable
-    call feedkeys("\<C-l>", "n")
-  endif
-endfunction
-augroup initial_mode
-  autocmd!
-  autocmd BufReadPost,BufNewFile * :call SetInitialMode()
-augroup END
 
 source $VIMRUNTIME/mswin.vim
 let g:unite_enable_start_insert=1
@@ -749,5 +761,6 @@ endif
 if has('nvim')
   source .vim/nvim-term-keysym.vim
   tnoremap <Esc> <C-\><C-n>
+  tnoremap <C-l> <C-\><C-n>
 endif
 
