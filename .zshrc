@@ -271,6 +271,7 @@ function uim_off() {
 add-zsh-hook preexec uim_off
 
 
+alias keycode="xev | awk -F'[ )]+' '/^KeyPress/ { a[NR+2] } NR in a { printf \"%-3s %s\n\", \$5, \$8 }'"
 alias ls='ls -a --group-directories-first --color=auto'
 alias vim='/usr/bin/nvim'
 alias ovim='/usr/bin/vim'

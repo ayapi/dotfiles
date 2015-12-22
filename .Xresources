@@ -79,19 +79,23 @@ xft:MSGothic:pixelsize=12:antialias=false
 ! URxvt.keysym.Zenkaku_Hankaku: \033[64;5~
 URxvt.keysym.Zenkaku_Hankaku: \033[21~
 
-URxvt.keysym.Mod3-Left:    \033<Mod3-Left>
-URxvt.keysym.Mod3-Right:    \033<Mod3-Right>
-URxvt.keysym.Shift-Mod3-Left: \033<Shift-Mod3-Left>
-URxvt.keysym.Shift-Mod3-Right: \033<Shift-Mod3-Right>
-
 URxvt.keysym.Control-Return: \033\015
 URxvt.keysym.Control-Delete: \033[3;5~
 
 URxvt.keysym.Control-Tab                : \033[27;5;9~
 URxvt.keysym.Control-Shift-ISO_Left_Tab : \033[27;6;9~
 URxvt.keysym.Mod3-Tab                   : \033[27;3;9~
+URxvt.keysym.Mod3-Shift-ISO_Left_Tab    : \033[27;4;9~
 
 URxvt.keysym.Control-Shift-S  : \033[24~
+
+URxvt.keysym.Mod3-bar:\033|
+URxvt.keysym.Mod3-backslash:\033|
+URxvt.keysym.Mod3-equal:\033=
+URxvt.keysym.Mod3-minus:\033=
+URxvt.keysym.Mod3-KP_Add:\033+
+URxvt.keysym.Mod3-KP_Subtract:\033-
+URxvt.keysym.Mod3-x:\033x
 
 URxvt.keysym.Home             : \033[1~
 URxvt.keysym.End              : \033[4~
@@ -103,20 +107,20 @@ URxvt.keysym.S-Right          : \033[1;2C
 URxvt.keysym.S-Left           : \033[1;2D
 URxvt.keysym.S-Home           : \033[1;2H
 URxvt.keysym.S-End            : \033[1;2F
-URxvt.keysym.M-Up             : \033[1;3A
-URxvt.keysym.M-Down           : \033[1;3B
-URxvt.keysym.M-Right          : \033[1;3C
-URxvt.keysym.M-Left           : \033[1;3D
-URxvt.keysym.M-Page_Up        : \033[5;3~
-URxvt.keysym.M-Page_Down      : \033[6;3~
-URxvt.keysym.M-Home           : \033[1;3H
-URxvt.keysym.M-End            : \033[1;3F
-URxvt.keysym.M-S-Up           : \033[1;4A
-URxvt.keysym.M-S-Down         : \033[1;4B
-URxvt.keysym.M-S-Right        : \033[1;4C
-URxvt.keysym.M-S-Left         : \033[1;4D
-URxvt.keysym.M-S-Home         : \033[1;4H
-URxvt.keysym.M-S-End          : \033[1;4F
+URxvt.keysym.Mod3-Up             : \033[1;3A
+URxvt.keysym.Mod3-Down           : \033[1;3B
+URxvt.keysym.Mod3-Right          : \033[1;3C
+URxvt.keysym.Mod3-Left           : \033[1;3D
+URxvt.keysym.Mod3-Page_Up        : \033[5;3~
+URxvt.keysym.Mod3-Page_Down      : \033[6;3~
+URxvt.keysym.Mod3-Home           : \033[1;3H
+URxvt.keysym.Mod3-End            : \033[1;3F
+URxvt.keysym.Mod3-S-Up           : \033[1;4A
+URxvt.keysym.Mod3-S-Down         : \033[1;4B
+URxvt.keysym.Mod3-S-Right        : \033[1;4C
+URxvt.keysym.Mod3-S-Left         : \033[1;4D
+URxvt.keysym.Mod3-S-Home         : \033[1;4H
+URxvt.keysym.Mod3-S-End          : \033[1;4F
 URxvt.keysym.C-Up             : \033[1;5A
 URxvt.keysym.C-Down           : \033[1;5B
 URxvt.keysym.C-Right          : \033[1;5C
@@ -133,20 +137,20 @@ URxvt.keysym.C-S-Home         : \033[1;6H
 URxvt.keysym.C-S-End          : \033[1;6F
 URxvt.keysym.C-S-Page_Up      : \033[5;6~
 URxvt.keysym.C-S-Page_Down    : \033[6;6~
-URxvt.keysym.M-C-Up           : \033[1;7A
-URxvt.keysym.M-C-Down         : \033[1;7B
-URxvt.keysym.M-C-Right        : \033[1;7C
-URxvt.keysym.M-C-Left         : \033[1;7D
-URxvt.keysym.M-C-Page_Up      : \033[5;7~
-URxvt.keysym.M-C-Page_Down    : \033[6;7~
-URxvt.keysym.M-C-Home         : \033[1;7H
-URxvt.keysym.M-C-End          : \033[1;7F
-URxvt.keysym.M-C-S-Up         : \033[1;8A
-URxvt.keysym.M-C-S-Down       : \033[1;8B
-URxvt.keysym.M-C-S-Right      : \033[1;8C
-URxvt.keysym.M-C-S-Left       : \033[1;8D
-URxvt.keysym.M-C-S-Home       : \033[1;8H
-URxvt.keysym.M-C-S-End        : \033[1;8F
+URxvt.keysym.Mod3-C-Up           : \033[1;7A
+URxvt.keysym.Mod3-C-Down         : \033[1;7B
+URxvt.keysym.Mod3-C-Right        : \033[1;7C
+URxvt.keysym.Mod3-C-Left         : \033[1;7D
+URxvt.keysym.Mod3-C-Page_Up      : \033[5;7~
+URxvt.keysym.Mod3-C-Page_Down    : \033[6;7~
+URxvt.keysym.Mod3-C-Home         : \033[1;7H
+URxvt.keysym.Mod3-C-End          : \033[1;7F
+URxvt.keysym.Mod3-C-S-Up         : \033[1;8A
+URxvt.keysym.Mod3-C-S-Down       : \033[1;8B
+URxvt.keysym.Mod3-C-S-Right      : \033[1;8C
+URxvt.keysym.Mod3-C-S-Left       : \033[1;8D
+URxvt.keysym.Mod3-C-S-Home       : \033[1;8H
+URxvt.keysym.Mod3-C-S-End        : \033[1;8F
 
 URxvt.keysym.F1 : \033OP
 URxvt.keysym.F2 : \033OQ
@@ -188,21 +192,21 @@ URxvt.keysym.C-S-F9 : \033[20;6~
 URxvt.keysym.C-S-F10 : \033[21;6~
 URxvt.keysym.C-S-F11 : \033[23;6~
 URxvt.keysym.C-S-F12 : \033[24;6~
-URxvt.keysym.M-F1 : \033[1;3P
-URxvt.keysym.M-F2 : \033[1;3Q
-URxvt.keysym.M-F3 : \033[1;3R
-URxvt.keysym.M-F4 : \033[1;3S
-URxvt.keysym.M-F5 : \033[15;3~
-URxvt.keysym.M-F6 : \033[17;3~
-URxvt.keysym.M-F7 : \033[18;3~
-URxvt.keysym.M-F8 : \033[19;3~
-URxvt.keysym.M-F9 : \033[20;3~
-URxvt.keysym.M-F10 : \033[21;3~
-URxvt.keysym.M-F11 : \033[23;3~
-URxvt.keysym.M-F12 : \033[24;3~
-URxvt.keysym.M-S-F1: \033[1;4P
-URxvt.keysym.M-S-F2: \033[1;4Q
-URxvt.keysym.M-S-F3: \033[1;4R
+URxvt.keysym.Mod3-F1 : \033[1;3P
+URxvt.keysym.Mod3-F2 : \033[1;3Q
+URxvt.keysym.Mod3-F3 : \033[1;3R
+URxvt.keysym.Mod3-F4 : \033[1;3S
+URxvt.keysym.Mod3-F5 : \033[15;3~
+URxvt.keysym.Mod3-F6 : \033[17;3~
+URxvt.keysym.Mod3-F7 : \033[18;3~
+URxvt.keysym.Mod3-F8 : \033[19;3~
+URxvt.keysym.Mod3-F9 : \033[20;3~
+URxvt.keysym.Mod3-F10 : \033[21;3~
+URxvt.keysym.Mod3-F11 : \033[23;3~
+URxvt.keysym.Mod3-F12 : \033[24;3~
+URxvt.keysym.Mod3-S-F1: \033[1;4P
+URxvt.keysym.Mod3-S-F2: \033[1;4Q
+URxvt.keysym.Mod3-S-F3: \033[1;4R
 
 URxvt.keysym.Menu: \033[17;5~
 

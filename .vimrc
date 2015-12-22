@@ -42,7 +42,7 @@ NeoBundle 'davidhalter/jedi-vim', {
   \ }
   \}
 
-NeoBundle 'kana/vim-submode'
+" NeoBundle 'kana/vim-submode'
 NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/unite-outline'
 NeoBundle 'Shougo/neomru.vim'
@@ -634,47 +634,80 @@ noremap [6;6~ <C-c>:tabmove +1<CR>
 inoremap [6;6~ <C-o>:tabmove +1<CR>
 nnoremap [6;6~ :tabmove +1<CR>
 
-" [enter pane-mode]
-let g:submode_always_show_submode = 1
-let g:submode_timeoutlen = 1000
-call submode#enter_with('pane', 'i', '', '<C-p>', '<Esc>')
-call submode#enter_with('pane', 'n', '', '<C-p>')
+function! MapAllMode(lhs, rhs) abort
+  execute "noremap \<silent> ".a:lhs." \<C-c>".a:rhs
+  execute "inoremap \<silent> ".a:lhs." \<C-o>".a:rhs
+  execute "snoremap \<silent> ".a:lhs." \<C-g>".a:rhs
+  execute "nnoremap \<silent> ".a:lhs." ".a:rhs
+  if has('nvim')
+    execute "tnoremap \<silent> ".a:lhs." \<C-\\>\<C-n>".a:rhs
+  endif
+endfunction
 
 " [resize pane]
-call submode#map('pane', 'i', '', '>', '<C-o><C-w>>')
-call submode#map('pane', 'i', '', '<', '<C-o><C-w><')
-call submode#map('pane', 'i', '', '+', '<C-o><C-w>+')
-call submode#map('pane', 'i', '', '-', '<C-o><C-w>-')
-call submode#map('pane', 'n', '', '>', '<C-w>>i')
-call submode#map('pane', 'n', '', '<', '<C-w><i')
-call submode#map('pane', 'n', '', '+', '<C-w>+i')
-call submode#map('pane', 'n', '', '-', '<C-w>-i')
+call MapAllMode("\<lt>M-+>", "\<lt>C-w>+")
+call MapAllMode("\<lt>M-->", "\<lt>C-w>-")
 
 " [select(focus) pane]
-call submode#map('pane', 'i', '', '<Tab>', '<C-o><C-w>w')
-call submode#map('pane', 'n', '', '<Tab>', '<C-w>w')
+" http://vim.wikia.com/wiki/Mapping_fast_keycodes_in_terminal_Vim#2a._Mappings
+map <Esc>[27;3;9~ <M-Tab>
+call MapAllMode("\<lt>M-Tab>", "\<lt>C-w>w")
+call MapAllMode("\<lt>M-S-Tab>", "\<lt>C-w>W")
+call MapAllMode("\<lt>M-Up>", "\<lt>C-w>k")
+call MapAllMode("\<lt>M-Down>", "\<lt>C-w>j")
+call MapAllMode("\<lt>M-Right>", "\<lt>C-w>l")
+call MapAllMode("\<lt>M-Left>", "\<lt>C-w>h")
 
 " [move pane]
-call submode#map('pane', 'i', '', '<Left>', '<C-o><C-w>H')
-call submode#map('pane', 'i', '', '<Right>', '<C-o><C-w>L')
-call submode#map('pane', 'i', '', '<Up>', '<C-o><C-w>K')
-call submode#map('pane', 'i', '', '<Down>', '<C-o><C-w>J')
-call submode#map('pane', 'n', '', '<Left>', '<C-w>H')
-call submode#map('pane', 'n', '', '<Right>', '<C-w>L')
-call submode#map('pane', 'n', '', '<Up>', '<C-w>K')
-call submode#map('pane', 'n', '', '<Down>', '<C-w>J')
+" ref. http://stackoverflow.com/questions/2586984/how-can-i-swap-positions-of-two-open-files-in-splits-in-vim
+function! SwapBuffer(targetWinnr) abort
+  let l:targetWinnr = a:targetWinnr
+  if l:targetWinnr == ""
+    call inputsave()
+    let l:targetWinnr = input('Swap with > Pane No.: ')
+    call inputrestore()
+    if l:targetWinnr == ""
+      echoerr "empty number, aborted."
+      return
+    endif
+  endif
+  let l:currentBufnr = bufnr("%")
+  execute 'hide buf' winbufnr(l:targetWinnr)
+  execute l:targetWinnr . " wincmd w"
+  execute 'hide buf' l:currentBufnr
+endfunction
+
+function! SwapBufferArrow(direction) abort
+  let l:currentWinnr = winnr()
+  execute 'wincmd '.a:direction
+  let l:targetWinnr = winnr()
+  if l:currentWinnr == l:targetWinnr
+    return
+  endif
+  execute l:currentWinnr.' wincmd w'
+  call SwapBuffer(l:targetWinnr)
+endfunction
+
+map <Esc>[1;7A <M-C-Up>
+call MapAllMode("\<lt>M-C-Up>", ":call SwapBufferArrow('k')\<lt>CR>")
+map <Esc>[1;7B <M-C-Down>
+call MapAllMode("\<lt>M-C-Down>", ":call SwapBufferArrow('j')\<lt>CR>")
+map <Esc>[1;7C <M-C-Right>
+call MapAllMode("\<lt>M-C-Right>", ":call SwapBufferArrow('l')\<lt>CR>")
+map <Esc>[1;7D <M-C-Left>
+call MapAllMode("\<lt>M-C-Left>", ":call SwapBufferArrow('h')\<lt>CR>")
 
 " [split pane w/ new file]
 set splitbelow
 set splitright
-call submode#map('pane', 'i', '', '\|', '<Esc>:vnew<CR>')
-call submode#map('pane', 'i', '', '=', '<Esc>:new<CR>')
-call submode#map('pane', 'n', '', '\|', ':vnew<CR>')
-call submode#map('pane', 'n', '', '=', ':new<CR>')
+
+" alt-pipe(|)
+call MapAllMode("\<lt>M-\\|>", ":vnew\<lt>CR>")
+" alt-equal(=)
+call MapAllMode("\<lt>M-=>", ":new\<lt>CR>")
 
 " [close pane]
-call submode#map('pane', 'i', '', 'x', '<C-o>:confirm quit<CR>')
-call submode#map('pane', 'n', '', 'x', ':confirm quit<CR>')
+call MapAllMode("\<lt>M-x>", ":confirm quit\<lt>CR>")
 
 " [diff(merge-tool) mode]
 function! MergeFromTop()
