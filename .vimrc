@@ -101,6 +101,10 @@ set cursorline
 highlight cursorline cterm=none ctermbg=none ctermfg=none
 highlight cursorlinenr ctermfg=white ctermbg=none
 
+" statusline
+highlight StatusLine ctermfg=170 ctermbg=0
+highlight StatusLineNC ctermfg=0 ctermbg=255
+
 " indent style
 set noautoindent
 set tabstop=2
