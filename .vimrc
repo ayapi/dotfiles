@@ -23,6 +23,7 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 " Refer to |:NeoBundle-examples|.
 " Note: You don't set neobundle setting in .gvimrc!
 
+NeoBundle 'vim-jp/vimdoc-ja'
 if has('nvim')
   NeoBundle 'neovim/node-host'
 endif
