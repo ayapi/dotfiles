@@ -4,6 +4,7 @@
 [core]
   quotepath = false
 	editor = nvim
+	excludesfile = /home/ayapi/.gitignore_global
 [merge]
   tool = hrdiff
   conflictstyle = diff3

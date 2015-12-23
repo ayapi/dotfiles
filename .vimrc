@@ -24,6 +24,10 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 " Note: You don't set neobundle setting in .gvimrc!
 
 NeoBundle 'vim-jp/vimdoc-ja'
+NeoBundle 'xolox/vim-session', {
+  \   'depends' : 'xolox/vim-misc',
+  \ }
+
 if has('nvim')
   NeoBundle 'neovim/node-host'
 endif
@@ -156,6 +160,22 @@ if has('nvim')
   highlight TermCursor ctermfg=251 ctermbg=0
   highlight TermCursorNC ctermfg=251 ctermbg=0
 endif
+
+" ------------------------------------
+" Session
+" ------------------------------------
+" ref. http://qiita.com/take/items/3be8908bbf4ad5b49e46
+let s:local_session_directory = xolox#misc#path#merge(getcwd(), '.vimsessions')
+if isdirectory(s:local_session_directory)
+  let g:session_directory = s:local_session_directory
+  let g:session_autosave = 'yes'
+  let g:session_autoload = 'yes'
+  let g:session_autosave_periodic = 1
+else
+  let g:session_autosave = 'no'
+  let g:session_autoload = 'no'
+endif
+unlet s:local_session_directory
 
 " ------------------------------------
 " Git cooperation
