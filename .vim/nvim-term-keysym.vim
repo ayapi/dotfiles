@@ -14,20 +14,20 @@ tnoremap <S-Right> [1;2C
 tnoremap <S-Left> [1;2D
 tnoremap <S-Home> [1;2H
 tnoremap <S-End> [1;2F
-tnoremap <M-Up> [1;3A
-tnoremap <M-Down> [1;3B
-tnoremap <M-Right> [1;3C
-tnoremap <M-Left> [1;3D
-tnoremap <M-PageUp> [5;3~
-tnoremap <M-PageDown> [6;3~
-tnoremap <M-Home> [1;3H
-tnoremap <M-End> [1;3F
-tnoremap <M-S-Up> [1;4A
-tnoremap <M-S-Down> [1;4B
-tnoremap <M-S-Right> [1;4C
-tnoremap <M-S-Left> [1;4D
-tnoremap <M-S-Home> [1;4H
-tnoremap <M-S-End> [1;4F
+" tnoremap <M-Up> [1;3A
+" tnoremap <M-Down> [1;3B
+" tnoremap <M-Right> [1;3C
+" tnoremap <M-Left> [1;3D
+" tnoremap <M-PageUp> [5;3~
+" tnoremap <M-PageDown> [6;3~
+" tnoremap <M-Home> [1;3H
+" tnoremap <M-End> [1;3F
+" tnoremap <M-S-Up> [1;4A
+" tnoremap <M-S-Down> [1;4B
+" tnoremap <M-S-Right> [1;4C
+" tnoremap <M-S-Left> [1;4D
+" tnoremap <M-S-Home> [1;4H
+" tnoremap <M-S-End> [1;4F
 tnoremap <C-Up> [1;5A
 tnoremap <C-Down> [1;5B
 tnoremap <C-Right> [1;5C
@@ -44,21 +44,21 @@ tnoremap <C-S-Home> [1;6H
 tnoremap <C-S-End> [1;6F
 tnoremap <C-S-PageUp> [5;6~
 tnoremap <C-S-PageDown> [6;6~
-tnoremap <M-C-Up> [1;7A
-tnoremap <M-C-Down> [1;7B
-tnoremap <M-C-Right> [1;7C
-tnoremap <M-C-Left> [1;7D
-tnoremap <M-C-PageUp> [5;7~
-tnoremap <M-C-PageDown> [6;7~
-tnoremap <M-C-Home> [1;7H
-tnoremap <M-C-End> [1;7F
-tnoremap <M-C-S-Up> [1;8A
-tnoremap <M-C-S-Down> [1;8B
-tnoremap <M-C-S-Right> [1;8C
-tnoremap <M-C-S-Left> [1;8D
-tnoremap <M-C-S-Home> [1;8H
-tnoremap <M-C-S-End> [1;8F
-
+" tnoremap <M-C-Up> [1;7A
+" tnoremap <M-C-Down> [1;7B
+" tnoremap <M-C-Right> [1;7C
+" tnoremap <M-C-Left> [1;7D
+" tnoremap <M-C-PageUp> [5;7~
+" tnoremap <M-C-PageDown> [6;7~
+" tnoremap <M-C-Home> [1;7H
+" tnoremap <M-C-End> [1;7F
+" tnoremap <M-C-S-Up> [1;8A
+" tnoremap <M-C-S-Down> [1;8B
+" tnoremap <M-C-S-Right> [1;8C
+" tnoremap <M-C-S-Left> [1;8D
+" tnoremap <M-C-S-Home> [1;8H
+" tnoremap <M-C-S-End> [1;8F
+"
 tnoremap <F1> OP
 tnoremap <F2> OQ
 tnoremap <F3> OR
@@ -107,19 +107,19 @@ tnoremap <C-S-F9> [20;6~
 tnoremap <C-S-F10> [21;6~
 tnoremap <C-S-F11> [23;6~
 tnoremap <C-S-F12> [24;6~
-tnoremap <M-F1> [1;3P
-tnoremap <M-F2> [1;3Q
-tnoremap <M-F3> [1;3R
-tnoremap <M-F4> [1;3S
-tnoremap <M-F5> [15;3~
-tnoremap <M-F6> [17;3~
-tnoremap <M-F7> [18;3~
-tnoremap <M-F8> [19;3~
-tnoremap <M-F9> [20;3~
-tnoremap <M-F10> [21;3~
-tnoremap <M-F11> [23;3~
-tnoremap <M-F12> [24;3~
-tnoremap <M-S-F1> [1;4P
-tnoremap <M-S-F2> [1;4Q
-tnoremap <M-S-F3> [1;4R
-
+" tnoremap <M-F1> [1;3P
+" tnoremap <M-F2> [1;3Q
+" tnoremap <M-F3> [1;3R
+" tnoremap <M-F4> [1;3S
+" tnoremap <M-F5> [15;3~
+" tnoremap <M-F6> [17;3~
+" tnoremap <M-F7> [18;3~
+" tnoremap <M-F8> [19;3~
+" tnoremap <M-F9> [20;3~
+" tnoremap <M-F10> [21;3~
+" tnoremap <M-F11> [23;3~
+" tnoremap <M-F12> [24;3~
+" tnoremap <M-S-F1> [1;4P
+" tnoremap <M-S-F2> [1;4Q
+" tnoremap <M-S-F3> [1;4R
+"
