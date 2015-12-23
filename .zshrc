@@ -287,7 +287,7 @@ export PATH=$PATH:$HOME/node_tools
 alias gpgimp='gpg --keyserver http://pgp.mit.edu --recv-key'
 alias pacupg='sudo snp "pacman -Syu; pacmrr; pacnews"'
 alias aurupg='snp "yaourt -Syua; sudo pacmrr; sudo pacnews"'
-alias uimupg='uim-module-manager --register mozc'
+alias uimupg='sudo uim-module-manager --register mozc'
 
 alias news='newsbeuter'
 
