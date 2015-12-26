@@ -1,0 +1,114 @@
+Control+BackSpace="^H"
+Control+Prior=PAGE_UP
+Control+Next=PAGE_DOWN
+UNUSED=SCROLL_UP
+UNUSED=SCROLL_DOWN
+Shift+Prior=UNUSED
+Shift+Next=UNUSED
+
+Control+Tab="\x1b[27;5;9~"
+Control+Shift+ISO_Left_Tab="\x1b[27;6;9~"
+Mod3+Tab="\x1b[27;3;9~"
+Mod3+Shift+ISO_Left_Tab="\x1b[27;4;9~"
+
+Control+Shift+s="\x1b[24~"
+
+Mod3+bar="\x1b|"
+Mod3+backslash="\x1b|"
+Mod3+equal="\x1b="
+Mod3+minus="\x1b="
+Mod3+KP_Add="\x1b+"
+Mod3+KP_Subtract="\x1b-"
+Mod3+x="\x1bx"
+
+Home="\x1b[1~"
+End="\x1b[4~"
+Shift+Up="\x1b[1;2A"
+Shift+Down="\x1b[1;2B"
+Shift+Right="\x1b[1;2C"
+Shift+Left="\x1b[1;2D"
+Shift+Home="\x1b[1;2H"
+Shift+End="\x1b[1;2F"
+Mod3+Up="\x1b[1;3A"
+Mod3+Down="\x1b[1;3B"
+Mod3+Right="\x1b[1;3C"
+Mod3+Left="\x1b[1;3D"
+Mod3+Page_Up="\x1b[5;3~"
+Mod3+Page_Down="\x1b[6;3~"
+Mod3+Home="\x1b[1;3H"
+Mod3+End="\x1b[1;3F"
+Mod3+Shift+Up="\x1b[1;4A"
+Mod3+Shift+Down="\x1b[1;4B"
+Mod3+Shift+Right="\x1b[1;4C"
+Mod3+Shift+Left="\x1b[1;4D"
+Mod3+Shift+Home="\x1b[1;4H"
+Mod3+Shift+End="\x1b[1;4F"
+Control+Up="\x1b[1;5A"
+Control+Down="\x1b[1;5B"
+Control+Right="\x1b[1;5C"
+Control+Left="\x1b[1;5D"
+Control+Home="\x1b[1;5H"
+Control+End="\x1b[1;5F"
+Control+Shift+Up="\x1b[1;6A"
+Control+Shift+Down="\x1b[1;6B"
+Control+Shift+Right="\x1b[1;6C"
+Control+Shift+Left="\x1b[1;6D"
+Control+Shift+Home="\x1b[1;6H"
+Control+Shift+End="\x1b[1;6F"
+Control+Shift+Page_Up="\x1b[5;6~"
+Control+Shift+Page_Down="\x1b[6;6~"
+Mod3+Control+Up="\x1b[1;7A"
+Mod3+Control+Down="\x1b[1;7B"
+Mod3+Control+Right="\x1b[1;7C"
+Mod3+Control+Left="\x1b[1;7D"
+Mod3+Control+Page_Up="\x1b[5;7~"
+Mod3+Control+Page_Down="\x1b[6;7~"
+Mod3+Control+Home="\x1b[1;7H"
+Mod3+Control+End="\x1b[1;7F"
+Mod3+Control+Shift+Up="\x1b[1;8A"
+Mod3+Control+Shift+Down="\x1b[1;8B"
+Mod3+Control+Shift+Right="\x1b[1;8C"
+Mod3+Control+Shift+Left="\x1b[1;8D"
+Mod3+Control+Shift+Home="\x1b[1;8H"
+Mod3+Control+Shift+End="\x1b[1;8F"
+
+
+
+#### Default settings
+# UNUSED=IM_HOTKEY
+# Control+F1=OPEN_SCREEN
+# Control+F2=OPEN_PTY
+# Control+F3=NEXT_PTY
+# Control+F4=PREV_PTY
+# Shift+F1=HSPLIT_SCREEN
+# Shift+F2=VSPLIT_SCREEN
+# Shift+F3=NEXT_SCREEN
+# Shift+F5=CLOSE_SCREEN
+# Shift+F6=HEXPAND_SCREEN
+# Shift+F7=VEXPAND_SCREEN
+# Shift+Prior=PAGE_UP
+# Shift+Up=SCROLL_UP
+# Shift+Insert=INSERT_SELECTION
+# UNUSED=SWITCH_OSC52
+# UNUSED=EXIT_PROGRAM
+# Control+Button1="menu:mlterm-menu"
+# Control+Button3="menu:mlconfig"
+
+#### Examples
+# Control+Right=NEXT_PTY
+# Control+Left=PREV_PTY
+# Button7=NEXT_PTY
+# Button6=PREV_PTY
+# Control+F5="proto:mlclient --serv localhost -e screen -xR"
+# Control+F6="w3m http://www.google.co.jp/\n"
+# Control+F7="proto:font_size=12;encoding=utf8"
+# Control+F8="proto:input_method=ibus"
+# Control+F9="proto:aafont:DEFAULT=Kochi Gothic"
+# Control+F10="proto:color:black=rgb:ff/00/00"
+# Control+F11="proto:use_local_echo=true"
+# Control+F12="proto:use_local_echo=false"
+# Button3="exesel:mlclient -e w3m"
+# Button3="exesel:\"/cygdrive/c/Program Files/Internet Explorer/iexplore.exe\""
+# Button3="exesel:/cygdrive/c/Program\\ Files/Internet\\ Explorer/iexplore.exe"
+# Button4="\x1bOA\x1bOA"
+# Button5="\x1bOB\x1bOB"

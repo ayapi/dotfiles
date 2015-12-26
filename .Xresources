@@ -33,9 +33,9 @@ xterm*locale: true
 xterm*utf8: 1
 
 
-xterm*faceName: MSGothicEx:pixelsize=12:antialias=false
+xterm*faceName: AyapiGothic:pixelsize=12:antialias=false
 !xterm*faceName: GohuFont:size=11:antialias=false
-xterm*faceNameDoublesize: MSGothicEx:pixelsize=12:antialias=false
+xterm*faceNameDoublesize: AyapiGothic:pixelsize=12:antialias=false
 !xterm*faceSize: 9
 xterm*allowBoldFonts: false
 
@@ -47,34 +47,13 @@ Xft.rgba: none
 URxvt*imLocale: ja_JP.UTF-8
 URxvt*perl-ext-common: default
 
-URxvt*letterSpace: 0
+URxvt*letterSpace: 1
 URxvt*lineSpace: 2
 URxvt*cursorBlink: true
 
 
 URxvt*font: \
-xft:MSGothicEx:pixelsize=12:antialias=false
-
-!URxvt*font: \
-xft:SHG30MEx:pixelsize=12:antialias=false
-
-!URxvt*font: \
-xft:Terminess Powerline:pixelsize=12:antialias=false, \
-xft:MSGothic:pixelsize=12:antialias=false
-
-!URxvt*boldFont: \
-xft:Terminess Powerline:pixelsize=12:antialias=false, \
-xft:MSGothic:pixelsize=12:antialias=false
-
-!URxvt*italicFont: \
-xft:Terminess Powerline:pixelsize=12:antialias=false, \
-xft:MSGothic:pixelsize=12:antialias=false
-
-!URxvt*boldItalicFont: \
-xft:Terminess Powerline:pixelsize=12:antialias=false, \
-xft:MSGothic:pixelsize=12:antialias=false
-
-
+xft:AyapiGothic:pixelsize=12:antialias=false
 
 ! URxvt.keysym.Zenkaku_Hankaku: \033[64;5~
 URxvt.keysym.Zenkaku_Hankaku: \033[21~

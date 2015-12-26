@@ -92,30 +92,34 @@ set lazyredraw
 set updatetime=500
 
 " syntax highlight
-set t_Co=256
+if has('nvim')
+  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+else
+  set t_Co=256
+endif
 let g:rehash256 = 1
 syntax on
 colorscheme molokai
-highlight Normal ctermfg=none ctermbg=none
-highlight VisualNOS cterm=none term=none
-highlight NonText cterm=none ctermfg=none
-highlight MatchParen cterm=none ctermbg=236 ctermfg=255
+highlight Normal ctermfg=none ctermbg=none guifg=none guibg=none
+highlight VisualNOS cterm=none term=none gui=none
+highlight NonText cterm=none ctermfg=none gui=none
+highlight MatchParen cterm=none ctermbg=236 ctermfg=255 guibg=gray guifg=white
 
 " gutter
 set number
 set numberwidth=1
-highlight LineNr ctermbg=none
+highlight LineNr ctermbg=none guibg=none
 let g:gitgutter_realtime = 1
 let g:gitgutter_eager = 1
 let g:gitgutter_sign_column_always = 1
 let g:gitgutter_max_signs = 9999
 set cursorline
-highlight cursorline cterm=none ctermbg=none ctermfg=none
-highlight cursorlinenr ctermfg=white ctermbg=none
+highlight cursorline cterm=none ctermbg=none ctermfg=none gui=none guibg=none guifg=none
+highlight cursorlinenr ctermfg=white ctermbg=none guifg=white guibg=none
 
 " statusline
-highlight StatusLine ctermfg=170 ctermbg=0
-highlight StatusLineNC ctermfg=0 ctermbg=255
+highlight StatusLine ctermfg=170 ctermbg=0 guifg=#d75fd7 guibg=#000000
+highlight StatusLineNC ctermfg=255 ctermbg=0 guifg=#eeeeee guibg=#000000
 
 " indent style
 set noautoindent
@@ -134,10 +138,10 @@ set shortmess+=c "supress 'Pattern not found' message
 "   autocmd!
 "   autocmd CompleteDone * :pclose
 " augroup END
-highlight Pmenu ctermbg=234 ctermfg=255
-highlight PmenuSel ctermbg=205 ctermfg=0
-highlight PmenuSbar ctermbg=233
-highlight PmenuThumb ctermbg=236
+highlight Pmenu ctermbg=234 ctermfg=255 guibg=#1c1c1c guifg=#eeeeee
+highlight PmenuSel ctermbg=205 ctermfg=0 guibg=#ff5faf guifg=#000000
+highlight PmenuSbar ctermbg=233 guibg=#121212
+highlight PmenuThumb ctermbg=236 guibg=#303030
 
 " markdown
 let g:pandoc#modules#disabled=["spell","chdir","menu","formatting","command","bibliographies", "folding"]
@@ -150,15 +154,39 @@ let g:pandoc#syntax#codeblocks#embeds#langs = ["javascript", "python", "bash=sh"
 if &diff 
   set diffopt=filler,context:1000000,horizontal
 endif
-highlight DiffAdd     ctermfg=154 ctermbg=237
-highlight DiffDelete  ctermfg=197 ctermbg=237
-highlight DiffChange  ctermfg=222 ctermbg=237
-highlight DiffText    ctermfg=16  ctermbg=222
+highlight DiffAdd     ctermfg=154 ctermbg=237 guifg=#afff00 guibg=#3a3a3a
+highlight DiffDelete  ctermfg=197 ctermbg=237 guifg=#ff005f guibg=#3a3a3a
+highlight DiffChange  ctermfg=222 ctermbg=237 guifg=#ffd787 guibg=#3a3a3a
+highlight DiffText    ctermfg=16  ctermbg=222 guifg=#000000 guibg=#ffd787
 
 " terminal-mode
 if has('nvim')
-  highlight TermCursor ctermfg=251 ctermbg=0
-  highlight TermCursorNC ctermfg=251 ctermbg=0
+  highlight TermCursor ctermfg=251 ctermbg=0 guifg=#c6c6c6 guibg=#000000
+  highlight TermCursorNC ctermfg=251 ctermbg=0 guifg=#c6c6c6 guibg=#000000
+
+  let g:terminal_color_0="#1B1D1E"
+  let g:terminal_color_1="#FF0044"
+  let g:terminal_color_2="#A6E22E"
+  let g:terminal_color_3="#f4bf75"
+  let g:terminal_color_4="#266C98"
+  let g:terminal_color_5="#AC0CB1"
+  let g:terminal_color_6="#AE81FF"
+  let g:terminal_color_7="#CCCCCC"
+  let g:terminal_color_8="#808080"
+  let g:terminal_color_9="#F92672"
+  let g:terminal_color_10="#A6E22E"
+  let g:terminal_color_11="#E6DB74"
+  let g:terminal_color_12="#7070F0"
+  let g:terminal_color_13="#D63AE1"
+  let g:terminal_color_14="#66D9EF"
+  let g:terminal_color_15="#F8F8F2"
+endif
+
+if &term =~ "mlterm"
+  let &t_ti .= "\e[?6h\e[?69h"
+  let &t_te .= "\e7\e[?69l\e[?6l\e8"
+  let &t_CV = "\e[%i%p1%d;%p2%ds"
+  let &t_CS = "y"
 endif
 
 " ------------------------------------
@@ -288,12 +316,6 @@ set t_ku=[A
 set t_kd=[B
 set t_kr=[C
 set t_kl=[D
-
-set t_so=
-set t_me=[m(B
-
-set t_ks=
-set t_ke=
 
 source $VIMRUNTIME/mswin.vim
 let g:unite_enable_start_insert=1

@@ -1,0 +1,246 @@
+#
+# Copy to ~/.mlterm/main
+#
+
+# -- Window --
+
+# display =
+
+# geometry = 342x115
+
+# app_name = mlterm
+  
+# title = mlterm
+  
+# icon_name = mlterm
+
+# icon_path =
+
+# screen_width_ratio = 100
+
+# screen_height_ratio = 100
+
+# inner_border = 2
+
+# layout_inner_border = 0
+
+# -- Terminal --
+# use_login_shell = false
+
+# (xterm,mlterm,kterm)
+termtype = mlterm-256color
+
+# max_ptys = 32
+
+# startup_screens = 1
+
+# -- Encoding --
+# (ISO-8859-[1-11], ISO-8859-[13-16], TIS-620 (same as ISO-8859-11),
+#  KOI8-[RUT], ISCII, VISCII, TCVN5712, GEORGIAN_PS, CP125[0-8], CP874,
+#  EUC-JP, EUC-JISX0213, Shift_JIS, Shift_JISX0213, ISO-2022-JP[1-3],
+#  EUC-KR, UHC, JOHAB, ISO-2022-KR, GB2312 (EUC-CN), GBK, GB18030,
+#  ISO-2022-CN, HZ, EUC-TW, BIG5, BIG5HKSCS, UTF-8, AUTO)
+ENCODING = UTF-8
+
+use_ctl = false
+
+# (normal,left,right)
+# bidi_mode = normal
+
+# bidi_separators =
+
+use_combining = false
+
+# use_dynamic_comb = false
+
+# (assamese,bengali,gujarati,hindi,kannada,malayalam,oriya,punjabi,roman,tamil,telugu)
+# iscii_lang = malayalam
+
+# big5_buggy = false
+
+col_size_of_width_a = 1
+
+# (none,cjk,mongol)
+# vertical_mode = none
+
+# use_vertical_cursor = false
+
+# use_multi_column_char = false
+
+# receive_string_via_ucs = true
+
+# auto_detect_encodings =
+
+# use_auto_detect = false
+
+# -- Font --
+fontsize = 12
+
+font_size_range = 12-12
+
+# step_in_changing_font_size = 1
+
+use_point_size = false
+
+use_variable_column_width = false
+
+type_engine = xft
+
+use_anti_alias = false
+
+use_cp932_ucs_for_xft = false
+
+not_use_unicode_font = false
+
+# unicode_noconv_areas =
+
+only_use_unicode_font = true
+
+iso88591_font_for_usascii = false
+
+# box_drawing_font = noconvs
+
+compose_dec_special_font = false
+
+use_bold_font = false
+
+use_italic_font = false
+
+# leftward_double_drawing = true
+
+# unicode_full_width_areas =
+
+# -- Appearance --
+# use_transbg = true
+
+alpha = 220
+
+# (8,16,24,32)
+depth = 32
+
+use_scrollbar = false
+
+# scrollbar_mode = left
+
+# (simple,sample,sample2,sample3,next,motif,athena,mozmodern)
+# scrollbar_view_name = simple
+
+fg_color = white
+
+bg_color = #000000
+
+# sb_fg_color =
+
+# sb_bg_color =
+
+# cursor_fg_color = 
+
+cursor_bg_color = white
+
+# bd_color =
+
+# it_color =
+
+# ul_color =
+
+# bl_color =
+
+# co_color =
+
+# hide_underline = false
+
+# wall_picture =
+
+# fade_ratio = 100
+
+# brightness = 100
+
+# contrast = 100
+
+# gamma = 100
+
+line_space = 4
+
+letter_space = 1
+
+# borderless = true
+
+blink_cursor = true
+
+# -- Others --
+# use_xim = true
+  
+# (xim,uim,scim,m17n-lib,ibus,none)
+input_method = uim
+
+# tabsize = 8
+
+# logsize = 128
+
+# word_separators = " ,.:;/@"
+
+# (none,mod1,mod2,mod3,mod4,meta,alt,super,hyper)
+mod_meta_key = mod3
+
+# (none,esc,8bit)
+mod_meta_mode = esc
+
+# (none,sound,visual,sound|visual)
+# bel_mode = sound
+
+# use_urgent_bell = false
+
+# (none,blend,genuine)
+# daemon_mode = none
+
+# use_extended_scroll_shortcut = false
+
+# init_str =
+
+# click_interval = 250
+  
+# static_backscroll_mode = true
+
+# exit_backscroll_by_pty = false
+
+# logging_vt_seq = false
+
+# (raw,ttyrec)
+# vt_seq_format = raw
+
+# use_clipboard = true
+
+logging_msg = false
+
+# server_list =
+
+# default_server =
+
+# always_show_dialog = false
+
+# ssh_public_key = 
+
+# ssh_private_key = 
+
+# cipher_list =
+
+# ssh_keepalive_interval = 0
+
+# ssh_x11_forwarding = false
+
+# allow_scp = false
+
+# auto_restart = true
+
+# allow_osc52 = false
+
+# use_local_echo = false
+
+# use_alt_buffer = true
+
+# use_ansi_colors = true
+
+# allow_change_shortcut = false
+
+# working_directory =
+conf_menu_path_2 = mlterm-zoom

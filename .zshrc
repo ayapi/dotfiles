@@ -1,5 +1,6 @@
 if [[ -n "$VIM" ]]; then
-  export TERM="rxvt-unicode-256color"
+  # export TERM="rxvt-unicode-256color"
+  export TERM="mlterm-256color"
 fi
 
 export TERMINFO=~/.terminfo
@@ -15,6 +16,7 @@ alias zmv='noglob zmv -W'
 
 plugins=()
 
+eval $(dircolors ~/.dircolors)
 zle_highlight=(region:bg=238 isearch:bg=065)
 
 autoload zkbd
