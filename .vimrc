@@ -724,6 +724,20 @@ call MapAllMode("\<lt>M-Left>", "\<lt>C-w>h")
 
 " [move pane]
 " ref. http://stackoverflow.com/questions/2586984/how-can-i-swap-positions-of-two-open-files-in-splits-in-vim
+
+function! GutterToggle() abort
+  if &buftype == ''
+    set number
+  else
+    set nonumber
+  endif
+endfunction
+
+augroup gutter_toggle
+  autocmd!
+  autocmd BufWinEnter * :call GutterToggle()
+augroup END
+
 function! SwapBuffer(targetWinnr) abort
   let l:targetWinnr = a:targetWinnr
   if l:targetWinnr == ""
