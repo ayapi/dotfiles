@@ -551,8 +551,14 @@ endif
 set scrolloff=3
 noremap <silent> <PageUp> 1000<C-u>
 noremap <silent> <PageDown> 1000<C-d>
+snoremap <silent> <PageUp> <C-g>v1000<C-u>
+snoremap <silent> <PageDown> <C-g>v1000<C-d>
+snoremap <silent> <S-PageUp> <C-o>1000<C-u>
+snoremap <silent> <S-PageDown> <C-o>1000<C-d>
 inoremap <silent><expr> <PageUp> pumvisible() ? "\<PageUp>" : "\<C-o>1000\<C-u>"
 inoremap <silent><expr> <PageDown> pumvisible() ? "\<PageDown>" : "\<C-o>1000\<C-d>"
+call IMapWithClosePopup("<S-PageUp>",   "\\<C-o>v1000\\<C-u>\\<C-g>")
+call IMapWithClosePopup("<S-PageDown>", "\\<C-o>v1000\\<C-d>\\<C-g>")
 
 " [scroll viewport up/down]
 " like a mouse wheel, scroll 3 lines.
