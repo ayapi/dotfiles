@@ -227,12 +227,15 @@ bindkey "^v" cb_paste
 
 # fuzzy completion
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -l'
-export FZF_DEFAULT_OPTS='
-  --reverse 
+export FZF_DEFAULT_OPTS="
   --ansi 
   --color fg:252,hl:222,fg+:170,bg+:235,hl+:222 
-  --color info:144,prompt:161,spinner:135,pointer:135,marker:118
-'
+  --color info:144,prompt:161,spinner:135,pointer:135,marker:118 
+  --bind=ctrl-h:backward-kill-word 
+"
+# followings are invalid. fzf cant handle these keys
+# ctrl-right:forward-word,ctrl-left:backward-word,ctrl-del:kill-word,ctrl-v:yank
+
 source /etc/profile.d/fzf.zsh
 
 # file search including hidden files(dotfiles)
