@@ -607,9 +607,12 @@ vnoremap <C-y> <C-c><C-r>
 inoremap <expr> <C-z>   pumvisible() ? "\<C-e>\<C-o>u" : "\<C-o>u"
 
 " [open]
-noremap <C-o> <C-c>:Unite file_rec -direction=botright<CR>
-inoremap <C-o> <C-o>:Unite file_rec -direction=botright<CR>
-nnoremap <C-o> :Unite file_rec -direction=botright<CR>
+function! FilesFromRoot() abort
+  call fzf#vim#files("/", {'options': '-q '.getcwd()[1:], 'down': '~40%'})
+endfunction
+noremap <C-o> <C-c>:call FilesFromRoot()<CR>
+inoremap <C-o> <C-o>:call FilesFromRoot()<CR>
+nnoremap <C-o> :call FilesFromRoot()<CR>
 
 " [quit]
 noremap <C-q> <Esc>:confirm quitall<CR>

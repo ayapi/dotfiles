@@ -226,6 +226,7 @@ bindkey "^x" cb_cut
 bindkey "^v" cb_paste
 
 # fuzzy completion
+export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -l'
 export FZF_DEFAULT_OPTS='
   --reverse 
   --ansi 
@@ -234,7 +235,26 @@ export FZF_DEFAULT_OPTS='
 '
 source /etc/profile.d/fzf.zsh
 
-bindkey '^F' fzf-file-widget
+# file search including hidden files(dotfiles)
+# ref. https://github.com/junegunn/fzf/issues/337
+fzf-file-include-hidden-widget() {
+  local selected
+  selected=( $(ag --hidden --ignore .git -l 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
+  LBUFFER="${LBUFFER}$selected"
+  zle redisplay
+}
+zle -N fzf-file-include-hidden-widget
+
+fzf-file-from-root-include-hidden-widget() {
+  local selected
+  selected=( $(ag --hidden --ignore .git -l '^(?=.)' / 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
+  LBUFFER="${LBUFFER}$selected"
+  zle redisplay
+}
+zle -N fzf-file-from-root-include-hidden-widget
+
+bindkey '^F' fzf-file-include-hidden-widget
+bindkey '^_' fzf-file-from-root-include-hidden-widget
 bindkey '^D' fzf-cd-widget
 bindkey '^R' fzf-history-widget
 
