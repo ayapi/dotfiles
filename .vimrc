@@ -622,13 +622,15 @@ set noincsearch
 noremap <C-f> <C-c>/
 inoremap <C-f> <Esc>/
 nnoremap <C-f> /
-nnoremap j nzz
-nnoremap k Nzz
+snoremap <C-f> <C-g><C-\><C-n>/\%V
+nnoremap n nzz
+nnoremap N Nzz
 
 " [replace]
 noremap <C-r> <C-c>:%s///gc<Left><Left><Left><Left>
 inoremap <C-r> <Esc>:%s///gc<Left><Left><Left><Left>
 nnoremap <C-r> :%s///gc<Left><Left><Left><Left>
+snoremap <C-r> <C-g>:s/\%V\%V//gc<Left><Left><Left><Left><Left><Left><Left>
 
 " [reformat]
 noremap <C-l> <C-v>=i<C-g>u
