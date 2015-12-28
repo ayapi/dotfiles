@@ -617,6 +617,8 @@ call IMapWithClosePopup("<C-q>", "\\<C-o>:confirm quitall<CR>", 1)
 nnoremap <C-q> :confirm quitall<CR>
 
 " [find]
+set ignorecase
+set noincsearch
 noremap <C-f> <C-c>/
 inoremap <C-f> <Esc>/
 nnoremap <C-f> /
