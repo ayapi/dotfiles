@@ -93,7 +93,7 @@ set updatetime=500
 
 " syntax highlight
 if has('nvim')
-  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+  " let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 else
   set t_Co=256
 endif
