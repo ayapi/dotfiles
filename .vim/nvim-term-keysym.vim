@@ -5,6 +5,7 @@ tnoremap <Right> [C
 tnoremap <Del> [3~
 tnoremap <C-Tab> 27;5;9~
 tnoremap <C-S-Tab> 27;6;9~
+tnoremap <S-Tab> [Z
 
 tnoremap <Home> [1~
 tnoremap <End> [4~

@@ -192,13 +192,13 @@ bindkey "${key[Backspace]}" backward-delete-char-or-region
 bindkey "${key[Delete]}" delete-char-or-region
 
 # deleting selected chars with normal char
-zle -A self-insert zle-self-insert
 delete-region-with-normal-char() {
   if [ $REGION_ACTIVE -ne 0 ]; then
     zle delete-region
   fi
-  zle zle-self-insert
+  zle .self-insert
 }
+zle -N delete-region-with-normal-char
 zle -N self-insert delete-region-with-normal-char
 
 # copy/paste
@@ -224,6 +224,122 @@ zle -N cb_paste
 bindkey "^c" cb_copy
 bindkey "^x" cb_cut
 bindkey "^v" cb_paste
+
+# auto completion
+# zstyle -d ':completion:*:default' list-prompt
+# unset LISTPROMPT
+setopt auto_menu
+unsetopt auto_list
+unset LISTMAX
+setopt menu_complete
+setopt always_last_prompt
+setopt no_list_beep
+setopt no_beep
+# zstyle -e ':completion:*' '(( compstate[nmatches] > 10)) && reply=( true )'
+zstyle ':completion:*' menu select=0 interactive
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+
+menu_visible=0
+menu-expand-or-complete-wrap() {
+  menu_visible=1
+  zle menu-expand-or-complete
+}
+zle -N menu-expand-or-complete-wrap
+bindkey "^i" menu-expand-or-complete-wrap
+
+zmodload zsh/complist
+
+bindkey -M menuselect "${key[Left]}" backward-char
+bindkey -M menuselect "${key[Right]}" forward-char
+bindkey -M menuselect "${key[Up]}" up-line-or-history
+bindkey -M menuselect "${key[Down]}" down-line-or-history
+bindkey -M menuselect "\e[z"	reverse-menu-complete
+bindkey -M menuselect '^c' send-break
+bindkey -M menuselect '^m' .accept-line
+bindkey -M menuselect '^u' accept-and-hold
+
+function limit-completion
+{
+  if [[ compstate[list_lines]+BUFFERLINES+1 -gt LINES ]]; then
+    compstate[list]='list explanations'
+    [[ compstate[list_lines]+BUFFERLINES+1 -gt LINES ]] && compstate[list]=''
+  fi
+}
+
+list-choices-after-self-insert() {
+  zle delete-region-with-normal-char
+  if ((PENDING == 0)); then
+    comppostfuncs=(limit-completion)
+    zle list-choices
+    zle redisplay
+  fi
+}
+zle -N self-insert list-choices-after-self-insert
+
+list-choices-after-space() {
+  zle .magic-space
+  comppostfuncs=(limit-completion)
+  zle list-choices
+  zle redisplay
+}
+zle -N magic-space list-choices-after-space
+
+list-choices-after-backspace() {
+  zle .backward-delete-char
+  comppostfuncs=(limit-completion)
+  zle list-choices
+  zle redisplay
+}
+zle -N backward-delete-char list-choices-after-backspace
+
+list-choices-after-delete() {
+  zle .delete-char
+  comppostfuncs=(limit-completion)
+  zle list-choices
+  zle redisplay
+}
+zle -N delete-char list-choices-after-delete
+
+list-choices-after-delete-word() {
+  zle .delete-word
+  comppostfuncs=(limit-completion)
+  zle list-choices
+  zle redisplay
+}
+zle -N delete-word list-choices-after-delete-word
+
+list-choices-after-backward-delete-word() {
+  zle .backward-delete-word
+  comppostfuncs=(limit-completion)
+  zle list-choices
+  zle redisplay
+}
+zle -N backward-delete-word list-choices-after-backward-delete-word
+
+list-choices-after-accept-line() {
+  if ((menu_visible == 1)); then
+    menu_visible=0
+    comppostfuncs=(limit-completion)
+    zle list-choices
+  else
+    zle .accept-line
+  fi
+  zle redisplay
+}
+zle -N accept-line list-choices-after-accept-line
+
+cancel-menu() {
+  if ((menu_visible == 1)); then
+    menu_visible=0
+  fi
+}
+zle -N send-break cancel-menu
+
+autoload -U compinit
+compinit
+
+source /usr/lib/prezto/modules/syntax-highlighting/init.zsh
+
 
 # fuzzy completion
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -l'
