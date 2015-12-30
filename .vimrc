@@ -208,22 +208,17 @@ unlet s:local_session_directory
 " ------------------------------------
 " Git cooperation
 " ------------------------------------
+" ref. http://vim-jp.org/vim-users-jp/2011/03/12/Hack-206.html
 set autoread
-let g:cursor_holded = 0
-function! OnCursorMove() abort
-  if g:cursor_holded == 0
-    return
-  endif
-  let g:cursor_holded = 0
+function! UpdateWindow() abort
   checktime
   if &buftype==''
     call gitgutter#all()
   endif
 endfunction
-augroup pseudo_focus
+augroup vimrc-checktime
   autocmd!
-  autocmd CursorHold,CursorHoldI * :let g:cursor_holded = 1
-  autocmd CursorMoved,CursorMovedI * :call OnCursorMove()
+  autocmd WinEnter * :call UpdateWindow()
 augroup END
 
 
