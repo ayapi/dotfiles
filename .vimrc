@@ -453,33 +453,40 @@ inoremap <silent><expr> <Esc> VariousClear()
 
 set virtualedit=onemore
 
+function! WordOperation(action) abort
+  let l:default_keyword=&iskeyword
+  setlocal iskeyword=@,48-57
+  execute "normal! ".a:action
+  execute "setlocal iskeyword=".l:default_keyword
+endfunction
+
 " [move cursor word-by-word]
 " general move
-noremap <silent> <C-Right> el
-noremap <silent> <C-Left> b
-inoremap <silent> <C-Right> <C-o>e<C-o>l
-inoremap <silent> <C-Left> <C-o>b
+noremap <silent> <C-Right> :call WordOperation("el")<CR>
+noremap <silent> <C-Left> :call WordOperation("b")<CR>
+inoremap <silent> <C-Right> <C-o>:call WordOperation("el")<CR>
+inoremap <silent> <C-Left> <C-o>:call WordOperation("b")<CR>
 
 " when entering select-mode
-inoremap <silent> <C-S-Right> <C-o>ve<C-g>
-inoremap <silent> <C-S-Left> <C-o>vb<C-g>
+inoremap <silent> <C-S-Right> <C-o>:call WordOperation("ve")<CR><C-g>
+inoremap <silent> <C-S-Left> <C-o>:call WordOperation("vb")<CR><C-g>
 
 " while select-mode
-snoremap <silent> <C-S-Right> <C-o>e
-snoremap <silent> <C-S-Left> <C-o>b
+snoremap <silent> <C-S-Right> <C-o>:call WordOperation("e")<CR>
+snoremap <silent> <C-S-Left> <C-o>:call WordOperation("b")<CR>
 
 " when leaving select-mode
-snoremap <silent> <C-Right> <C-g>ve
-snoremap <silent> <C-Left> <C-g>vb
+snoremap <silent> <C-Right> <C-g>:call WordOperation("ve")<CR>
+snoremap <silent> <C-Left> <C-g>:call WordOperation("vb")<CR>
 
 " [delete word]
-noremap <silent> <C-Del> de
-inoremap <silent> <C-Del> <C-o>:execute "normal! de"<CR>
+noremap <silent> <C-Del> :call WordOperation("de")<CR>
+inoremap <silent> <C-Del> <C-o>:call WordOperation("de")<CR>
 
 " [delete backward word]
 " <C-BS> is <C-h> in urxvt
-noremap <silent> <C-h> db
-inoremap <silent> <C-h> <C-o>:execute "normal! db"<CR>
+noremap <silent> <C-h> :call WordOperation("db")<CR>
+inoremap <silent> <C-h> <C-o>:call WordOperation("db")<CR>
 
 
 " <Home> --------------------------
