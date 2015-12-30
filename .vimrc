@@ -213,12 +213,11 @@ set autoread
 function! UpdateWindow() abort
   checktime
   if &buftype==''
-    for buffer_id in tabpagebuflist()
-      let file = expand('#' . buffer_id . ':p')
-      if !empty(file)
-        call gitgutter#process_buffer(buffer_id, 1)
-      endif
-    endfor
+    let buffer_id = winbufnr(0)
+    let file = expand('#' . buffer_id . ':p')
+    if !empty(file)
+      call gitgutter#process_buffer(buffer_id, 1)
+    endif
   endif
 endfunction
 augroup vimrc-checktime
