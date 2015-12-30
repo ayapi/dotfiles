@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+MERGED=${1}
+LOCAL=${2}
+BASE=${3}
+REMOTE=${4}
+
+if [ -s "$BASE" ]; then
+  cat $BASE >! $MERGED
+  nvim -d -R -c "wincmd j" -c "set noreadonly" $LOCAL $MERGED $REMOTE
+else
+  cat $LOCAL >! $MERGED
+  nvim -d -R -c "set noreadonly" $MERGED $REMOTE
+fi

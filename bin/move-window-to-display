@@ -1,0 +1,23 @@
+#!/bin/bash
+
+offx=1200
+offy=0
+curx=$(xwininfo -id `xprop -root | grep "_NET_ACTIVE_WINDOW(WINDOW)"| cut -d ' ' -f 5` | grep "Absolute upper-left X" | cut -d ' ' -f 7)
+cury=$(xwininfo -id `xprop -root | grep "_NET_ACTIVE_WINDOW(WINDOW)"| cut -d ' ' -f 5` | grep "Absolute upper-left Y" | cut -d ' ' -f 7)
+
+if [ $curx -ge $offx ]
+then
+  if [ $1 -eq 1 ]; then
+    newx=$((curx-offx))
+    newy=$((cury-offy))
+  fi
+else
+  if [ $1 -eq 2 ]; then
+    newx=$((curx+offx))
+    newy=$((cury+offy))
+  fi
+fi
+
+/usr/bin/xdotool windowmove `/usr/bin/xdotool getwindowfocus` $newx $newy
+
+exit 0

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+/usr/bin/xdotool windowsize `/usr/bin/xdotool getwindowfocus` 2395 1855
+/usr/bin/xdotool windowmove `/usr/bin/xdotool getwindowfocus` 0 40
+
+exit 0
+
