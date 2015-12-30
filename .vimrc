@@ -435,11 +435,11 @@ function! VariousClear() abort
   elseif neosnippet#expandable_or_jumpable()
     return "\<C-o>:NeoSnippetClearMarkers\<CR>"
   else
-    return "\<C-o>:silent nohlsearch|:silent lclose|:silent pclose |:silent helpclose\<CR>"
+    return "\<C-o>:silent nohlsearch|:silent lclose|:silent pclose\<CR>"
   endif
 endfunction
 
-noremap <silent> <Esc> :silent nohlsearch \| lclose \| pclose \| helpclose<CR>
+noremap <silent> <Esc> :silent nohlsearch \| lclose \| pclose<CR>
 inoremap <silent><expr> <Esc> VariousClear()
 
 
