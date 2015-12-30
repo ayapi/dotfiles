@@ -453,40 +453,44 @@ inoremap <silent><expr> <Esc> VariousClear()
 
 set virtualedit=onemore
 
-function! WordOperation(action) abort
-  let l:default_keyword=&iskeyword
+function! BeforeWord() abort
+  let b:default_keyword=&iskeyword
   setlocal iskeyword=@,48-57
-  execute "normal! ".a:action
-  execute "setlocal iskeyword=".l:default_keyword
+  return ""
+endfunction
+
+function! AfterWord() abort
+  execute "setlocal iskeyword=".b:default_keyword
+  return ""
 endfunction
 
 " [move cursor word-by-word]
 " general move
-noremap <silent> <C-Right> :call WordOperation("el")<CR>
-noremap <silent> <C-Left> :call WordOperation("b")<CR>
-inoremap <silent> <C-Right> <C-o>:call WordOperation("el")<CR>
-inoremap <silent> <C-Left> <C-o>:call WordOperation("b")<CR>
+noremap <silent><expr> <C-Right> BeforeWord()."el".AfterWord()
+noremap <silent><expr> <C-Left> BeforeWord()."b".AfterWord()
+inoremap <silent><expr> <C-Right> "\<C-o>".BeforeWord()."e\<C-o>l".AfterWord()
+inoremap <silent><expr> <C-Left> "\<C-o>".BeforeWord()."b".AfterWord()
 
 " when entering select-mode
-inoremap <silent> <C-S-Right> <C-o>:call WordOperation("ve")<CR><C-g>
-inoremap <silent> <C-S-Left> <C-o>:call WordOperation("vb")<CR><C-g>
+inoremap <silent><expr> <C-S-Right> "\<C-o>".BeforeWord()."ve".AfterWord()."\<C-g>"
+inoremap <silent><expr> <C-S-Left> "\<C-o>".BeforeWord()."vb".AfterWord()."\<C-g>"
 
 " while select-mode
-snoremap <silent> <C-S-Right> <C-o>:call WordOperation("e")<CR>
-snoremap <silent> <C-S-Left> <C-o>:call WordOperation("b")<CR>
+snoremap <silent><expr> <C-S-Right> "\<C-o>".BeforeWord()."e".AfterWord()
+snoremap <silent><expr> <C-S-Left> "\<C-o>".BeforeWord()."b".AfterWord()
 
 " when leaving select-mode
-snoremap <silent> <C-Right> <C-g>:call WordOperation("ve")<CR>
-snoremap <silent> <C-Left> <C-g>:call WordOperation("vb")<CR>
+snoremap <silent><expr> <C-Right> "\<C-g>".BeforeWord()."ve".AfterWord()
+snoremap <silent><expr> <C-Left> "\<C-g>".BeforeWord()."vb".AfterWord()
 
 " [delete word]
-noremap <silent> <C-Del> :call WordOperation("de")<CR>
-inoremap <silent> <C-Del> <C-o>:call WordOperation("de")<CR>
+noremap <silent><expr> <C-Del> BeforeWord()."de".AfterWord()
+inoremap <silent><expr> <C-Del> "\<C-o>".BeforeWord()."de".AfterWord()
 
 " [delete backward word]
 " <C-BS> is <C-h> in urxvt
-noremap <silent> <C-h> :call WordOperation("db")<CR>
-inoremap <silent> <C-h> <C-o>:call WordOperation("db")<CR>
+noremap <silent><expr> <C-h> BeforeWord()."db".AfterWord()
+inoremap <silent><expr> <C-h> "\<C-o>".BeforeWord()."db".AfterWord()
 
 
 " <Home> --------------------------
