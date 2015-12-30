@@ -837,5 +837,7 @@ if has('nvim')
   source ~/.vim/nvim-term-keysym.vim
   tnoremap <Esc> <C-\><C-n>
   tnoremap <C-l> <C-\><C-n>
+  noremap <C-t> :term<CR>
+  inoremap <C-t> <Esc>:term<CR>
 endif
 
