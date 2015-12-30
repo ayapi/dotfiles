@@ -29,7 +29,7 @@ function! VimScriptOmniComplete(findstart, base)
   return l:matches
 endfunction
 
-set omnifunc=VimScriptOmniComplete
+setlocal omnifunc=VimScriptOmniComplete
 
 setlocal keywordprg=:help
 
