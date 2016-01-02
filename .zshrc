@@ -335,12 +335,6 @@ cancel-menu() {
 }
 zle -N send-break cancel-menu
 
-autoload -U compinit
-compinit
-
-source /usr/lib/prezto/modules/syntax-highlighting/init.zsh
-
-
 # fuzzy completion
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -l'
 export FZF_DEFAULT_OPTS="
@@ -425,6 +419,13 @@ export NODE_PATH=${NVM_PATH}_modules
 
 export PATH=$PATH:$HOME/node_tools
 
+export GOPATH=$HOME/.go
+export PATH=$HOME/.go/bin:$PATH
+
+if which ghq > /dev/null 2>&1; then
+  fpath=($GOPATH/src/github.com/motemen/ghq/zsh ${fpath})
+fi
+
 alias gpgimp='gpg --keyserver http://pgp.mit.edu --recv-key'
 alias pacupg='sudo snp "pacman -Syu; pacmrr; pacnews"'
 alias aurupg='snp "yaourt -Syua; sudo pacmrr; sudo pacnews"'
@@ -458,3 +459,7 @@ alias font-install=font-install
 
 source ~/.zshrc.local
 
+autoload -U compinit
+compinit
+
+source /usr/lib/prezto/modules/syntax-highlighting/init.zsh

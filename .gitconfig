@@ -16,4 +16,6 @@
 [github]
   user = ayapi
 [alias]
-graph=log --graph --oneline --decorate=full
+  graph=log --graph --oneline --decorate=full
+[ghq]
+  root = ~/github
