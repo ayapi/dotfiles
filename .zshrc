@@ -384,6 +384,21 @@ function agp() {
 }
 alias agp=agp
 
+function nv() {
+  if [ $# -eq 0 ]; then
+    echo "<filename>    open file"
+    echo "-o <filename> open file split"
+    return 1
+  fi
+  
+  if [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
+    nvr "$@"
+  else
+    nvim "$@"
+  fi
+}
+alias nv=nv
+
 # uim-fep
 if [[ -n "$TMUX" ]]; then
   if [ -n "$TMUX_SPLIT" ]; then
