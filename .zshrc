@@ -371,6 +371,19 @@ bindkey '^_' fzf-file-from-root-include-hidden-widget
 bindkey '^D' fzf-cd-widget
 bindkey '^R' fzf-history-widget
 
+# grep & preview
+function agp() {
+  if [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
+    ag --hidden --ignore .git --nocolor --nogroup --column $@ 2> /dev/null | ag2nvim
+  else
+    sockpath=$(mktemp -d /tmp/nvimXXXXXX)/nvim
+    NVIM_LISTEN_ADDRESS="$sockpath" nvim &
+    ag --hidden --ignore .git --nocolor --nogroup --column $@ 2> /dev/null | NVIM_LISTEN_ADDRESS="$sockpath" ag2nvim 2> /dev/null &!
+    fg
+  fi
+}
+alias agp=agp
+
 # uim-fep
 if [[ -n "$TMUX" ]]; then
   if [ -n "$TMUX_SPLIT" ]; then

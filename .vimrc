@@ -305,6 +305,41 @@ endfunction
 
 
 " ------------------------------------
+" Neovim remote
+" ------------------------------------
+" grep in zsh -> append loclist in nvim
+
+function! RestoreQuickfixCursor() abort
+  if &buftype == 'quickfix' && exists('w:last_cursor')
+    call setpos(".", w:last_cursor)
+  endif
+endfunction
+
+function! SaveQuickfixCursor() abort
+  if &buftype == 'quickfix'
+    let w:last_cursor = getpos(".")
+  endif
+endfunction
+
+augroup loclist_cursor
+  autocmd!
+  autocmd BufEnter * call RestoreQuickfixCursor()
+  autocmd BufLeave * call SaveQuickfixCursor()
+augroup END
+
+function! AppendLocList(loclist_bufnr, entries) abort
+  let l:loclist_winnr = bufwinnr(a:loclist_bufnr)
+  let l:current_winnr = winnr()
+  if l:loclist_winnr == l:current_winnr
+    let w:last_cursor = getpos(".")
+  endif
+  call setloclist(l:loclist_winnr, eval(a:entries), 'a')
+  if l:loclist_winnr == l:current_winnr
+    call setpos(".", w:last_cursor)
+  endif
+endfunction
+
+" ------------------------------------
 " keybinds
 " ------------------------------------
 set ttimeout

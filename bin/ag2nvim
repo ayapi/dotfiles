@@ -1,0 +1,67 @@
+#!/bin/sh
+":" //# comment; exec babel-node --presets es2015,stage-3 "$0" "$@"
+
+var util = require('util');
+var through2 = require('through2');
+var split2 = require('split2');
+
+var stream = through2({
+    objectMode: true
+  },
+  function(chunk, enc, cb) {
+    var string = chunk.toString();
+    var p = string.replace(/\n/, '').split(':');
+    
+    this.push({
+      filename: p[0],
+      lnum: p[1],
+      col: p[2],
+      vcol: 1,
+      text: p.slice(3).join(':').slice(0, 80)
+    });
+    cb();
+  }
+);
+
+stream.once('end', function(){
+  process.exit(0);
+});
+
+process.stdin  
+    .pipe(split2())
+    .pipe(stream)
+ 
+var net = require('net');
+var attach = require('promised-neovim-client').attach;
+
+(async function () {
+  let nvim_proc = net.connect({path: process.env.NVIM_LISTEN_ADDRESS});
+  let nvim = await attach(nvim_proc, nvim_proc);
+  let loclist_bufnr;
+  
+  function push2nvim() {
+    let entries = [];
+    let entry;
+    while (null !== (entry = stream.read())) {
+      entries.push(entry);
+    }
+    if (entries.length == 0) {
+      stream.once('readable', push2nvim);
+      return;
+    }
+    nvim.callFunction(
+      'AppendLocList',
+      [loclist_bufnr, JSON.stringify(entries)]
+    ).then(push2nvim);
+  }
+
+  if (await nvim.eval('expand("%")')) {
+    await nvim.command('new');
+  }
+  await nvim.eval('setloclist(0, [], "r")');
+    
+  await nvim.command('lopen');
+  loclist_bufnr = await nvim.eval('winbufnr(0)');
+  stream.once('readable', push2nvim);
+})();
+
