@@ -335,6 +335,8 @@ cancel-menu() {
 }
 zle -N send-break cancel-menu
 
+zstyle -d :completion:\*:\*:kill:\*
+
 # fuzzy completion
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -l'
 export FZF_DEFAULT_OPTS="
