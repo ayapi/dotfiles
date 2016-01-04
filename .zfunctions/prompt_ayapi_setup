@@ -9,7 +9,6 @@
 #
 
 # Load dependencies.
-pmodload 'helper'
 
 # Define variables.
 # _prompt_ayapi_current_bg='NONE'
@@ -134,36 +133,10 @@ prompt_ayapi_setup() {
   add-zsh-hook preexec prompt_ayapi_preexec
   add-zsh-hook precmd prompt_ayapi_precmd
 
-  # Set editor-info parameters.
-  zstyle ':prezto:module:editor:info:completing' format '...'
-  zstyle ':prezto:module:editor:info:keymap:primary' format '>'
-  zstyle ':prezto:module:editor:info:keymap:primary:overwrite' format '%F{red}♺%f'
-  zstyle ':prezto:module:editor:info:keymap:alternate' format '%F{red}<%f'
-
-  # Set git-info parameters.
-  zstyle ':prezto:module:git:info' verbose 'yes'
-  zstyle ':prezto:module:git:info:action' format ' ⁝ %s'
-  zstyle ':prezto:module:git:info:added' format ' ✚'
-  zstyle ':prezto:module:git:info:ahead' format ' ⬆'
-  zstyle ':prezto:module:git:info:behind' format ' ⬇'
-  zstyle ':prezto:module:git:info:branch' format ' %b'
-  zstyle ':prezto:module:git:info:commit' format '➦ %.7c'
-  zstyle ':prezto:module:git:info:deleted' format ' ✖'
-  zstyle ':prezto:module:git:info:dirty' format ' ⁝'
-  zstyle ':prezto:module:git:info:modified' format ' ✱'
-  zstyle ':prezto:module:git:info:position' format '%p'
-  zstyle ':prezto:module:git:info:renamed' format ' ➙'
-  zstyle ':prezto:module:git:info:stashed' format ' S'
-  zstyle ':prezto:module:git:info:unmerged' format ' ═'
-  zstyle ':prezto:module:git:info:untracked' format ' ?'
-  zstyle ':prezto:module:git:info:keys' format \
-    'ref' '$(coalesce "%b" "%p" "%c")' \
-    'status' '%s%D%A%B%S%a%d%m%r%U%u'
-
   # Define prompts.
   PROMPT='
 ${(e)$(prompt_ayapi_build_prompt)}
- ${editor_info[keymap]} '
+ > '
   # RPROMPT='%F{blue}[%F{green}%D{%H:%M:%S}%F{blue}]%f'
   SPROMPT='zsh: %F{red}%R%f って、もしかして %F{green}%r%f のこと？[nyae] '
 }

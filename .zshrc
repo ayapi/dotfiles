@@ -1,3 +1,12 @@
+if [[ -s ${ZDOTDIR:-${HOME}}/.zim/init.zsh ]]; then
+  source ${ZDOTDIR:-${HOME}}/.zim/init.zsh
+fi
+
+fpath=( "$HOME/.zfunctions" $fpath )
+
+autoload -U promptinit && promptinit
+prompt ayapi
+
 if [[ -n "$VIM" ]]; then
   # export TERM="rxvt-unicode-256color"
   export TERM="mlterm-256color"
@@ -492,4 +501,3 @@ source ~/.zshrc.local
 autoload -U compinit
 compinit
 
-source /usr/lib/prezto/modules/syntax-highlighting/init.zsh
