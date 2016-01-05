@@ -474,6 +474,7 @@ function! VariousClear() abort
 endfunction
 
 noremap <silent> <Esc> :silent nohlsearch \| lclose \| pclose<CR>
+nnoremap <silent> <Esc> :silent nohlsearch \| lclose \| pclose<CR>i
 inoremap <silent><expr> <Esc> VariousClear()
 
 
