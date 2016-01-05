@@ -204,6 +204,7 @@ else
   let g:session_autoload = 'no'
 endif
 unlet s:local_session_directory
+let g:session_autosave_silent=1
 
 " ------------------------------------
 " Git cooperation
