@@ -45,11 +45,11 @@ prompt_ayapi_build_prompt() {
 
   print -n "%{\e[38;5;0;48;5;170m%}"
   print -n $_head
-  print -n "%{\e[m%}%{\e[38;5;0;48;5;170m%}%{\u2593%}%{\e[m%}"
+  print -n "%{\e[m%}%{\e[38;5;0;48;5;170m%}%{\e[m%}"
 
   local zero='%([BSUbfksu]|([FB]|){*})'
   local _head_len=${#${(S%%)_head//$~zero/}}
-  ((_head_len = _head_len + 2))
+  ((_head_len = _head_len + 1))
 
   # current working directory
   # i want to see long path always
@@ -69,7 +69,7 @@ prompt_ayapi_build_prompt() {
   # clock
   print -n "%K{white}"
   print -n "%F{black}"
-  print -n "%{\u2593%} %D{%H:%M:%S}"
+  print -n " %D{%H:%M:%S}"
   print -n " %k%f"
   
   # if [[ -n "$git_info" ]]; then
