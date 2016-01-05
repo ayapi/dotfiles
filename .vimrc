@@ -884,5 +884,6 @@ if has('nvim')
   tnoremap <C-l> <C-\><C-n>
   noremap <C-t> :term<CR>
   inoremap <C-t> <Esc>:term<CR>
+  tmap <C-v> <C-\><C-n><C-v>i
 endif
 
