@@ -1,1 +1,3 @@
 .vimsessions/
+.idea/
+*.iml
