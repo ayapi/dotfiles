@@ -638,16 +638,28 @@ inoremap <C-s> <C-o>:call Save()<CR>
 snoremap <C-s> <C-g>v:call Save()<CR>
 nnoremap <C-s> :call Save()<CR>
 
+" confirm message
+" ref. https://github.com/saihoooooooo/dotfiles/
+function! s:Confirm(msg)
+  return input(printf('%s [y/N]: ', a:msg)) =~? '^y\%[es]$'
+endfunction
+
 " [save as]
 " ref. http://vim.wikia.com/wiki/User_input_from_a_script
 function! SaveAs()
   call inputsave()
-  let filename = input('Save As > File Name: ', expand("%"))
+  let l:filename = input('Save As > File Name: ', expand("%"))
   call inputrestore()
-  if filename == ""
+  if l:filename == ""
     echoerr "empty filename, aborted."
   else
-    execute ":saveas ".filename
+    try
+      execute ":saveas ".l:filename
+    catch /E13: File exists/
+      if s:Confirm('"'.l:filename.'" already exists. Overwrite?')
+        execute ":saveas! ".l:filename
+      endif
+    endtry
   endif
 endfunction
 
