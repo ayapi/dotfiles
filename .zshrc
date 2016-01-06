@@ -451,6 +451,51 @@ alias vim='/usr/bin/nvim'
 alias ovim='/usr/bin/vim'
 alias vimdiff='nvim -d'
 
+# aliases from prezto utility (some arranged by ayapi)
+
+# Disable correction.
+setopt CORRECT
+alias ag='nocorrect ag'
+alias ack='nocorrect ack'
+alias cd='nocorrect cd'
+alias cp='nocorrect cp'
+alias ebuild='nocorrect ebuild'
+alias gcc='nocorrect gcc'
+alias gist='nocorrect gist'
+alias grep='nocorrect grep'
+alias heroku='nocorrect heroku'
+alias ln='nocorrect ln'
+alias man='nocorrect man'
+alias mkdir='nocorrect mkdir'
+alias mv='nocorrect mv'
+alias mysql='nocorrect mysql'
+alias rm='nocorrect rm'
+
+# Disable globbing.
+alias bower='noglob bower'
+alias fc='noglob fc'
+alias find='noglob find'
+alias ftp='noglob ftp'
+alias history='noglob history'
+alias locate='noglob locate'
+alias rake='noglob rake'
+alias rsync='noglob rsync'
+alias scp='noglob scp'
+alias sftp='noglob sftp'
+
+# Define general aliases.
+alias cp="${aliases[cp]:-cp} -i"
+alias ln="${aliases[ln]:-ln} -i"
+alias mkdir="${aliases[mkdir]:-mkdir} -p"
+alias mv="${aliases[mv]:-mv} -i"
+alias rm="${aliases[rm]:-rm} -i"
+alias type='type -a'
+
+# Resource Usage
+alias df='df -kh'
+alias du='du -kh'
+
+
 export NVM_DIR="/home/ayapi/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
