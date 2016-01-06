@@ -2,7 +2,7 @@ if [[ -s ${ZDOTDIR:-${HOME}}/.zim/init.zsh ]]; then
   source ${ZDOTDIR:-${HOME}}/.zim/init.zsh
 fi
 
-fpath=( "$HOME/.zfunctions" $fpath )
+fpath=( "${ZDOTDIR:-${HOME}}/.zfunctions" $fpath )
 
 autoload -U promptinit && promptinit
 prompt ayapi
@@ -12,7 +12,7 @@ if [[ -n "$VIM" ]]; then
   export TERM="mlterm-256color"
 fi
 
-export TERMINFO=~/.terminfo
+export TERMINFO=${ZDOTDIR:-${HOME}}/.terminfo
 
 ulimit -c unlimited
 stty -ixon -ixoff
@@ -25,11 +25,11 @@ alias zmv='noglob zmv -W'
 
 plugins=()
 
-eval $(dircolors ~/.dircolors)
+eval $(dircolors ${ZDOTDIR:-${HOME}}/.dircolors)
 zle_highlight=(region:bg=238 isearch:bg=065)
 
 autoload zkbd
-source ~/.zkbd/$TERM-:0.0 # may be different - check where zkbd saved yours
+source ${ZDOTDIR:-${HOME}}/.zkbd/$TERM-:0.0 # may be different - check where zkbd saved yours
 
 [[ -n ${key[Backspace]} ]] && bindkey "${key[Backspace]}" backward-delete-char
 [[ -n ${key[Insert]} ]] && bindkey "${key[Insert]}" overwrite-mode
@@ -60,6 +60,13 @@ bindkey "^Y" redo
 # inserting new line by ctrl+enter (multi-line prompt)
 bindkey "^J" self-insert
 bindkey -s "^[\015" "^J"
+
+# delete by word
+# <C-Del>
+bindkey "^[[3;5~" delete-word
+bindkey "^[[3^" delete-word
+# <C-BS>
+bindkey "^H" backward-delete-word
 
 # Move cursor up/down by display lines when wrapping
 # http://chneukirchen.org/blog/archive/2015/02/10-fancy-zsh-tricks-you-may-not-know.html
@@ -447,53 +454,58 @@ zle -N send-break cancel-menu
 zstyle -d :completion:\*:\*:kill:\*
 
 # fuzzy completion
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -l'
-export FZF_DEFAULT_OPTS="
-  --ansi 
-  --color fg:252,hl:222,fg+:170,bg+:235,hl+:222 
-  --color info:144,prompt:161,spinner:135,pointer:135,marker:118 
-  --bind=ctrl-h:backward-kill-word 
-"
-# followings are invalid. fzf cant handle these keys
-# ctrl-right:forward-word,ctrl-left:backward-word,ctrl-del:kill-word,ctrl-v:yank
 
-source /etc/profile.d/fzf.zsh
+if which fzf > /dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -l'
+  export FZF_DEFAULT_OPTS="
+    --ansi 
+    --color fg:252,hl:222,fg+:170,bg+:235,hl+:222 
+    --color info:144,prompt:161,spinner:135,pointer:135,marker:118 
+    --bind=ctrl-h:backward-kill-word 
+  "
+  # followings are invalid. fzf cant handle these keys
+  # ctrl-right:forward-word,ctrl-left:backward-word,ctrl-del:kill-word,ctrl-v:yank
 
-# file search including hidden files(dotfiles)
-# ref. https://github.com/junegunn/fzf/issues/337
-fzf-file-include-hidden-widget() {
-  local selected
-  selected=( $(ag --hidden --ignore .git -l 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
-  LBUFFER="${LBUFFER}$selected"
-  zle redisplay
-}
-zle -N fzf-file-include-hidden-widget
+  source ${ZDOTDIR:-${HOME}}/.fzf.zsh
 
-fzf-file-from-root-include-hidden-widget() {
-  local selected
-  selected=( $(ag --hidden --ignore .git -l '^(?=.)' / 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
-  LBUFFER="${LBUFFER}$selected"
-  zle redisplay
-}
-zle -N fzf-file-from-root-include-hidden-widget
+  # file search including hidden files(dotfiles)
+  # ref. https://github.com/junegunn/fzf/issues/337
+  fzf-file-include-hidden-widget() {
+    local selected
+    selected=( $(ag --hidden --ignore .git -l 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
+    LBUFFER="${LBUFFER}$selected"
+    zle redisplay
+  }
+  zle -N fzf-file-include-hidden-widget
 
-bindkey '^F' fzf-file-include-hidden-widget
-bindkey '^_' fzf-file-from-root-include-hidden-widget
-bindkey '^D' fzf-cd-widget
-bindkey '^R' fzf-history-widget
+  fzf-file-from-root-include-hidden-widget() {
+    local selected
+    selected=( $(ag --hidden --ignore .git -l '^(?=.)' / 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
+    LBUFFER="${LBUFFER}$selected"
+    zle redisplay
+  }
+  zle -N fzf-file-from-root-include-hidden-widget
+
+  bindkey '^F' fzf-file-include-hidden-widget
+  bindkey '^_' fzf-file-from-root-include-hidden-widget
+  bindkey '^D' fzf-cd-widget
+  bindkey '^R' fzf-history-widget
+fi
 
 # grep & preview
-function agp() {
-  if [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
-    ag --hidden --ignore .git --nocolor --nogroup --column $@ 2> /dev/null | ag2nvim
-  else
-    sockpath=$(mktemp -d /tmp/nvimXXXXXX)/nvim
-    NVIM_LISTEN_ADDRESS="$sockpath" nvim &
-    ag --hidden --ignore .git --nocolor --nogroup --column $@ 2> /dev/null | NVIM_LISTEN_ADDRESS="$sockpath" ag2nvim 2> /dev/null &!
-    fg
-  fi
-}
-alias agp=agp
+if which ag2nvim > /dev/null 2>&1; then
+  function agp() {
+    if [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
+      ag --hidden --ignore .git --nocolor --nogroup --column $@ 2> /dev/null | ag2nvim
+    else
+      sockpath=$(mktemp -d /tmp/nvimXXXXXX)/nvim
+      NVIM_LISTEN_ADDRESS="$sockpath" nvim &
+      ag --hidden --ignore .git --nocolor --nogroup --column $@ 2> /dev/null | NVIM_LISTEN_ADDRESS="$sockpath" ag2nvim 2> /dev/null &!
+      fg
+    fi
+  }
+  alias agp=agp
+fi
 
 function nv() {
   if [ $# -eq 0 ]; then
@@ -596,12 +608,20 @@ alias df='df -kh'
 alias du='du -kh'
 
 
-export NVM_DIR="/home/ayapi/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+if which nvim > /dev/null 2>&1; then
+  alias vim='/usr/bin/nvim'
+  alias ovim='/usr/bin/vim'
+  alias vimdiff='nvim -d'
+fi
 
-export NODE_PATH=${NVM_PATH}_modules
+if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+  source "$HOME/.nvm/nvm.sh"
+  export NODE_PATH=${NVM_PATH}_modules
+fi
 
-export PATH=$PATH:$HOME/node_tools
+if [[ -s "$HOME/node_tools" ]]; then
+  export PATH=$PATH:$HOME/node_tools
+fi
 
 export GOPATH=$HOME/.go
 export PATH=$HOME/.go/bin:$PATH
@@ -641,7 +661,9 @@ function font-install(){
 }
 alias font-install=font-install
 
-source ~/.zshrc.local
+if [[ -s "${ZDOTDIR:-${HOME}}/.zshrc.local" ]]; then
+  source ${ZDOTDIR:-${HOME}}/.zshrc.local
+fi
 
 autoload -U compinit
 compinit
