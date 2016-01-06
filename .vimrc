@@ -625,7 +625,18 @@ autocmd VimLeave * call system("xsel -ib", getreg('+'))
 execute 'snoremap <script> <C-v> '. paste#paste_cmd['i']
 
 " [save]
-call IMapWithClosePopup("<C-s>", "\\<C-o>:update\\<CR>")
+function! Save() abort
+  if expand("%") == ""
+    call SaveAs()
+  else
+    execute ":update"
+  endif
+endfunction
+
+noremap  <C-s> <C-c>:call Save()<CR>
+inoremap <C-s> <C-o>:call Save()<CR>
+snoremap <C-s> <C-g>v:call Save()<CR>
+nnoremap <C-s> :call Save()<CR>
 
 " [save as]
 " ref. http://vim.wikia.com/wiki/User_input_from_a_script
