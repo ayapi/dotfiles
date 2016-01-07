@@ -582,10 +582,10 @@ inoremap <silent> <expr> <Down>  pumvisible() ? "\<Down>" : "\<C-o>gj"
 inoremap <silent> <expr> <Up>    pumvisible() ? "\<Up>" : "\<C-o>gk"
 if has('nvim')
   call IMapWithClosePopup("<Home>", "\\<C-o>:execute printf(\\\"normal! %s\\\", GetGoHomeCmd())\\<CR>")
-  inoremap <End> <C-o>:call GoEnd("g$")<CR>
+  call IMapWithClosePopup("<End>", "\\<C-o>:call GoEnd(\\\"g$\\\")\\<CR>")
 else
   call IMapWithClosePopup("<kHome>","\\<C-o>:execute printf(\\\"normal! %s\\\", GetGoHomeCmd())\\<CR>")
-  inoremap <kEnd> <C-o>:call GoEnd("g$")<CR>
+  call IMapWithClosePopup("<kEnd>", "\\<C-o>:call GoEnd(\\\"g$\\\")\\<CR>")
 endif
 
 " when entering select-mode
@@ -593,7 +593,7 @@ call IMapWithClosePopup("<S-Down>", "\\<C-o>vgj\\<C-g>")
 call IMapWithClosePopup("<S-Up>",   "\\<C-o>vgk\\<C-g>")
 
 call IMapWithClosePopup("<S-Home>", "\\<C-o>:execute printf(\\\"normal! v%s<C-g>\\\", GetGoHomeCmd())\\<CR>")
-inoremap <S-End> <C-o>:call GoEnd("vg$")<CR>
+call IMapWithClosePopup("<S-End>", "\\<C-o>:call GoEnd(\\\"vg$\\\")\\<CR>")
 
 " while select-mode
 snoremap <silent> <S-Down> <C-O>gj
