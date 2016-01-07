@@ -546,3 +546,5 @@ source ~/.zshrc.local
 autoload -U compinit
 compinit
 
+compdef -d rm
+
