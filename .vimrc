@@ -600,8 +600,8 @@ function! GoWord(direction, ...) abort
     let l:to_group = s:get_char_group(l:to_char)
     if l:to_group[0] == "upper"
       " camelCase camelCase
-      "      ^  ^
-      "      2  1 
+      "      ^^
+      "      21
       " cursor on 1, so backward to 2 now
       silent! normal! h
     endif
