@@ -624,10 +624,33 @@ autocmd VimLeave * call system("xsel -ib", getreg('+'))
 " ref. $VIMRUNTIME/autoload/paste.vim
 execute 'snoremap <script> <C-v> '. paste#paste_cmd['i']
 
+
+" confirm message
+" ref. https://github.com/saihoooooooo/dotfiles/
+function! s:Confirm(msg)
+  return input(printf('%s [y/N]: ', a:msg)) =~? '^y\%[es]$'
+endfunction
+
+" write file with `sudo`
+" ref. http://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
+function! WriteWithSudo(filename) abort
+  if s:Confirm('"'.a:filename.'" isnt writable. Write with sudo?')
+    " redraw prompt
+    " ref. http://vim.1045645.n5.nabble.com/Clear-input-prompt-after-input-is-entered-td5717719.html
+    redraw
+    execute ":silent write !sudo tee ".a:filename
+    redraw
+    execute ":silent edit! ".a:filename
+  endif
+endfunction
+
 " [save]
 function! Save() abort
-  if expand("%") == ""
+  let l:filename=expand("%")
+  if l:filename == ""
     call SaveAs()
+  elseif !filewritable(l:filename)
+    call WriteWithSudo(l:filename)
   else
     execute ":update"
   endif
@@ -638,12 +661,6 @@ inoremap <C-s> <C-o>:call Save()<CR>
 snoremap <C-s> <C-g>v:call Save()<CR>
 nnoremap <C-s> :call Save()<CR>
 
-" confirm message
-" ref. https://github.com/saihoooooooo/dotfiles/
-function! s:Confirm(msg)
-  return input(printf('%s [y/N]: ', a:msg)) =~? '^y\%[es]$'
-endfunction
-
 " [save as]
 " ref. http://vim.wikia.com/wiki/User_input_from_a_script
 function! SaveAs()
@@ -652,6 +669,8 @@ function! SaveAs()
   call inputrestore()
   if l:filename == ""
     echoerr "empty filename, aborted."
+  elseif !filewritable(l:filename)
+    call WriteWithSudo(l:filename)
   else
     try
       execute ":saveas ".l:filename
