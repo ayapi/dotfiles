@@ -489,44 +489,152 @@ inoremap <silent><expr> <Esc> VariousClear()
 
 set virtualedit=onemore
 
-function! BeforeWord() abort
-  let b:default_keyword=&iskeyword
-  setlocal iskeyword=@,48-57
-  return ""
+" get next/prev cursor char (multibyte support! cool)
+" ref. http://d.hatena.ne.jp/eagletmt/20100623/1277289728
+function! s:next_cursor_char(n) abort
+  return matchstr(getline('.'), '.', col('.')-1, a:n)
 endfunction
 
-function! AfterWord() abort
-  execute "setlocal iskeyword=".b:default_keyword
-  return ""
+function! s:prev_cursor_char(n)
+  let chars = split(getline('.')[0 : col('.')-1], '\zs')
+  let len = len(chars)
+  if a:n >= len
+    return ''
+  else
+   return chars[len(chars) - a:n - 1]
+  endif
+endfunction
+
+
+" <C-Left/Right> ------------------
+" ayapi's original smart word move
+" stop on camelCase upper char
+" stop on hiragana/katakana/others
+" ---------------------------------
+
+let s:char_groups = {
+      \"symbol": "[\\u0021-\\u002F\\u003A-\\u0040\\u005B-\\u0060\\u007B-\\u007E]",
+      \"upper": "[A-Z]",
+      \"lower": "[a-z]",
+      \"number": "[0-9]",
+      \"blank": "[\\x20\\x09]",
+      \"hiragana": "[\\u3040-\\u309F]",
+      \"katakana": "[\\u30A0-\\u30FF]",
+      \"other": "[^a-zA-Z0-9\\x20\\x09\\u0021-\\u002F\\u003A-\\u0040\\u005B-\\u0060\\u007B-\\u007E\\u3040-\\u309F\\u30A0-\\u30FF]"
+      \}
+
+function! s:get_char_group(char) abort
+  for l:item in items(s:char_groups)
+    if a:char =~# l:item[1]
+      let l:group = l:item
+      break
+    endif
+  endfor
+  return l:group
+endfunction
+
+function! s:get_char_by_direction(direction) abort
+  return a:direction == 'h'
+        \ ? s:prev_cursor_char(1)
+        \ : s:next_cursor_char(1)
+endfunction
+
+set whichwrap+=h,l
+
+function! GoWord(direction, ...) abort
+  if a:0 == 1 && a:1 == 1
+    " when entering select-mode
+    silent! normal! v
+  endif
+  
+  if a:0 == 2 && a:2 == 1
+    " while select-mode, need `gv`(restore selection)
+    silent! normal! gv
+  endif
+  
+  let l:from_char = s:get_char_by_direction(a:direction)
+  if l:from_char == ""
+    if a:direction == "h"
+      " now cursor on the start of line
+      if line(".") > 1
+        " go to end of the prev line (virtualedit onemore position)
+        silent! normal! gkg$
+      endif
+    else
+      " now cursor on the end of line
+      " go to start of the next line
+      silent! normal! l
+    endif
+    return
+  endif
+  
+  let l:from_group = s:get_char_group(l:from_char)
+
+  " forwarding camelCase
+  if a:direction == "l" && l:from_group[0] == "upper"
+    let l:tmp_next_group = s:get_char_group(s:next_cursor_char(2))
+    if l:tmp_next_group[0] == "lower"
+      " camelCase camelCase
+      "      ^^  ^
+      "      12  3
+      " cursor on 1, so forward to 2 now. (to forward to 3 later)
+      silent! normal! l
+      let l:from_group = l:tmp_next_group
+    endif
+  endif
+  
+  while 1
+    execute "silent! normal! ".a:direction
+    let l:to_char = s:get_char_by_direction(a:direction)
+    if l:to_char == "" || l:to_char !~# l:from_group[1]
+      break
+    endif
+  endwhile
+  
+  if l:to_char == ""
+    return
+  endif
+  
+  " backwarding camelCase, go to upper char
+  if a:direction == "h" && l:from_group[0] == "lower"
+    let l:to_group = s:get_char_group(l:to_char)
+    if l:to_group[0] == "upper"
+      " camelCase camelCase
+      "      ^  ^
+      "      2  1 
+      " cursor on 1, so backward to 2 now
+      silent! normal! h
+    endif
+  endif
 endfunction
 
 " [move cursor word-by-word]
 " general move
-noremap <silent><expr> <C-Right> BeforeWord()."el".AfterWord()
-noremap <silent><expr> <C-Left> BeforeWord()."b".AfterWord()
-inoremap <silent><expr> <C-Right> "\<C-o>".BeforeWord()."e\<C-o>l".AfterWord()
-inoremap <silent><expr> <C-Left> "\<C-o>".BeforeWord()."b".AfterWord()
+noremap <silent> <C-Right> :call GoWord("l")<CR>
+noremap <silent> <C-Left> :call GoWord("h")<CR>
+call IMapWithClosePopup("<C-Right>","\\<C-o>:call GoWord(\\\"l\\\")\\<CR>")
+call IMapWithClosePopup("<C-Left>", "\\<C-o>:call GoWord(\\\"h\\\")\\<CR>")
 
 " when entering select-mode
-inoremap <silent><expr> <C-S-Right> "\<C-o>".BeforeWord()."ve".AfterWord()."\<C-g>"
-inoremap <silent><expr> <C-S-Left> "\<C-o>".BeforeWord()."vb".AfterWord()."\<C-g>"
+call IMapWithClosePopup("<C-S-Right>","\\<C-o>:call GoWord(\\\"l\\\", 1)\\<CR>\\<C-g>")
+call IMapWithClosePopup("<C-S-Left>", "\\<C-o>:call GoWord(\\\"h\\\", 1)\\<CR>\\<C-g>")
 
 " while select-mode
-snoremap <silent><expr> <C-S-Right> "\<C-o>".BeforeWord()."e".AfterWord()
-snoremap <silent><expr> <C-S-Left> "\<C-o>".BeforeWord()."b".AfterWord()
+snoremap <silent> <C-S-Right> <C-g>:call GoWord("l",0,1)<CR><C-g>
+snoremap <silent> <C-S-Left>  <C-g>:call GoWord("h",0,1)<CR><C-g>
 
 " when leaving select-mode
-snoremap <silent><expr> <C-Right> "\<C-g>".BeforeWord()."ve".AfterWord()
-snoremap <silent><expr> <C-Left> "\<C-g>".BeforeWord()."vb".AfterWord()
+snoremap <silent> <C-Right> <C-g>v:call GoWord("l")<Esc>i
+snoremap <silent> <C-Left>  <C-g>v:call GoWord("h")<Esc>i
 
 " [delete word]
-noremap <silent><expr> <C-Del> BeforeWord()."de".AfterWord()
-inoremap <silent><expr> <C-Del> "\<C-o>".BeforeWord()."de".AfterWord()
+noremap <silent> <C-Del> :call GoWord("l",1)<CR><C-g><Del>
+call IMapWithClosePopup("<C-Del>","\\<C-o>:call GoWord(\\\"l\\\", 1)\\<CR>\\<C-g>\\<Del>")
 
 " [delete backward word]
 " <C-BS> is <C-h> in urxvt
-noremap <silent><expr> <C-h> BeforeWord()."db".AfterWord()
-inoremap <silent><expr> <C-h> "\<C-o>".BeforeWord()."db".AfterWord()
+noremap <silent> <C-h> :call GoWord("h",1)<CR><C-g><Del>
+call IMapWithClosePopup("<C-h>","\\<C-o>:call GoWord(\\\"h\\\", 1)\\<CR>\\<C-g>\\<Del>")
 
 
 " <Home> --------------------------
