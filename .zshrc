@@ -53,13 +53,6 @@ bindkey "^Y" redo
 bindkey "^J" self-insert
 bindkey -s "^[\015" "^J"
 
-# delete by word
-# <C-Del>
-bindkey "^[[3;5~" delete-word
-bindkey "^[[3^" delete-word
-# <C-BS>
-bindkey "^H" backward-delete-word
-
 # Move cursor up/down by display lines when wrapping
 # http://chneukirchen.org/blog/archive/2015/02/10-fancy-zsh-tricks-you-may-not-know.html
 up-line-by-display-or-history() {
@@ -83,6 +76,85 @@ down-line-by-display-or-history() {
 zle -N up-line-by-display-or-history
 zle -N down-line-by-display-or-history
 
+
+# Move cursor word-by-word (custom word splitting)
+typeset -g -A char_groups
+char_groups=(
+  symbol "[!-/:-@[-\`{-~]"
+  upper "[A-Z]"
+  lower "[a-z]"
+  number "[0-9]"
+  blank "[[:space:]]"
+  hiragana "[あ-ん]"
+  katakana "[ア-ヶ]"
+  other "[^a-zA-Z0-9[:space:]!-/:-@[-\`{-~あ-んア-ヶ]"
+)
+get_char_group() {
+  local char="$1"
+  for k in ${(k)char_groups}; do
+    if [[ "$char" =~ ${char_groups[$k]} ]]; then
+      local group=($k ${char_groups[$k]})
+      echo $group
+      break
+    fi
+  done
+}
+
+backward-smart-word() {
+  local char=${LBUFFER[$#LBUFFER, $#LBUFFER]}
+  local group=($(get_char_group "${char}"))
+  local dest
+  for ((i = $#LBUFFER; i > 0; i--)) {
+    if ! [[ "${LBUFFER[$i]}" =~ "${group[2]}" ]]; then
+      dest=$i
+      break
+    fi
+  }
+  if [ -z "$dest" ]; then
+    zle beginning-of-line
+  else
+    if [ "${group[1]}" == "lower" ]; then
+      local to_group=($(get_char_group "${LBUFFER[$(($dest))]}"))
+      if [ "${to_group[1]}" == "upper" ]; then
+        dest=$(($dest-1))
+      fi
+    fi
+    CURSOR=$dest
+  fi
+  zle redisplay
+}
+zle -N backward-smart-word
+
+forward-smart-word() {
+  local char=${BUFFER[$CURSOR+1, $CURSOR+1]}
+  local group=($(get_char_group "${char}"))
+  local start=1
+  if [ "${group[1]}" == "upper" ]; then
+    local tmp_next_group=($(get_char_group "${BUFFER[$CURSOR+2, $CURSOR+2]}"))
+    if [ "${tmp_next_group[1]}" == "lower" ]; then
+      start=2
+      unset group
+      local group=(${tmp_next_group})
+    fi
+  fi
+  
+  local dest
+  for ((i = $start; i <= $#RBUFFER; i++)) {
+    if ! [[ "${RBUFFER[$i]}" =~ "${group[2]}" ]]; then
+      dest=$(($i+$CURSOR))
+      break
+    fi
+  }
+  if [ -z "$dest" ]; then
+    zle end-of-line
+  else
+    CURSOR=$(($dest-1))
+  fi
+  zle redisplay
+}
+zle -N forward-smart-word
+
+
 # text selection w/ shift+arrow
 # originally code posted by Mr.Stephane Chazelas
 # http://stackoverflow.com/questions/5407916/zsh-zle-shift-selection
@@ -101,8 +173,8 @@ shift-up() shift-arrow up-line-by-display-or-history
 shift-down() shift-arrow down-line-by-display-or-history
 shift-home() shift-arrow beginning-of-line
 shift-end() shift-arrow end-of-line
-shift-ctrl-left() shift-arrow backward-word
-shift-ctrl-right() shift-arrow forward-word
+shift-ctrl-left() shift-arrow backward-smart-word
+shift-ctrl-right() shift-arrow forward-smart-word
 
 zle -N shift-left
 zle -N shift-right
@@ -134,8 +206,8 @@ k_up() arrow up-line-by-display-or-history
 k_down() arrow down-line-by-display-or-history
 k_home() arrow beginning-of-line
 k_end() arrow end-of-line
-k_ctrl_left() arrow backward-word
-k_ctrl_right() arrow forward-word
+k_ctrl_left() arrow backward-smart-word
+k_ctrl_right() arrow forward-smart-word
 
 zle -N k_left
 zle -N k_right
@@ -209,6 +281,26 @@ delete-region-with-normal-char() {
 }
 zle -N delete-region-with-normal-char
 zle -N self-insert delete-region-with-normal-char
+
+# delete by word
+# <C-BS>
+ctrl-bs() {
+  shift-arrow
+  backward-smart-word
+  zle delete-region
+}
+zle -N ctrl-bs
+bindkey "^H" ctrl-bs
+
+# <C-Del>
+ctrl-del() {
+  shift-arrow
+  forward-smart-word
+  zle delete-region
+}
+zle -N ctrl-del
+bindkey "^[[3;5~" ctrl-del
+bindkey "^[[3^" ctrl-del
 
 # copy/paste
 cb_copy() {
