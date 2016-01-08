@@ -665,11 +665,11 @@ endfunction
 " ---------------------------------
 
 function! GoEnd(cmd) range
-  set virtualedit=
   execute ":silent! normal! ".a:cmd
-  set virtualedit=onemore
-  silent! normal! l
-endfunction
+  if virtcol(".") < virtcol("$")
+    silent! normal! l
+  endif
+  endfunction
 
 " [Move cursor by display lines when wrapping]
 " http://vim.wikia.com/wiki/Move_cursor_by_display_lines_when_wrapping
@@ -701,7 +701,7 @@ call IMapWithClosePopup("<S-Down>", "\\<C-o>vgj\\<C-g>")
 call IMapWithClosePopup("<S-Up>",   "\\<C-o>vgk\\<C-g>")
 
 call IMapWithClosePopup("<S-Home>", "\\<C-o>:execute printf(\\\"normal! v%s<C-g>\\\", GetGoHomeCmd())\\<CR>")
-call IMapWithClosePopup("<S-End>", "\\<C-o>:call GoEnd(\\\"vg$\\\")\\<CR>")
+call IMapWithClosePopup("<S-End>", "\\<C-o>:call GoEnd(\\\"vg$\\\")\\<CR>\\<C-g>")
 
 " while select-mode
 snoremap <silent> <S-Down> <C-O>gj
