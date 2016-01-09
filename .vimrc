@@ -127,6 +127,10 @@ set tabstop=2
 set shiftwidth=2
 set expandtab
 
+" search
+highlight Search cterm=none ctermfg=0 ctermbg=81 gui=none guifg=#000000 guibg=#5fd7ff
+highlight IncSearch cterm=none ctermfg=0 ctermbg=222 gui=none guifg=#000000 guibg=#ffd787
+
 " whitespaces
 " ref. http://rcmdnk.github.io/blog/2014/07/22/computer-vim/
 highlight link Trail Error
@@ -474,18 +478,24 @@ inoremap <silent> <S-tab> <C-o><<<C-g>u
 " 'Location List', 'Scratch Preview'
 " ---------------------------------
 
+function! ClearSearch() abort
+  call matchdelete(b:ring)
+  set nohlsearch
+  " let @/ =
+endfunction
+
 function! VariousClear() abort
   if pumvisible()
     return "\<C-e>"
   elseif neosnippet#expandable_or_jumpable()
     return "\<C-o>:NeoSnippetClearMarkers\<CR>"
   else
-    return "\<C-o>:silent nohlsearch|:silent lclose|:silent pclose\<CR>"
+    return "\<C-o>:silent! call ClearSearch()|:silent lclose|:silent pclose\<CR>"
   endif
 endfunction
 
-noremap <silent> <Esc> :silent nohlsearch \| lclose \| pclose<CR>
-nnoremap <silent> <Esc> :silent nohlsearch \| lclose \| pclose<CR>i
+noremap <silent> <Esc> :silent! call ClearSearch()<CR>:silent lclose \| pclose<CR>
+nnoremap <silent> <Esc> :silent! call ClearSearch()<CR>:silent lclose \| pclose<CR>i
 inoremap <silent><expr> <Esc> VariousClear()
 
 
@@ -848,15 +858,56 @@ noremap <C-q> <Esc>:confirm quitall<CR>
 call IMapWithClosePopup("<C-q>", "\\<C-o>:confirm quitall<CR>", 1)
 nnoremap <C-q> :confirm quitall<CR>
 
+
+" Set cursor colour different when on a highlighted word
+" ref. http://vi.stackexchange.com/questions/2761/set-cursor-colour-different-when-on-a-highlighted-word
+function! SearchHighlight()
+  silent! call matchdelete(b:ring)
+  let b:ring = matchadd('IncSearch', '\c\%#' . @/, 101)
+endfunction
+
+function! SearchNext()
+  try
+    execute 'normal! '.'Nn'[v:searchforward].'zz'
+  catch /E385:/
+    echohl ErrorMsg | echo "E385: search hit BOTTOM without match for: " . @/ | echohl None
+  endtry
+  call SearchHighlight()
+endfun
+
+function! SearchPrev()
+  try
+    execute 'normal! '.'nN'[v:searchforward].'zz'
+  catch /E384:/
+    echohl ErrorMsg | echo "E384: search hit TOP without match for: " . @/ | echohl None
+  endtry
+  call SearchHighlight()
+endfunction
+
+" immediately after search started with Enter, highlight first match
+function! SearchStart()
+  autocmd! search_start
+  augroup! search_start
+  set hlsearch
+  call SearchHighlight()
+endfunction
+
+function! AddSearchStartHook() abort
+  augroup search_start
+    autocmd!
+    autocmd CursorMoved <buffer> call SearchStart()
+  augroup END
+endfunction
+
 " [find]
 set ignorecase
 set noincsearch
-noremap <C-f> <C-c>/
-inoremap <C-f> <Esc>/
-nnoremap <C-f> /
-snoremap <C-f> <C-g><C-\><C-n>/\%V
-nnoremap n nzz
-nnoremap N Nzz
+noremap <C-f> <C-c>:call AddSearchStartHook()<CR>/
+inoremap <C-f> <Esc>:call AddSearchStartHook()<CR>/
+nnoremap <C-f> :call AddSearchStartHook()<CR>/
+snoremap <C-f> <C-g><C-\><C-n>:call AddSearchStartHook()<CR>/\%V
+nnoremap <silent> n :call SearchNext()<CR>
+nnoremap <silent> N :call SearchPrev()<CR>
 
 " [replace]
 noremap <C-r> <C-c>:%s///gc<Left><Left><Left><Left>
