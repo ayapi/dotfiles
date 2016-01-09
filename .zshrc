@@ -128,9 +128,9 @@ backward-smart-word() {
   if [ -z "$dest" ]; then
     zle beginning-of-line
   else
-    if [ "${group[1]}" == "lower" ]; then
+    if [[ "${group[1]}" == "lower" ]]; then
       local to_group=($(get_char_group "${LBUFFER[$(($dest))]}"))
-      if [ "${to_group[1]}" == "upper" ]; then
+      if [[ "${to_group[1]}" == "upper" ]]; then
         dest=$(($dest-1))
       fi
     fi
@@ -144,9 +144,9 @@ forward-smart-word() {
   local char=${BUFFER[$CURSOR+1, $CURSOR+1]}
   local group=($(get_char_group "${char}"))
   local start=1
-  if [ "${group[1]}" == "upper" ]; then
+  if [[ "${group[1]}" == "upper" ]]; then
     local tmp_next_group=($(get_char_group "${BUFFER[$CURSOR+2, $CURSOR+2]}"))
-    if [ "${tmp_next_group[1]}" == "lower" ]; then
+    if [[ "${tmp_next_group[1]}" == "lower" ]]; then
       start=2
       unset group
       local group=(${tmp_next_group})
