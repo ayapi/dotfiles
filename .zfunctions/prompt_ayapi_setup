@@ -43,9 +43,9 @@ prompt_ayapi_build_prompt() {
 
   local _head=" %n@%m%f "
 
-  print -n "%{\e[38;5;0;48;5;170m%}"
+  print -n $_prompt_ayapi_head_color
   print -n $_head
-  print -n "%{\e[m%}%{\e[38;5;0;48;5;170m%}%{\e[m%}"
+  print -n "%{\e[m%}"
 
   local zero='%([BSUbfksu]|([FB]|){*})'
   local _head_len=${#${(S%%)_head//$~zero/}}
@@ -115,10 +115,16 @@ prompt_ayapi_precmd() {
 
   # Calculate and print the elapsed time.
   # prompt_ayapi_print_elapsed_time
+
+  _prompt_ayapi_head_color="%{\e[38;5;0;48;5;170m%}"
 }
 
 prompt_ayapi_preexec() {
  # _prompt_ayapi_start_time="$SECONDS"
+}
+
+prompt_ayapi_postaccept() {
+  _prompt_ayapi_head_color="%{\e[38;5;0;48;5;99m%}"
 }
 
 prompt_ayapi_setup() {

@@ -45,6 +45,14 @@ source ~/.zkbd/$TERM-:0.0 # may be different - check where zkbd saved yours
 
 bindkey -e
 
+# reset prompt before exec
+re-prompt() {
+  prompt_ayapi_postaccept
+  zle .reset-prompt
+  zle .accept-line
+}
+zle -N accept-line re-prompt
+
 # undo/redo
 bindkey "^Z" undo
 bindkey "^Y" redo
@@ -356,7 +364,7 @@ bindkey -M menuselect "${key[Up]}" up-line-or-history
 bindkey -M menuselect "${key[Down]}" down-line-or-history
 bindkey -M menuselect "\e[z"	reverse-menu-complete
 bindkey -M menuselect '^c' send-break
-bindkey -M menuselect '^m' .accept-line
+bindkey -M menuselect '^m' accept-line
 bindkey -M menuselect '^u' accept-and-hold
 
 function limit-completion
@@ -417,17 +425,17 @@ list-choices-after-backward-delete-word() {
 }
 zle -N backward-delete-word list-choices-after-backward-delete-word
 
-list-choices-after-accept-line() {
-  if ((menu_visible == 1)); then
-    menu_visible=0
-    comppostfuncs=(limit-completion)
-    zle list-choices
-  else
-    zle .accept-line
-  fi
-  zle redisplay
-}
-zle -N accept-line list-choices-after-accept-line
+# list-choices-after-accept-line() {
+#   if ((menu_visible == 1)); then
+#     menu_visible=0
+#     comppostfuncs=(limit-completion)
+#     zle list-choices
+#   else
+#     zle .accept-line
+#   fi
+#   zle redisplay
+# }
+# zle -N accept-line list-choices-after-accept-line
 
 cancel-menu() {
   if ((menu_visible == 1)); then
