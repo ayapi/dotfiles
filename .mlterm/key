@@ -12,6 +12,7 @@ Mod3+Tab="\x1b[27;3;9~"
 Mod3+Shift+ISO_Left_Tab="\x1b[27;4;9~"
 
 Control+Shift+S="\x1b[24~"
+Control+Shift+R="\x1b[23~"
 
 Mod3+bar="\x1b|"
 Mod3+backslash="\x1b|"

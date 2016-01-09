@@ -915,6 +915,74 @@ inoremap <C-r> <Esc>:%s///gc<Left><Left><Left><Left>
 nnoremap <C-r> :%s///gc<Left><Left><Left><Left>
 snoremap <C-r> <C-g>:s/\%V\%V//gc<Left><Left><Left><Left><Left><Left><Left>
 
+" [revert]
+" <C-S-r> = <F11> in my keysym
+inoremap <F11> <C-o>:GitGutterRevertHunk<CR>
+nnoremap <F11> :GitGutterRevertHunk<CR>
+
+" [jump git hunk]
+" ref. http://vim.wikia.com/wiki/Capture_ex_command_output
+function! s:Warning(msg)
+  redraw
+  echohl WarningMsg
+  echo a:msg
+  echohl None
+  let v:warningmsg = a:msg
+endfunction
+
+function! CirculateNextHunk () abort
+  echo ""
+  let l:hunks = gitgutter#hunk#hunks()
+  if len(l:hunks) == 0
+    call s:Warning("buffer has any git hunks")
+    return
+  endif
+  
+  redir => m
+    silent call gitgutter#hunk#next_hunk(1)
+  redir END
+  
+  if empty(m)
+    normal! zz
+    return
+  endif
+  
+  if m =~ 'No more hunks'
+    normal! gg
+    silent call gitgutter#hunk#next_hunk(1)
+    normal! zz
+    call s:Warning("jump hit BOTTOM. Continueing at TOP")
+  endif
+endfunction
+
+function! CirculatePrevHunk () abort
+  echo ""
+  let l:hunks = gitgutter#hunk#hunks()
+  if len(l:hunks) == 0
+    call s:Warning("buffer has any hunks")
+    return
+  endif
+  
+  redir => m
+    silent call gitgutter#hunk#prev_hunk(1)
+  redir END
+  
+  if empty(m)
+    normal! zz
+    return
+  endif
+  
+  if m =~ 'No previous hunks'
+    normal! G
+    silent call gitgutter#hunk#prev_hunk(1)
+    normal! zz
+    call s:Warning("jump hit Top. Continueing at BOTTOM")
+  endif
+endfunction
+
+nnoremap <silent> g :call CirculateNextHunk()<CR>
+nnoremap <silent> G :call CirculatePrevHunk()<CR>
+
 " [reformat]
 noremap <C-l> <C-v>=i<C-g>u
 
