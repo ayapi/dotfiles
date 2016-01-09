@@ -127,6 +127,16 @@ set tabstop=2
 set shiftwidth=2
 set expandtab
 
+" whitespaces
+" ref. http://rcmdnk.github.io/blog/2014/07/22/computer-vim/
+highlight link Trail Error
+highlight link WideSpace Error
+highlight Error ctermbg=197 ctermfg=0
+autocmd VimEnter,WinEnter * let w:m_trail = matchadd("Trail", '\([\t ]\+$\)')
+autocmd VimEnter,WinEnter * let w:m_widespace = matchadd("WideSpace", '　')
+highlight Tab ctermbg=235 ctermfg=0
+autocmd VimEnter,WinEnter * let w:m_tab = matchadd("Tab", '\(^\t\+\)')
+
 " completion popup
 set pumheight=10
 set splitbelow  "show Scratch Preview pane on the bottom
