@@ -60,6 +60,7 @@ NeoBundle 'junegunn/fzf.vim'
 " NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'tyru/caw.vim.git'
 NeoBundle 'airblade/vim-gitgutter'
+NeoBundle 'tpope/vim-sleuth'
 " NeoBundle 'vheon/vim-cursormode'
 
 " color scheme
@@ -113,6 +114,7 @@ let g:gitgutter_realtime = 1
 let g:gitgutter_eager = 1
 let g:gitgutter_sign_column_always = 1
 let g:gitgutter_max_signs = 9999
+let g:gitgutter_diff_args = '--ignore-all-space'
 set cursorline
 highlight cursorline cterm=none ctermbg=none ctermfg=none gui=none guibg=none guifg=none
 highlight cursorlinenr ctermfg=white ctermbg=none guifg=white guibg=none
@@ -123,9 +125,6 @@ highlight StatusLineNC ctermfg=255 ctermbg=0 guifg=#eeeeee guibg=#000000
 
 " indent style
 set noautoindent
-set tabstop=2
-set shiftwidth=2
-set expandtab
 
 " search
 highlight Search cterm=none ctermfg=0 ctermbg=81 gui=none guifg=#000000 guibg=#5fd7ff
@@ -138,8 +137,8 @@ highlight link WideSpace Error
 highlight Error ctermbg=197 ctermfg=0
 autocmd VimEnter,WinEnter * let w:m_trail = matchadd("Trail", '\([\t ]\+$\)')
 autocmd VimEnter,WinEnter * let w:m_widespace = matchadd("WideSpace", '　')
-highlight Tab ctermbg=235 ctermfg=0
-autocmd VimEnter,WinEnter * let w:m_tab = matchadd("Tab", '\(^\t\+\)')
+" highlight Tab ctermbg=235 ctermfg=0
+" autocmd VimEnter,WinEnter * let w:m_tab = matchadd("Tab", '\(^\t\+\)')
 
 " completion popup
 set pumheight=10
