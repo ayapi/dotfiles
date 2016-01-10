@@ -117,6 +117,14 @@ prompt_ayapi_precmd() {
   # prompt_ayapi_print_elapsed_time
 
   _prompt_ayapi_head_color="%{\e[38;5;0;48;5;170m%}"
+
+  # set window title
+  # ref. http://tldp.org/HOWTO/Xterm-Title-4.html
+  case $TERM in
+    mlterm*|urxvt*|xterm*)
+      print -Pn "\e]0;%~\a"
+      ;;
+  esac
 }
 
 prompt_ayapi_preexec() {
