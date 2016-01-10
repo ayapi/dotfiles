@@ -979,8 +979,8 @@ function! CirculatePrevHunk () abort
   endif
 endfunction
 
-nnoremap <silent> g :call CirculateNextHunk()<CR>
-nnoremap <silent> G :call CirculatePrevHunk()<CR>
+nnoremap <silent> m :call CirculateNextHunk()<CR>
+nnoremap <silent> M :call CirculatePrevHunk()<CR>
 
 " [reformat]
 noremap <C-l> <C-v>=i<C-g>u
