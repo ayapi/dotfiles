@@ -788,20 +788,21 @@ function! WriteWithSudo(filename) abort
     " ref. http://vim.1045645.n5.nabble.com/Clear-input-prompt-after-input-is-entered-td5717719.html
     redraw
     execute ":silent write !sudo tee ".a:filename
-    redraw
-    execute ":silent edit! ".a:filename
+    set nomodified
+    execute ":silent file! ".a:filename
   endif
 endfunction
 
 " [save]
 function! Save() abort
-  let l:filename=expand("%")
+  let l:filename = expand("%")
   if l:filename == ""
     call SaveAs()
-  elseif !filewritable(l:filename)
+  elseif filewritable(expand("%:p")) != 1 &&
+        \ filewritable(expand("%:p:h")) != 2
     call WriteWithSudo(l:filename)
   else
-    execute ":update"
+    update
   endif
 endfunction
 
@@ -814,21 +815,44 @@ nnoremap <C-s> :call Save()<CR>
 " ref. http://vim.wikia.com/wiki/User_input_from_a_script
 function! SaveAs()
   call inputsave()
-  let l:filename = input('Save As > File Name: ', expand("%"))
+  let l:inputpath = input('Save As > File Name: ', expand("%"))
   call inputrestore()
-  if l:filename == ""
+  if l:inputpath == ""
     echoerr "empty filename, aborted."
-  elseif !filewritable(l:filename)
-    call WriteWithSudo(l:filename)
-  else
-    try
-      execute ":saveas ".l:filename
-    catch /E13: File exists/
-      if s:Confirm('"'.l:filename.'" already exists. Overwrite?')
-        execute ":saveas! ".l:filename
-      endif
-    endtry
+    return
   endif
+  
+  " ref. http://vim.1045645.n5.nabble.com/dirname-td1185590.html
+  let l:savepath = fnamemodify(expand(l:inputpath), ":p")
+  let l:savedir = fnamemodify(expand(l:inputpath), ":p:h")
+
+  let l:need_sudo = 0
+  if glob(l:savepath) != "" " file exists
+    if filewritable(l:savepath) != 1
+      let l:need_sudo = 1
+    endif
+  else
+    if !isdirectory(l:savedir) " dir not exists
+      " TODO: should `mkdir -p`... ?
+    else
+      if filewritable(l:savedir) != 2
+        let l:need_sudo = 1
+      endif
+    endif
+  endif
+  
+  if l:need_sudo
+    call WriteWithSudo(l:savepath)
+    return
+  endif
+  
+  try
+    execute ":saveas ".l:savepath
+  catch /E13: File exists/
+    if s:Confirm('"'.l:savepath.'" already exists. Overwrite?')
+      execute ":saveas! ".l:savepath
+    endif
+  endtry
 endfunction
 
 " i cant use <C-S-s> caused by terminal's limitation
