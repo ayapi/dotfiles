@@ -124,21 +124,31 @@ highlight StatusLine ctermfg=170 ctermbg=0 guifg=#d75fd7 guibg=#000000
 highlight StatusLineNC ctermfg=255 ctermbg=0 guifg=#eeeeee guibg=#000000
 
 " indent style
-set noautoindent
+set noautoindent  
 
 " search
 highlight Search cterm=none ctermfg=0 ctermbg=81 gui=none guifg=#000000 guibg=#5fd7ff
 highlight IncSearch cterm=none ctermfg=0 ctermbg=222 gui=none guifg=#000000 guibg=#ffd787
 
-" whitespaces
-" ref. http://rcmdnk.github.io/blog/2014/07/22/computer-vim/
-highlight link Trail Error
+" whitespaces  
+highlight link TrailSpace Error  
 highlight link WideSpace Error
-highlight Error ctermbg=197 ctermfg=0
-autocmd VimEnter,WinEnter * let w:m_trail = matchadd("Trail", '\([\t ]\+$\)')
-autocmd VimEnter,WinEnter * let w:m_widespace = matchadd("WideSpace", '　')
-" highlight Tab ctermbg=235 ctermfg=0
-" autocmd VimEnter,WinEnter * let w:m_tab = matchadd("Tab", '\(^\t\+\)')
+highlight Error ctermbg=197 ctermfg=0 
+
+" ref. http://vim.wikia.com/wiki/Highlight_unwanted_spaces#Highlighting_with_the_syntax_command
+function! SetWhiteSpaceSyntax() abort
+  " highlight as error trailing whitespaces,
+  " but exclude comment blocks & empty lines
+  syntax match LeadSpace excludenl /^\s\+$/ containedin=ALL
+  syntax match TrailSpace excludenl /\s\+$/ containedin=ALLBUT,.*Comment.*,LeadSpace
+
+  " highlight japanese wide-width space, everywhere
+  syntax match WideSpace excludenl /　/ containedin=ALL
+endfunction
+augroup whitespace_syntax
+  autocmd!
+  autocmd Syntax * call SetWhiteSpaceSyntax()
+augroup END
 
 " completion popup
 set pumheight=10
