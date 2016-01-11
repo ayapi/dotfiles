@@ -124,16 +124,16 @@ highlight StatusLine ctermfg=170 ctermbg=0 guifg=#d75fd7 guibg=#000000
 highlight StatusLineNC ctermfg=255 ctermbg=0 guifg=#eeeeee guibg=#000000
 
 " indent style
-set noautoindent  
+set noautoindent
 
 " search
 highlight Search cterm=none ctermfg=0 ctermbg=81 gui=none guifg=#000000 guibg=#5fd7ff
 highlight IncSearch cterm=none ctermfg=0 ctermbg=222 gui=none guifg=#000000 guibg=#ffd787
 
-" whitespaces  
-highlight link TrailSpace Error  
+" whitespaces
+highlight link TrailSpace Error
 highlight link WideSpace Error
-highlight Error ctermbg=197 ctermfg=0 
+highlight Error ctermbg=197 ctermfg=0
 
 " ref. http://vim.wikia.com/wiki/Highlight_unwanted_spaces#Highlighting_with_the_syntax_command
 function! SetWhiteSpaceSyntax() abort
