@@ -11,6 +11,8 @@ augroup save_indent_size
   autocmd!
   autocmd FileType * call SaveIndentSize()
   autocmd BufWritePost * call ConvertIndent()
+  autocmd FileChangedShellPost * call ConvertIndentOrSetTodo()
+  autocmd BufEnter * call ConvertIndentIfTodoExists()
   autocmd BufWritePre * call RevertIndent()
 augroup END
 
@@ -24,30 +26,25 @@ function! SaveIndentSize() abort
   endif
 
   let b:org_shiftwidth = getbufvar("", "&shiftwidth", 8)
-  
-  if !exists('b:noconvertindent')
-    if !&modifiable
-      let l:org_modifiable=1
-      set modifiable
-    endif
+  call ConvertIndent()
+  call ForgetUndo()
+endfunction
 
-    if &readonly
-      let l:org_readonly=1
-      set noreadonly
-    endif
-    
+function! ConvertIndentOrSetTodo() abort
+  let l:changed_bufno = expand("<afile>")
+  if l:changed_bufno == expand("%")
     call ConvertIndent()
     call ForgetUndo()
+  else
+    call setbufvar(l:changed_bufno, "need_convert_indent", 1)
+  endif
+endfunction
 
-    if exists("l:org_modifiable")
-      set nomodifiable
-    endif
-
-    if exists("l:org_readonly")
-      set readonly
-    endif
-    
-    set nomodified
+function! ConvertIndentIfTodoExists() abort
+  if exists('b:need_convert_indent')
+    unlet b:need_convert_indent
+    call ConvertIndent()
+    call ForgetUndo()
   endif
 endfunction
 
@@ -55,6 +52,17 @@ function! ConvertIndent() abort
   if exists('b:noconvertindent') || !exists('b:org_shiftwidth')
     return
   endif
+  
+  if !&modifiable
+    let l:org_modifiable=1
+    set modifiable
+  endif
+
+  if &readonly
+    let l:org_readonly=1
+    set noreadonly
+  endif
+
   call setbufvar("", "&shiftwidth", b:org_shiftwidth)
   call setbufvar("", "&tabstop", b:org_shiftwidth)
   set noexpandtab
@@ -69,6 +77,18 @@ function! ConvertIndent() abort
 
   set tabstop=2
   set shiftwidth=2
+
+  " call ForgetUndo()
+  
+  if exists("l:org_modifiable")
+    set nomodifiable
+  endif
+
+  if exists("l:org_readonly")
+    set readonly
+  endif
+  
+  set nomodified
 endfunction
 
 augroup revert_indent
