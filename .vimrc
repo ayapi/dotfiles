@@ -236,17 +236,10 @@ let g:session_autosave_silent=1
 set autoread
 function! UpdateWindow() abort
   checktime
-  if &buftype==''
-    let buffer_id = winbufnr(0)
-    let file = expand('#' . buffer_id . ':p')
-    if !empty(file)
-      call gitgutter#process_buffer(buffer_id, 1)
-    endif
-  endif
 endfunction
 augroup vimrc-checktime
   autocmd!
-  autocmd WinEnter * :call UpdateWindow()
+  autocmd BufEnter * :call UpdateWindow()
 augroup END
 
 
