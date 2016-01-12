@@ -1181,6 +1181,7 @@ endfunction
 
 function! RestoreLoclist(stashed) abort
   if !has_key(a:stashed, 'loclist')
+    call setloclist(0, [])
     return
   endif
   call setloclist(0, a:stashed.loclist.data)
@@ -1275,13 +1276,14 @@ function! LayAsideBufferArrow(direction) abort
   if &buftype == 'quickfix'
     new
   else
-    let l:from_win_loclist = getloclist(0)
-    if len(l:from_win_loclist)
+    let l:stop_win_winnr = winnr()
+    let l:stop_win_loclist = getloclist(0)
+    if len(l:stop_win_loclist)
       " go to window below, is it loclist?
       wincmd j
-      if l:from.winnr != winnr()
+      if l:stop_win_winnr != winnr()
           \ && &buftype == 'quickfix'
-          \ && getloclist(0) == l:from_win_loclist
+          \ && getloclist(0) == l:stop_win_loclist
         " loclist is visible. insert new pane below
         new
       else
