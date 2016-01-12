@@ -668,7 +668,7 @@ call IMapWithClosePopup("<C-h>","\\<C-o>:call GoWord(\\\"h\\\", 1)\\<CR>\\<C-g>\
 " when hit <Home> & cursor in range 2-3, cursor will go to 3.
 " ---------------------------------
 function! GetGoHomeCmd() abort
-  return indent('.') >= col('.') - 1 ? "g0" : "g^"
+  return indent('.') >= virtcol('.') - 1 ? "g0" : "g^"
 endfunction
 
 " <End> ---------------------------
