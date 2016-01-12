@@ -21,7 +21,7 @@ function! SaveIndentSize() abort
     " hard-tab detected by tpope/vim-sleuth
     let b:noconvertindent = 1
     set shiftwidth=8
-  elseif &diff || &filetype == "help" || &buftype ==# 'terminal'
+  elseif &diff || &filetype == "help" || &buftype != ''
     let b:noconvertindent = 1
   endif
 
@@ -113,4 +113,5 @@ function! ForgetUndo()
   execute "silent! normal! a \<BS>\<Esc>"
   let &undolevels = old_undolevels
   unlet old_undolevels
+  set nomodified
 endfunction
