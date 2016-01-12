@@ -1195,10 +1195,9 @@ function! RestoreLoclist(stashed) abort
   endif
 endfunction
 
-function! SwapBufferArrow(direction) abort
-  let l:from = StashLoclist()
-  execute 'wincmd '.a:direction
-  let l:to = StashLoclist()
+function! SwapBuffer(from, to) abort
+  let l:from = a:from
+  let l:to = a:to
   
   if l:from.bufnr == l:to.bufnr
     return
@@ -1223,6 +1222,13 @@ function! SwapBufferArrow(direction) abort
   execute bufwinnr(l:from.bufnr)." wincmd w"
 endfunction
 
+function! SwapBufferArrow(direction) abort
+  let l:from = StashLoclist()
+  execute 'wincmd '.a:direction
+  let l:to = StashLoclist()
+  call SwapBuffer(from, to)
+endfunction
+
 map <Esc>[1;7A <M-C-Up>
 call MapAllMode("\<lt>M-C-Up>", ":call SwapBufferArrow('k')\<lt>CR>")
 map <Esc>[1;7B <M-C-Down>
@@ -1231,6 +1237,84 @@ map <Esc>[1;7C <M-C-Right>
 call MapAllMode("\<lt>M-C-Right>", ":call SwapBufferArrow('l')\<lt>CR>")
 map <Esc>[1;7D <M-C-Left>
 call MapAllMode("\<lt>M-C-Left>", ":call SwapBufferArrow('h')\<lt>CR>")
+
+
+" lay aside buffer
+" 
+" ~~~~~~~~~~~~~~~~~~
+" before -> after
+" -----     -----
+" 1 |3      1 |3
+"   |--     --|
+" --|4      2 |--
+" 2 |--     --|4
+"   |5*     5*|
+" -----     -----
+" ~~~~~~~~~~~~~~~~~~
+" * = current buffer
+"
+" but if 2 is empty [no name] buffer,
+" 
+" ~~~~~~~~~~~~~~~~~~
+" before -> after
+" -----     -----
+" 1 |3      1 |3
+"   |--       |
+" --|4      --|--
+" 2 |--     5*|4
+"   |5*       |
+" -----     -----
+" ~~~~~~~~~~~~~~~~~~
+
+function! LayAsideBufferArrow(direction) abort
+  let l:from = {}
+  let l:from.bufnr = bufnr('%')
+  let l:from.winnr = winnr()
+  execute 'wincmd '.a:direction
+
+  if &buftype == 'quickfix'
+    new
+  else
+    let l:from_win_loclist = getloclist(0)
+    if len(l:from_win_loclist)
+      " go to window below, is it loclist?
+      wincmd j
+      if l:from.winnr != winnr()
+          \ && &buftype == 'quickfix'
+          \ && getloclist(0) == l:from_win_loclist
+        " loclist is visible. insert new pane below
+        new
+      else
+        " loclist not visible
+        wincmd p
+        new
+      endif
+    elseif expand('%') == '' && line('$') == 1 && getline(1) == ''
+      " empty new buffer, reuse this
+    else
+      new
+    endif
+  endif
+  
+  " now cursor is in destination pane
+  let l:to = StashLoclist()
+  execute bufwinnr(l:from.bufnr).' wincmd w'
+  unlet l:from
+  let l:from = StashLoclist()
+  
+  call SwapBuffer(from, to)
+
+  " destination is empty so close it
+  execute bufwinnr(l:to.bufnr)." wincmd w"
+  close
+  execute bufwinnr(l:from.bufnr).' wincmd w'
+endfunction
+
+map <Esc>[1;8C <M-C-S-Right>
+call MapAllMode("\<lt>M-C-S-Right>", ":call LayAsideBufferArrow('l')\<lt>CR>")
+map <Esc>[1;8D <M-C-S-Left>
+call MapAllMode("\<lt>M-C-S-Left>", ":call LayAsideBufferArrow('h')\<lt>CR>")
+
 
 " [split pane w/ new file]
 set splitbelow
