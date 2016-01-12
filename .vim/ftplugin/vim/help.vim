@@ -4,12 +4,83 @@
 " vim opens help of `mode` COMMAND, not FUNCTION.
 " it's unuseful so i define search function for it
 
-" ref.
-" Fzf with arg or with word under cursor · Issue #50 · junegunn/fzf.vim
-" https://github.com/junegunn/fzf.vim/issues/50
-
 function! SearchHelpTags() abort
-  call fzf#vim#helptags({'options': '-q '.shellescape(expand('<cword>')), 'down': '~40%'})
+  call inputsave()
+  let l:tag = input('HelpTag > ', expand('<cword>'))
+  call inputrestore()
+
+  let l:from_bufnr = winbufnr(0)
+  
+  for nr in range(1, winnr('$'))
+    let l:buf_no = winbufnr(nr)
+    let l:buf_type = getbufvar(l:buf_no, '&buftype', '')
+    if l:buf_type == 'help'
+      let l:help_winnr = nr
+      break
+    endif
+  endfor
+
+  if !exists("l:help_winnr")
+    " open help window newly
+    help
+  else
+    " move cursor to existing help window
+    execute l:help_winnr."wincmd w"
+  endif
+  
+  let l:win_count_before_lclose = winnr('$')
+  try
+    lclose
+  catch /E776: No location list/
+    " ignore error
+  endtry
+  
+  if l:tag == ""
+    return
+  endif
+
+  let l:loclist_was_showing = l:win_count_before_lclose > winnr('$')
+  
+  let l:no_result = 0
+  try
+    execute "ltag /".l:tag
+  catch /E426: tag not found/
+    let l:no_result = 1
+  endtry
+  
+  if len(getloclist(0)) == 0
+    let l:no_result = 1
+  endif
+
+  if l:no_result == 1
+    set nohlsearch
+    
+    try
+      lolder
+    catch
+      " ignore error
+    endtry
+    
+    if l:loclist_was_showing
+      lopen
+    endif
+
+    redraw
+    echohl WarningMsg
+    echo "No result"
+    echohl None
+    let v:warningmsg = "No result"
+    return
+  endif
+  
+  lopen
+  lrewind
+  wincmd p
+  
+  " add highlight match
+  " ref. rking/ag.vim
+  let @/ = l:tag
+  call feedkeys(":set hlsearch\<CR>", 'n')
 endfunction
 
 noremap  <buffer> <F2> :call SearchHelpTags()<CR>
