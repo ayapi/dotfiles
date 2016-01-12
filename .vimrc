@@ -1125,32 +1125,102 @@ augroup gutter_toggle
   autocmd BufWinEnter * :call GutterToggle()
 augroup END
 
-function! SwapBuffer(targetWinnr) abort
-  let l:targetWinnr = a:targetWinnr
-  if l:targetWinnr == ""
-    call inputsave()
-    let l:targetWinnr = input('Swap with > Pane No.: ')
-    call inputrestore()
-    if l:targetWinnr == ""
-      echoerr "empty number, aborted."
-      return
+function! StashLoclist() abort
+  let l:start_bufnr = bufnr("%")
+  let l:main_win = {}
+  let l:start_win_loclist = getloclist(0)
+  if &buftype == 'quickfix'
+    if len(l:start_win_loclist) " maybe loclist
+      " main window is above from loclist in my vim
+      let l:loclist_last_cursor = getwinvar(0, 'last_cursor', 0)
+      let l:loclist_title = getwinvar(0, 'quickfix_title', 0)
+      wincmd k
+      let l:above_win_loclist = getloclist(0)
+      if l:start_win_loclist == l:above_win_loclist
+        let l:main_win.loclist = {}
+        let l:main_win.loclist.data = l:above_win_loclist
+        let l:main_win.loclist.cursor = l:loclist_last_cursor
+        let l:main_win.loclist.title = l:loclist_title
+        lclose
+      else
+        " back to loclist
+        wincmd p
+        " maybe loclist is alone so close it
+        lclose
+      endif
+    else
+      "maybe quickfix
+    endif
+  else
+    if len(l:start_win_loclist)
+      " normal buffer has loclist
+      let l:main_win.loclist = {}
+      let l:main_win.loclist.data = l:start_win_loclist
+      
+      " go to window below, is it loclist?
+      let l:main_winnr = winnr()
+      wincmd j
+      if l:main_winnr != winnr()
+            \ && &buftype == 'quickfix'
+            \ && getloclist(0) == l:start_win_loclist
+        let l:main_win.loclist.cursor = getwinvar(0, 'last_cursor', 0)
+        let l:main_win.loclist.title = getwinvar(0, 'quickfix_title', 0)
+      endif
+
+      " back to main window
+      execute l:main_winnr.' wincmd w'
+
+      if has_key(l:main_win.loclist, 'cursor')
+        lclose
+      endif
     endif
   endif
-  let l:currentBufnr = bufnr("%")
-  execute 'hide buf' winbufnr(l:targetWinnr)
-  execute l:targetWinnr . " wincmd w"
-  execute 'hide buf' l:currentBufnr
+  let l:main_win.bufnr = bufnr("%")
+  return l:main_win
+endfunction
+
+function! RestoreLoclist(stashed) abort
+  if !has_key(a:stashed, 'loclist')
+    return
+  endif
+  call setloclist(0, a:stashed.loclist.data)
+  if has_key(a:stashed.loclist, 'cursor')
+    lopen
+    if type(a:stashed.loclist.cursor) == 3
+      let w:last_cursor = a:stashed.loclist.cursor
+      call RestoreQuickfixCursor()
+
+      let w:quickfix_title = a:stashed.loclist.title
+    endif
+  endif
 endfunction
 
 function! SwapBufferArrow(direction) abort
-  let l:currentWinnr = winnr()
+  let l:from = StashLoclist()
   execute 'wincmd '.a:direction
-  let l:targetWinnr = winnr()
-  if l:currentWinnr == l:targetWinnr
+  let l:to = StashLoclist()
+  
+  if l:from.bufnr == l:to.bufnr
     return
   endif
-  execute l:currentWinnr.' wincmd w'
-  call SwapBuffer(l:targetWinnr)
+  
+  let l:from.winnr = bufwinnr(l:from.bufnr)
+  let l:to.winnr = bufwinnr(l:to.bufnr)
+  execute l:from.winnr " wincmd w"
+  execute 'hide buf' l:to.bufnr
+  execute l:to.winnr " wincmd w"
+  execute 'hide buf' l:from.bufnr
+  
+  let l:winnr_dict = {}
+  let l:winnr_dict[bufwinnr(l:from.bufnr)] = l:from
+  let l:winnr_dict[bufwinnr(l:to.bufnr)] = l:to
+  
+  execute bufwinnr(l:winnr_dict[max(keys(l:winnr_dict))]['bufnr'])." wincmd w"
+  call RestoreLoclist(l:winnr_dict[max(keys(l:winnr_dict))])
+  execute bufwinnr(l:winnr_dict[min(keys(l:winnr_dict))]['bufnr'])." wincmd w"
+  call RestoreLoclist(l:winnr_dict[min(keys(l:winnr_dict))])
+  
+  execute bufwinnr(l:from.bufnr)." wincmd w"
 endfunction
 
 map <Esc>[1;7A <M-C-Up>
