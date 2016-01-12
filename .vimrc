@@ -1175,46 +1175,102 @@ call MapAllMode("\<lt>M-=>", ":new\<lt>CR>")
 call MapAllMode("\<lt>M-x>", ":confirm quit\<lt>CR>")
 
 " [help]
-function! HelpGrepPrompt() abort
+function! HelpGrepPrompt()
   call inputsave()
   let l:keyword = input('HelpGrep > ')
   call inputrestore()
 
-  let l:win_count_before = winnr('$')
-  if expand('%') == '' && &buftype == ''
-    let l:was_empty_window = 1
+  let l:from_bufnr = winbufnr(0)
+  
+  if &buftype == 'quickfix'
+    let l:from_loclist =  getloclist(winnr())
   endif
+  
+  let l:from_empty_window = 0
+  if expand('%') == '' && &buftype == ''
+    let l:from_empty_window = 1
+  endif
+  
+  for nr in range(1, winnr('$'))
+    let l:buf_no = winbufnr(nr)
+    let l:buf_type = getbufvar(l:buf_no, '&buftype', '')
+    if l:buf_type == 'help'
+      let l:help_winnr = nr
+      break
+    endif
+  endfor
+  
+  let l:from_help_loclist = 0
+  
+  if !exists("l:help_winnr")
+    " open help window newly
+    help
+    
+    if l:from_empty_window
+      " help file was splitted to below from an empty window
+      " no longer need a window above
+      wincmd k
+      close
+      wincmd j
+    endif
+  else
+    " move cursor to existing help window
+    execute l:help_winnr."wincmd w"
+
+    if exists('l:from_loclist')
+          \ && getloclist(winnr()) == l:from_loclist
+      let l:from_help_loclist = 1
+    endif
+  endif
+  
+  let l:win_count_before_lclose = winnr('$')
+  try
+    lclose
+  catch /E776: No location list/
+    " ignore error
+  endtry
   
   if l:keyword == ""
-    help
-  else
+    return
+  endif
+
+  let l:loclist_was_showing = l:win_count_before_lclose > winnr('$')
+  
+  let l:no_result = 0
+  try
+    execute "lhelpgrep ".l:keyword."@ja"
+  catch /E480/
+    let l:no_result = 1
+  endtry
+  
+  if len(getloclist(0)) == 0
+    let l:no_result = 1
+  endif
+
+  if l:no_result == 1
+    set nohlsearch
+    
     try
-      execute "lhelpgrep ".l:keyword."@ja"
-    catch /E480: No match/
-      call s:Warning("No match: ".l:keyword)
-      return
+      lolder
+    catch /E380: At bottom/
+      " ignore error
     endtry
-  endif
+    
+    if l:loclist_was_showing
+      lopen
+    endif
 
-  " now helpfile is opened
-  " to fix height of helpfile, close location list temporally
-  if len(getloclist(0)) > 0
-    lclose
+    if !l:from_help_loclist
+      execute bufwinnr(l:from_bufnr)."wincmd w"
+    endif
+    call s:Warning("No result")
+    return
   endif
   
-  if l:win_count_before < winnr('$') " help window is new(isnt reuse)
-        \ && exists("l:was_empty_window")
-    " help file was splitted to below from an empty window
-    " no longer need a window above
-    wincmd k
-    close
-    wincmd j
-  endif
+  lopen
+  lrewind
+  wincmd p
   
-  if l:keyword != ""
-    lopen
-  endif
-
   " add highlight keyword
   " ref. rking/ag.vim
   let @/ = l:keyword
