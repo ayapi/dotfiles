@@ -1174,6 +1174,49 @@ call MapAllMode("\<lt>M-=>", ":new\<lt>CR>")
 " [close pane]
 call MapAllMode("\<lt>M-x>", ":confirm quit\<lt>CR>")
 
+" [help]
+function! HelpGrepPrompt() abort
+  call inputsave()
+  let l:keyword = input('HelpGrep: ')
+  call inputrestore()
+
+  let l:win_count_before = winnr('$')
+  if expand('%') == '' && &buftype == ''
+    let l:was_empty_window = 1
+  endif
+  
+  if l:keyword == ""
+    help
+  else
+    execute "lhelpgrep ".l:keyword."@ja"
+  endif
+
+  " now helpfile is opened
+  " to fix height of helpfile, close old location list
+  lclose
+  
+  if l:win_count_before < winnr('$') " help window is new(isnt reuse)
+        \ && exists("l:was_empty_window")
+    " help file was splitted to below from an empty window
+    " no longer need a window above
+    wincmd k
+    close
+    wincmd j
+  endif
+  
+  if l:keyword != ""
+    lopen
+  endif
+
+  " add highlight keyword
+  " ref. rking/ag.vim
+  let @/ = l:keyword
+  call feedkeys(":let &hlsearch=1 \| echo \<CR>", 'n')
+endfunction
+
+noremap  <silent> <F1> :call HelpGrepPrompt()<CR>
+inoremap <silent> <F1> <C-o>:call HelpGrepPrompt()<CR>
+
 " [diff(merge-tool) mode]
 function! MergeFromTop()
   let bufnr = winbufnr(1)
