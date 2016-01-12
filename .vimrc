@@ -1177,7 +1177,7 @@ call MapAllMode("\<lt>M-x>", ":confirm quit\<lt>CR>")
 " [help]
 function! HelpGrepPrompt() abort
   call inputsave()
-  let l:keyword = input('HelpGrep: ')
+  let l:keyword = input('HelpGrep > ')
   call inputrestore()
 
   let l:win_count_before = winnr('$')
@@ -1188,12 +1188,19 @@ function! HelpGrepPrompt() abort
   if l:keyword == ""
     help
   else
-    execute "lhelpgrep ".l:keyword."@ja"
+    try
+      execute "lhelpgrep ".l:keyword."@ja"
+    catch /E480: No match/
+      call s:Warning("No match: ".l:keyword)
+      return
+    endtry
   endif
 
   " now helpfile is opened
-  " to fix height of helpfile, close old location list
-  lclose
+  " to fix height of helpfile, close location list temporally
+  if len(getloclist(0)) > 0
+    lclose
+  endif
   
   if l:win_count_before < winnr('$') " help window is new(isnt reuse)
         \ && exists("l:was_empty_window")
@@ -1211,7 +1218,7 @@ function! HelpGrepPrompt() abort
   " add highlight keyword
   " ref. rking/ag.vim
   let @/ = l:keyword
-  call feedkeys(":let &hlsearch=1 \| echo \<CR>", 'n')
+  call feedkeys(":set hlsearch\<CR>", 'n')
 endfunction
 
 noremap  <silent> <F1> :call HelpGrepPrompt()<CR>
