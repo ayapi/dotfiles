@@ -71,6 +71,21 @@ function! SearchHelpTags(tag) abort
   endif
   
   lopen
+
+  " ref. http://stackoverflow.com/questions/11199068/how-to-format-vim-quickfix-entry
+  set modifiable
+  silent execute "normal 1GdG"
+  
+  call append(0,
+        \ map(getloclist(0),
+          \ 'fnamemodify(bufname(v:val["bufnr"]), ":p:t")."\|\|".v:val["text"]'
+        \ )
+        \)
+  silent execute "normal dd1G"
+  
+  set nomodified
+  set nomodifiable
+  
   lrewind
   wincmd p
   
