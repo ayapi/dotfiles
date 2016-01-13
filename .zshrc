@@ -362,7 +362,7 @@ bindkey -M menuselect "${key[Left]}" backward-char
 bindkey -M menuselect "${key[Right]}" forward-char
 bindkey -M menuselect "${key[Up]}" up-line-or-history
 bindkey -M menuselect "${key[Down]}" down-line-or-history
-bindkey -M menuselect "\e[z"	reverse-menu-complete
+bindkey -M menuselect "\e[z"  reverse-menu-complete
 bindkey -M menuselect '^c' send-break
 bindkey -M menuselect '^m' accept-line
 bindkey -M menuselect '^u' accept-and-hold
@@ -595,6 +595,7 @@ alias type='type -a'
 alias df='df -kh'
 alias du='du -kh'
 
+alias ag='ag --path-to-agignore=~/.agignore --hidden --silent'
 
 export NVM_DIR="/home/ayapi/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
