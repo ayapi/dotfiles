@@ -1363,11 +1363,8 @@ call MapAllMode("\<lt>M-=>", ":new\<lt>CR>")
 call MapAllMode("\<lt>M-x>", ":confirm quit\<lt>CR>")
 
 " [help]
-function! HelpGrepPrompt()
-  call inputsave()
-  let l:keyword = input('HelpGrep > ')
-  call inputrestore()
-
+function! HelpGrepToLoclist(keyword)
+  let l:keyword = a:keyword
   let l:from_bufnr = winbufnr(0)
   
   if &buftype == 'quickfix'
@@ -1465,8 +1462,20 @@ function! HelpGrepPrompt()
   call feedkeys(":set hlsearch\<CR>", 'n')
 endfunction
 
-noremap  <silent> <F1> :call HelpGrepPrompt()<CR>
-inoremap <silent> <F1> <C-o>:call HelpGrepPrompt()<CR>
+noremap  <silent> <F1> :call HelpGrepToLoclist(expand('<cword>'))<CR>
+inoremap <silent> <F1> <C-o>:call HelpGrepToLoclist(expand('<cword>'))<CR>
+
+function! HelpGrepToLoclistPrompt() abort
+  call inputsave()
+  let l:keyword = input('HelpGrep > ', expand('<cword>'))
+  call inputrestore()
+  call HelpGrepToLoclist(l:keyword)
+endfunction
+
+map <F13> <S-F1>
+imap <F13> <S-F1>
+noremap  <silent> <S-F1> :call HelpGrepToLoclistPrompt()<CR>
+inoremap <silent> <S-F1> <C-o>:call HelpGrepToLoclistPrompt()<CR>
 
 " [diff(merge-tool) mode]
 function! MergeFromTop()

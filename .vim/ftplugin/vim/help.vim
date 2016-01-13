@@ -89,6 +89,9 @@ endfunction
 
 noremap  <buffer> <F2> :call SearchHelpTags(expand('<cword>'))<CR>
 inoremap <buffer> <F2> <C-o>:call SearchHelpTags(expand('<cword>'))<CR>
-noremap  <buffer> <M-F2> :call SearchHelpTagsPrompt()<CR>
-inoremap <buffer> <M-F2> <C-o>:call SearchHelpTagsPrompt()<CR>
+
+map <F14> <S-F2>
+imap <F14> <S-F2>
+noremap  <buffer> <S-F2> :call SearchHelpTagsPrompt()<CR>
+inoremap <buffer> <S-F2> <C-o>:call SearchHelpTagsPrompt()<CR>
 
