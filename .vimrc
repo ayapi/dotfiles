@@ -438,11 +438,21 @@ function! GetCursorWord()
   return l:word
 endfunction
 
+let s:vim_ignore_help_expand = [
+  \ "if", "elseif", "ifelse", "for", "while", "function", "try",
+  \ "tryfinally", "catch", "echomsg", "command", "augroup",
+  \ "NeoBundle", "NeoBundleLazy", "bundle_hooks", "autoload"
+  \ ]
+
 function! ExpandSnip()
   if neosnippet#expandable()
     if &filetype == "vim"
-      execute "help ".GetCursorWord()
-      wincmd p
+      " i want to see help vim-function only
+      let l:word = GetCursorWord()
+      if index(s:vim_ignore_help_expand, l:word) < 0
+        execute "help ".l:word."()"
+        wincmd p
+      endif
     endif
     call feedkeys("\<Plug>(neosnippet_expand)")
   endif
