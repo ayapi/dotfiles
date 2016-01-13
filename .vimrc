@@ -423,16 +423,38 @@ inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
 " other modes     : indent
 " ---------------------------------
 
+" ref. devhelp.vim
+function! GetCursorWord()
+  " Try to get the word below the cursor
+  let l:word = expand('<cword>')
+
+  " If that's empty, try to use the word before the cursor
+  if empty (l:word)
+    let s:before = getline('.')[0 : getpos('.')[2]-1]
+    let s:start  = match(s:before,    '\(\w*\)$')
+    let s:end    = matchend(s:before, '\(\w*\)$')
+    let l:word   = s:before[s:start : s:end]
+  end
+  return l:word
+endfunction
+
 function! ExpandSnip()
   if neosnippet#expandable()
+    if &filetype == "vim"
+      execute "help ".GetCursorWord()
+      wincmd p
+    endif
     call feedkeys("\<Plug>(neosnippet_expand)")
   endif
   return ""
 endfunction
 
 function! JumpSnipOrTab()
-  if neosnippet#expandable_or_jumpable()
-    call feedkeys("\<Plug>(neosnippet_expand_or_jump)")
+  if neosnippet#expandable()
+    call ExpandSnip()
+    return ""
+  elseif neosnippet#jumpable()
+    call feedkeys("\<Plug>(neosnippet_jump)")
     return ""
   else
     return "\<Tab>"
