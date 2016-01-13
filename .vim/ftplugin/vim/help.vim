@@ -4,11 +4,8 @@
 " vim opens help of `mode` COMMAND, not FUNCTION.
 " it's unuseful so i define search function for it
 
-function! SearchHelpTags() abort
-  call inputsave()
-  let l:tag = input('HelpTag > ', expand('<cword>'))
-  call inputrestore()
-
+function! SearchHelpTags(tag) abort
+  let l:tag = a:tag
   let l:from_bufnr = winbufnr(0)
   
   for nr in range(1, winnr('$'))
@@ -83,5 +80,15 @@ function! SearchHelpTags() abort
   call feedkeys(":set hlsearch\<CR>", 'n')
 endfunction
 
-noremap  <buffer> <F2> :call SearchHelpTags()<CR>
-inoremap <buffer> <F2> <C-o>:call SearchHelpTags()<CR>
+function! SearchHelpTagsPrompt() abort
+  call inputsave()
+  let l:tag = input('HelpTag > ', expand('<cword>'))
+  call inputrestore()
+  call SearchHelpTags(l:tag)
+endfunction
+
+noremap  <buffer> <F2> :call SearchHelpTags(expand('<cword>'))<CR>
+inoremap <buffer> <F2> <C-o>:call SearchHelpTags(expand('<cword>'))<CR>
+noremap  <buffer> <M-F2> :call SearchHelpTagsPrompt()<CR>
+inoremap <buffer> <M-F2> <C-o>:call SearchHelpTagsPrompt()<CR>
+
