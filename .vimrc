@@ -1044,11 +1044,23 @@ nnoremap <silent> M :call CirculatePrevHunk()<CR>
 " [reformat]
 noremap <C-l> <C-v>=i<C-g>u
 
+
+function! CommentToggleWrap() abort
+  let l:before_line_length = col('$')
+  if (mode() == 'n' || mode() == 'i') && getline('.') =~ '^\s*$'
+    execute "normal \<Plug>(caw:i:comment)"
+  else
+    execute "normal \<Plug>(caw:i:toggle)"
+  endif
+  call cursor(line('.'), col('.') + (col('$') - l:before_line_length))
+endfunction
+let g:caw_i_sp_blank = ' '
+
 " [comment toggle]
 " <C-_> means `ctrl+/`
-nmap <C-_> <Plug>(caw:i:toggle)
-vmap <C-_> <Plug>(caw:i:toggle)
-inoremap <C-_> <C-o>:execute "normal \<Plug>(caw:i:toggle)"<CR>
+nnoremap <silent> <C-_> :call CommentToggleWrap()<CR>
+inoremap <silent> <C-_> <C-o>:call CommentToggleWrap()<CR>
+vmap <C-_> <Plug>(caw:i:toggle)gvV
 
 " [jump to line]
 " ref. http://vim.wikia.com/wiki/Jump_to_a_line_number
