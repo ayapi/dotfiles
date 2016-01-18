@@ -372,6 +372,9 @@ source $VIMRUNTIME/mswin.vim
 let g:unite_enable_start_insert=1
 set whichwrap+=~
 
+" [disable unwanted keymaps]
+inoremap <C-\> <Nop>
+
 " [show auto completion popup menu & auto select first item without insertion]
 " <C-x><C-o> try to show popup
 " <C-p>      clear selection of popup item
