@@ -36,6 +36,11 @@ NeoBundle 'Shougo/neosnippet.vim'
 " NeoBundle 'Shougo/neosnippet-snippets'
 " NeoBundle 'honza/vim-snippets'
 
+NeoBundle "Shougo/neco-vim", {
+\   "base" : "~/.vim/bundle-custom",
+\   "type" : "nosync"
+\}
+
 NeoBundle 'ternjs/tern_for_vim', {
   \ 'build': {
   \   'others': 'npm install'
@@ -443,7 +448,7 @@ inoremap <silent> <expr> <Nul> '<C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>"
 
 " alphabet keys and dot, space
 for k in add(
-  \split('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._','\zs'),
+  \split('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._!"#$%&(=-~^\@{[+*:<,?/','\zs'),
   \'<Space>'
   \)
   exec "inoremap <expr> ".k." '<C-g>u".k."<C-x><C-u><C-p><C-r>=pumvisible() ? \"\\<lt>Down>\" : \"\\<lt>C-e>\"<CR>'"
@@ -460,7 +465,7 @@ inoremap <silent> <expr> ' "<C-g>u\'<C-r>=pumvisible() ? \"\<lt>C-e>\" : \"\"<CR
 inoremap <silent> <expr> \| "<C-g>u\|<C-r>=pumvisible() ? \"\<lt>C-e>\" : \"\"<CR>"
 
 " other symbols
-for k in split('!"#$%&(=-~^\@{[+*:<,>?/);}]"`','\zs')
+for k in split('>);}]"`','\zs')
   exec "inoremap <expr> ".k." '<C-g>u".k."<C-r>=pumvisible() ? \"\\<lt>C-e>\" : \"\"<CR>'"
 endfor
 

@@ -1,35 +1,20 @@
-" ayapi's custom omnifunc
-" =======================
-" better omni-completion for vim-script.
-" 
-" feature
-" -------
-" - show only long-form name items
-" - show syntax group name
-" 
-
-source ~/.vim/scripts/vim_longform_keywords.vim
-
+" to use neco-vim without deoplete|neocomplete
 function! VimScriptOmniComplete(findstart, base)
+  let l:line = getline('.')
+  let l:input = l:line[:col('.')-1]
   if a:findstart
-    return call("syntaxcomplete#Complete", [a:findstart, a:base])
+    return call("necovim#get_complete_position", [l:input])
   endif
 
+  let l:candidates = call("necovim#gather_candidates", [l:input, a:base])
   let l:matches = []
-  let l:omni_matches = call("syntaxcomplete#Complete", [0, a:base])
-  if type(l:omni_matches) == 3
-    " filter out 'short-form name' item & add group name
-    for l:o in l:omni_matches
-      if has_key(g:vim_longform_keywords, l:o)
-        call add(l:matches,{'word': l:o,
-                           \'menu': '('.g:vim_longform_keywords[l:o].')'})
-      endif
-    endfor
-  endif
+  for k in l:candidates
+    if strpart(k.word, 0, strlen(a:base)) ==# a:base
+      call add(l:matches, k)
+    endif
+  endfor
   return l:matches
 endfunction
 
 setlocal omnifunc=VimScriptOmniComplete
-
-setlocal keywordprg=:help
 
