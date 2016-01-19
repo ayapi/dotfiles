@@ -312,6 +312,7 @@ let g:neosnippet#snippets_directory += ["~/.vim/snippets"]
 let g:neosnippet#scope_aliases = {}
 let g:neosnippet#scope_aliases['vim'] = 'vim,vim-functions'
 let g:neosnippet#disable_runtime_snippets = {'_' : 1}
+let g:funcsnips = {}
 
 autocmd FileType stylus setlocal omnifunc=StylusOmniComplete
 
@@ -508,21 +509,34 @@ let s:vim_ignore_help_expand = [
   \ ]
 
 function! ExpandSnip()
-  if neosnippet#expandable()
-    if &filetype == "vim"
-      " i want to see help vim-function only
-      let l:word = GetCursorWord()
-      if index(s:vim_ignore_help_expand, l:word) < 0
-        execute "help ".l:word."()"
-        wincmd p
-      endif
+  if exists("b:expandfunc") 
+    let l:result = call(function(b:expandfunc), [])
+    if l:result
+      return ""
     endif
+  endif
+  if neosnippet#expandable()
+    " if &filetype == "vim"
+    "   " i want to see help vim-function only
+    "   let l:word = GetCursorWord()
+    "   if index(s:vim_ignore_help_expand, l:word) < 0
+    "     execute "help ".l:word."()"
+    "     wincmd p
+    "   endif
+    " endif
+    
     call feedkeys("\<Plug>(neosnippet_expand)")
   endif
   return ""
 endfunction
 
 function! JumpSnipOrTab()
+  if exists("b:expandfunc") 
+    let l:result = call(function(b:expandfunc), [])
+    if l:result
+      return ""
+    endif
+  endif
   if neosnippet#expandable()
     call ExpandSnip()
     return ""
