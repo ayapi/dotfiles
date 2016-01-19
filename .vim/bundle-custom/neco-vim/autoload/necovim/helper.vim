@@ -570,26 +570,29 @@ function! s:make_cache_options() "{{{
         \ }")
 endfunction"}}}
 function! s:make_cache_features() "{{{
-  let helpfile = expand(findfile('doc/eval.txt', &runtimepath))
-
-  if !filereadable(helpfile)
-    return []
-  endif
-
   let features = []
-  let lines = readfile(helpfile)
-  let start = match(lines,
-        \ ((v:version > 704 || v:version == 704 && has('patch11')) ?
-        \   'acl' : '^all_builtin_terms'))
-  let end = match(lines, '^x11')
-  for l in lines[start : end]
-    let _ = matchlist(l, '^\(\k\+\)\t\+\(.\+\)$')
-    if !empty(_)
-      call add(features, {
-            \ 'word' : _[1],
-            \ 'menu' : '; ' . _[2],
-            \ })
+  let helpfiles = [
+        \ expand("~/.vim/bundle/.neobundle/doc/eval.jax"),
+        \ expand(findfile('doc/eval.txt', &runtimepath))]
+  for helpfile in helpfiles
+    if !filereadable(helpfile)
+      continue
     endif
+
+    let lines = readfile(helpfile)
+    let start = match(lines,
+          \ ((v:version > 704 || v:version == 704 && has('patch11')) ?
+          \   'acl' : '^all_builtin_terms'))
+    let end = match(lines, '^x11')
+    for l in lines[start : end]
+      let _ = matchlist(l, '^\(\k\+\)\t\+\(.\+\)$')
+      if !empty(_)
+        call add(features, {
+              \ 'word' : _[1],
+              \ 'menu' : '(Feature) ' . _[2],
+              \ })
+      endif
+    endfor
   endfor
 
   call add(features, {
