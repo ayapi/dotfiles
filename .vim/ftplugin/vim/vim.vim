@@ -1,18 +1,38 @@
 " to use neco-vim without deoplete|neocomplete
+" setlocal regexpengine=0
+
 function! VimScriptOmniComplete(findstart, base)
+  " let l:input = s:get_cur_text()
   let l:line = getline('.')
-  let l:input = l:line[:col('.')-1]
+  let l:input = l:line[:col('.')-2]
+  " echomsg "called input:" . l:input
+    
   if a:findstart
+    echomsg string(call("necovim#get_complete_position", [l:input]))
     return call("necovim#get_complete_position", [l:input])
   endif
+  
+  let l:candidates = call("necovim#gather_candidates",
+                        \ [substitute(l:input, '^\s\+', "", "g"), a:base])
+  echomsg string(a:base)
+  echomsg string(l:candidates)
 
-  let l:candidates = call("necovim#gather_candidates", [l:input, a:base])
+  if a:base == ""
+    return l:candidates
+  endif
+
   let l:matches = []
   for k in l:candidates
     if strpart(k.word, 0, strlen(a:base)) ==# a:base
       call add(l:matches, k)
     endif
   endfor
+  
+  if len(l:matches) == 0
+    return l:candidates
+  endif
+
+  echomsg string(l:matches)
   return l:matches
 endfunction
 
@@ -26,12 +46,12 @@ function! VimScriptExpandFunc() abort
   if !exists('v:completed_item') || empty(v:completed_item)
     return 0
   endif
-  
+
   let l:item = v:completed_item
   if l:item.word !~ "($"
     return 0
   endif
-  
+
   let l:matches = []
 
   for snip in g:funcsnips["vim"]

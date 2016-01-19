@@ -63,11 +63,13 @@ function! necovim#gather_candidates(input, complete_str) "{{{
 
   if cur_text =~ '\h\w*\.\%(\h\w*\)\?$'
     " Dictionary.
+    echomsg "Dictionary"
     let complete_str = matchstr(cur_text, '.\%(\h\w*\)\?$')
     return necovim#helper#var_dictionary(
           \ cur_text, complete_str)
   elseif a:complete_str =~# '^&\%([gl]:\)\?'
     " Options.
+    echomsg "Options"
     let prefix = matchstr(a:complete_str, '^&\%([gl]:\)\?')
     let list = deepcopy(
           \ necovim#helper#option(
@@ -78,6 +80,7 @@ function! necovim#gather_candidates(input, complete_str) "{{{
     endfor
   elseif a:complete_str =~? '^\c<sid>'
     " SID functions.
+    echomsg "SID"
     let prefix = matchstr(a:complete_str, '^\c<sid>')
     let complete_str = substitute(
           \ a:complete_str, '^\c<sid>', 's:', '')
@@ -91,22 +94,27 @@ function! necovim#gather_candidates(input, complete_str) "{{{
     endfor
   elseif cur_text =~# '\<has([''"]\w*$'
     " Features.
+    echomsg "Features"
     let list = necovim#helper#feature(
           \ cur_text, a:complete_str)
   elseif cur_text =~# '\<expand([''"][<>[:alnum:]]*$'
     " Expand.
+    echomsg "Expand"
     let list = necovim#helper#expand(
           \ cur_text, a:complete_str)
   elseif a:complete_str =~ '^\$'
     " Environment.
+    echomsg "Environment"
     let list = necovim#helper#environment(
           \ cur_text, a:complete_str)
   elseif cur_text =~ '^[[:digit:],[:space:][:tab:]$''<>]*!\s*\f\+$'
     " Shell commands.
+    echomsg "Shell"
     let list = necovim#helper#shellcmd(
           \ cur_text, a:complete_str)
   else
     " Commands.
+    echomsg "Commands"
     let list = necovim#helper#command(
           \ cur_text, a:complete_str)
   endif
