@@ -125,6 +125,7 @@ highlight StatusLineNC ctermfg=255 ctermbg=0 guifg=#eeeeee guibg=#000000
 
 " indent style
 set noautoindent
+highlight CursorColumn ctermbg=236
 
 " search
 highlight Search cterm=none ctermfg=0 ctermbg=81 gui=none guifg=#000000 guibg=#5fd7ff
@@ -320,6 +321,34 @@ function! ModeSelectBufEnter()
   endif
 endfunction
 
+" ------------------------------------
+" Cursor Vertical Guide
+" ------------------------------------
+"     console.log('ayp')
+" ^   ^        ^
+" 3   2        1
+" 
+" when cursor on and after 2 (like 1), hide vertical guide line
+" when cursor in range 2-3, show vertical guide line
+" ---------------------------------
+set nocursorcolumn
+function! VerticalGuide() abort
+  if &buftype != ""
+    setlocal nocursorcolumn
+    return
+  endif
+  if indent('.') >= virtcol('.') - 1
+    setlocal cursorcolumn
+  else
+    setlocal nocursorcolumn
+  endif
+endfunction
+
+augroup vertguide
+  autocmd!
+  autocmd CursorMoved,CursorMovedI,WinEnter * call VerticalGuide()
+  autocmd WinLeave * setlocal nocursorcolumn
+augroup END
 
 " ------------------------------------
 " Neovim remote
