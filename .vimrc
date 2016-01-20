@@ -47,6 +47,13 @@ NeoBundle 'davidhalter/jedi-vim', {
   \ }
   \}
 
+NeoBundle 'othree/html5.vim'
+NeoBundle 'hail2u/vim-css3-syntax'
+NeoBundle 'othree/csscomplete.vim'
+NeoBundle 'gorodinskiy/vim-coloresque'
+NeoBundle 'digitaltoad/vim-jade'
+NeoBundle 'wavded/vim-stylus'
+
 NeoBundle 'junegunn/fzf', {
   \ 'build': {
   \   'others': '$HOME/.vim/bundle/fzf/install'
@@ -124,7 +131,6 @@ highlight StatusLine ctermfg=170 ctermbg=0 guifg=#d75fd7 guibg=#000000
 highlight StatusLineNC ctermfg=255 ctermbg=0 guifg=#eeeeee guibg=#000000
 
 " indent style
-set noautoindent
 highlight CursorColumn ctermbg=236
 
 " search
@@ -298,6 +304,15 @@ let g:neosnippet#scope_aliases = {}
 let g:neosnippet#scope_aliases['vim'] = 'vim,vim-functions'
 let g:neosnippet#disable_runtime_snippets = {'_' : 1}
 
+autocmd FileType stylus setlocal omnifunc=StylusOmniComplete
+
+" ------------------------------------
+" Indent Styles
+" ------------------------------------
+
+set noautoindent
+autocmd FileType stylus,jade setlocal indentexpr=
+autocmd FileType stylus setlocal autoindent
 
 " ref. http://rcmdnk.github.io/blog/2014/07/14/computer-vim/
 set breakindent
