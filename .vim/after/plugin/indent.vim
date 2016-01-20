@@ -10,108 +10,116 @@ set shiftwidth=16
 augroup save_indent_size
   autocmd!
   autocmd FileType * call SaveIndentSize()
-  autocmd BufWritePost * call ConvertIndent()
-  autocmd FileChangedShellPost * call ConvertIndentOrSetTodo()
-  autocmd BufEnter * call ConvertIndentIfTodoExists()
-  autocmd BufWritePre * call RevertIndent()
+  autocmd FileChangedShellPost * call Org2TabOrSetTodo()
+  autocmd BufEnter * call Org2TabIfTodoExists()
+  autocmd BufWriteCmd * call Tab2OrgAndWrite()
 augroup END
 
 function! SaveIndentSize() abort
-  if &shiftwidth == 16 && &expandtab == 0
+  if &shiftwidth == 16  && &expandtab == 0
     " hard-tab detected by tpope/vim-sleuth
     let b:noconvertindent = 1
-    set shiftwidth=8
+    " TODO: set default shiftwidth value filetype specific
+    setlocal shiftwidth=8
+    setlocal tabstop=8
   elseif &diff || &filetype == "help" || &buftype != ''
     let b:noconvertindent = 1
   endif
 
   let b:org_shiftwidth = getbufvar("", "&shiftwidth", 8)
-  call ConvertIndent()
-  call ForgetUndo()
+  call Org2Tab()
 endfunction
 
-function! ConvertIndentOrSetTodo() abort
+function! Org2TabOrSetTodo() abort
   let l:changed_bufno = expand("<afile>")
   if l:changed_bufno == expand("%")
-    call ConvertIndent()
-    call ForgetUndo()
+    call Org2Tab()
   else
     call setbufvar(l:changed_bufno, "need_convert_indent", 1)
   endif
 endfunction
 
-function! ConvertIndentIfTodoExists() abort
+function! Org2TabIfTodoExists() abort
   if exists('b:need_convert_indent')
     unlet b:need_convert_indent
-    call ConvertIndent()
-    call ForgetUndo()
+    call Org2Tab()
   endif
 endfunction
 
-function! ConvertIndent() abort
+function! Org2Tab() abort
   if exists('b:noconvertindent') || !exists('b:org_shiftwidth')
     return
   endif
   
+  if &modified
+    let l:org_modified=1
+  endif
+  
   if !&modifiable
-    let l:org_modifiable=1
-    set modifiable
+    let l:org_nomodifiable=1
+    setlocal modifiable
   endif
 
   if &readonly
     let l:org_readonly=1
-    set noreadonly
+    setlocal noreadonly
   endif
 
   call setbufvar("", "&shiftwidth", b:org_shiftwidth)
   call setbufvar("", "&tabstop", b:org_shiftwidth)
-  set noexpandtab
-
-  let l:save_cursor = getcurpos()
+  setlocal noexpandtab
   
-  " now, convert spaces to tab
-  " ref. http://vim.1045645.n5.nabble.com/replace-spaces-by-tabs-begining-line-td3218935.html
-  silent! %s/^ \+/\=substitute(submatch(0), repeat(' ', &tabstop), '\t', 'g')
+  let line = 1
+  let last_line = line('$')
   
-  call setpos('.', l:save_cursor)
+  while line <= last_line
+    let matched = matchlist(getline(line), '^\( \+\)\(.*\)$')
+    if len(matched) > 0
+      let writetxt = substitute(matched[1], repeat(' ', b:org_shiftwidth), '\t', 'g').matched[2]
+      try | silent undojoin | catch | endtry
+      call setline(line, writetxt)
+    endif
+    let line += 1
+  endwhile
 
-  set tabstop=2
-  set shiftwidth=2
-
-  " call ForgetUndo()
+  setlocal tabstop=2
+  setlocal shiftwidth=2
   
-  if exists("l:org_modifiable")
-    set nomodifiable
+  if exists("l:org_nomodifiable")
+    setlocal nomodifiable
   endif
 
   if exists("l:org_readonly")
-    set readonly
+    setlocal readonly
   endif
   
-  set nomodified
-endfunction
-
-augroup revert_indent
-  autocmd!
-  autocmd BufWritePre * call RevertIndent()
-augroup END
-
-function! RevertIndent() abort
-  if exists('b:noconvertindent') || !exists('b:org_shiftwidth')
-    return
+  if !exists("l:org_modified")
+    setlocal nomodified
   endif
-  call setbufvar("", "&tabstop", b:org_shiftwidth)
-  call setbufvar("", "&shiftwidth", b:org_shiftwidth)
-  set expandtab
-  %retab
 endfunction
 
-" ref. http://superuser.com/questions/214696/how-can-i-discard-my-undo-history-in-vim
-function! ForgetUndo()
-  let old_undolevels = &undolevels
-  set undolevels=-1
-  execute "silent! normal! a \<BS>\<Esc>"
-  let &undolevels = old_undolevels
-  unlet old_undolevels
-  set nomodified
+function! Tab2OrgAndWrite() abort
+  if exists('b:noconvertindent') || !exists('b:org_shiftwidth')
+    call writefile(getline(1, '$'), expand("<afile>"), "b")
+  endif
+  let line = 1
+  let last_line = line('$')
+  let flag = ''
+  while line <= last_line
+    let txt = getline(line)
+    let writetxt = ""
+    let matched = matchlist(txt, '^\(\t\+\)\(.*\)$')
+    if len(matched) == 0
+      let writetxt = txt
+    else
+      let writetxt = substitute(matched[1], '\t', repeat(' ', b:org_shiftwidth), 'g').matched[2]
+    endif
+    
+    call writefile([writetxt], expand("<afile>"), flag)
+    
+    let line += 1
+    let flag = 'a'
+  endwhile
+  setlocal nomodified
 endfunction
+
