@@ -299,6 +299,13 @@ let g:neosnippet#scope_aliases['vim'] = 'vim,vim-functions'
 let g:neosnippet#disable_runtime_snippets = {'_' : 1}
 
 
+" ref. http://rcmdnk.github.io/blog/2014/07/14/computer-vim/
+set breakindent
+augroup breakindent
+  autocmd!
+  autocmd BufEnter * set breakindentopt=min:20,shift:0
+augroup END
+
 " ------------------------------------
 " Auto Mode Change
 " ------------------------------------
