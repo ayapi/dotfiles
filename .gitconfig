@@ -1,10 +1,10 @@
 [user]
-	email = colors.aya@gmail.com
-	name = ayapi
+  email = colors.aya@gmail.com
+  name = ayapi
 [core]
   quotepath = false
-	editor = nvim
-	excludesfile = /home/ayapi/.gitignore_global
+  editor = nvim
+  excludesfile = /home/ayapi/.gitignore_global
 [merge]
   tool = hrdiff
   conflictstyle = diff3
@@ -16,6 +16,6 @@
 [github]
   user = ayapi
 [alias]
-  graph=log -15 --graph --oneline --decorate=full
+  graph=log -15 --branches --remotes --tags --graph --oneline --decorate=full HEAD
 [ghq]
   root = ~/github
