@@ -8,14 +8,14 @@ function! VimScriptOmniComplete(findstart, base)
   " echomsg "called input:" . l:input
     
   if a:findstart
-    echomsg string(call("necovim#get_complete_position", [l:input]))
+    " echomsg string(call("necovim#get_complete_position", [l:input]))
     return call("necovim#get_complete_position", [l:input])
   endif
   
   let l:candidates = call("necovim#gather_candidates",
                         \ [substitute(l:input, '^\s\+', "", "g"), a:base])
-  echomsg string(a:base)
-  echomsg string(l:candidates)
+  " echomsg string(a:base)
+  " echomsg string(l:candidates)
 
   if a:base == ""
     return l:candidates
@@ -32,7 +32,7 @@ function! VimScriptOmniComplete(findstart, base)
     return l:candidates
   endif
 
-  echomsg string(l:matches)
+  " echomsg string(l:matches)
   return l:matches
 endfunction
 
@@ -43,15 +43,32 @@ if !exists("g:funcsnips.vim")
 endif
 
 function! VimScriptExpandFunc() abort
-  if !exists('v:completed_item') || empty(v:completed_item)
+  if !exists('b:completed_item') || empty(b:completed_item)
     return 0
   endif
 
-  let l:item = v:completed_item
-  if l:item.word !~ "($"
+  let l:item = b:completed_item
+
+  if l:item.word !~ '^\S\+(.*)\?$'
+    " completed word is not a function
     return 0
   endif
 
+  if getline('.')[:col('.')-2] !~ l:item.word . '$'
+    " completed word is old
+    let b:completed_item = {}
+    return 0
+  endif
+  
+  " show vim-function help
+  execute "help " . substitute(l:item.word, '(.*)', '()', 'g')
+  wincmd p
+  
+  if l:item.word !~ '($'
+    " function has any arguments
+    return 1
+  endif
+  
   let l:matches = []
 
   for snip in g:funcsnips["vim"]
@@ -64,9 +81,8 @@ function! VimScriptExpandFunc() abort
   if len(l:matches) == 1
     execute "inoremap <silent><expr> <F22> neosnippet#anonymous(\'".l:matches[0]."\')"
     call feedkeys("\<F22>")
-    return 1
   endif
-  return 0
+  return 1
 endfunction
 
 let b:expandfunc = "VimScriptExpandFunc"

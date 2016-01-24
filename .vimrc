@@ -305,6 +305,13 @@ function! MixComplete(findstart, base)
   return l:matches
 endfunction
 
+augroup completedone
+  autocmd!
+  " `v:completed_item` is readonly var.
+  " i want to consume it, so copy to buffer local var
+  autocmd CompleteDone * let b:completed_item = v:completed_item
+augroup END
+
 set omnifunc=syntaxcomplete#Complete
 set completefunc=MixComplete
 let g:neosnippet#snippets_directory = []
@@ -478,7 +485,7 @@ function! IMapWithClosePopup(before, after, ...)
 endfunction
 
 " [accept item in completion popup menu, without expand snippet]
-inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>\<C-o>:let b:completed_item={}\<CR>" : "\<CR>"
 
 
 " <Tab> ---------------------------
@@ -487,58 +494,28 @@ inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
 " other modes     : indent
 " ---------------------------------
 
-" ref. devhelp.vim
-function! GetCursorWord()
-  " Try to get the word below the cursor
-  let l:word = expand('<cword>')
-
-  " If that's empty, try to use the word before the cursor
-  if empty (l:word)
-    let s:before = getline('.')[0 : getpos('.')[2]-1]
-    let s:start  = match(s:before,    '\(\w*\)$')
-    let s:end    = matchend(s:before, '\(\w*\)$')
-    let l:word   = s:before[s:start : s:end]
-  end
-  return l:word
-endfunction
-
-let s:vim_ignore_help_expand = [
-  \ "if", "elseif", "ifelse", "for", "while", "function", "try",
-  \ "tryfinally", "catch", "echomsg", "command", "augroup",
-  \ "NeoBundle", "NeoBundleLazy", "bundle_hooks", "autoload"
-  \ ]
-
-function! ExpandSnip()
-  if exists("b:expandfunc") 
+function! ExpandSnipGetResult()
+  if exists("b:expandfunc")
     let l:result = call(function(b:expandfunc), [])
+    let b:completed_item = {}
     if l:result
-      return ""
+      return 1
     endif
   endif
   if neosnippet#expandable()
-    " if &filetype == "vim"
-    "   " i want to see help vim-function only
-    "   let l:word = GetCursorWord()
-    "   if index(s:vim_ignore_help_expand, l:word) < 0
-    "     execute "help ".l:word."()"
-    "     wincmd p
-    "   endif
-    " endif
-    
     call feedkeys("\<Plug>(neosnippet_expand)")
+    return 1
   endif
+  return 0
+endfunction
+
+function! ExpandSnip() abort
+  call ExpandSnipGetResult()
   return ""
 endfunction
 
 function! JumpSnipOrTab()
-  if exists("b:expandfunc") 
-    let l:result = call(function(b:expandfunc), [])
-    if l:result
-      return ""
-    endif
-  endif
-  if neosnippet#expandable()
-    call ExpandSnip()
+  if ExpandSnipGetResult()
     return ""
   elseif neosnippet#jumpable()
     call feedkeys("\<Plug>(neosnippet_jump)")
