@@ -556,21 +556,114 @@ function! s:make_cache_prototype_from_dict(dict_name) "{{{
   return keyword_dict
 endfunction"}}}
 function! s:make_cache_options() "{{{
-  redir => raw
-  silent set all
-  redir END
-  let options = map(filter(split(raw, '\s\{2,}\|\n')[1:],
-        \ "!empty(v:val) && v:val =~ '^\\h\\w*=\\?'"),
-        \ "substitute(v:val, '^no\\|=\\zs.*$', '', '')")
-  for option in copy(options)
-    if option[-1:] != '='
-      call add(options, 'no'.option)
+  let l:options_helpfile = expand(findfile('doc/options.txt', &runtimepath))
+  if !filereadable(l:options_helpfile)
+    return []
+  endif
+  
+  let l:descriptions = {}
+  let l:quickref_helpfiles = [
+        \ expand(findfile('doc/quickref.txt', &runtimepath)),
+        \ expand("~/.vim/bundle/.neobundle/doc/quickref.jax")]
+  for quickref_helpfile in l:quickref_helpfiles
+    if !filereadable(quickref_helpfile)
+      continue
+    endif
+
+    let lines = readfile(quickref_helpfile)
+    let start = match(lines, 'option-list')+1
+    let end = match(lines, '-----', start)-1
+    for l in lines[start : end]
+      let _ = matchlist(l, "^'" . '\(\k\+\)' . "'" . '\s\+\(.\+\)$')
+      if !empty(_)
+        let l:descriptions[_[1]] = substitute(_[2], '^''[^'']\+''\s\+', "", "g")
+        let l:prev_option_name = _[1]
+      else
+        let l:descriptions[l:prev_option_name] .= substitute(l, '^\s\+', "", "g")
+      endif
+    endfor
+  endfor
+  
+  let l:items = []
+  let l:noitems = []
+  let l:invitems = []
+  
+  let lines = readfile(l:options_helpfile)
+  let l:start = match(lines, 'Aleph')
+  let l:line = ""
+  for l in lines[l:start : ]
+    if match(l, '^\s\+\*''\w\+''\*') >= 0
+      let l:line .= l
+      continue
+    endif
+    if l:line == ""
+      continue
+    endif
+    
+    let _ = split(l:line, '\s')
+    call filter(_, 'v:val =~ "^\*''"')
+    call map(_, "substitute(v:val, '[\*'']', '', 'g')")
+    let l:line = ""
+    
+    let l:name_pattern_count = len(_)
+    
+    if l:name_pattern_count == 1
+      let l:is_bool = 0
+      let l:has_short = 0
+    elseif l:name_pattern_count == 2
+      if match(_, '^no') >= 0
+        let l:is_bool = 1
+        let l:has_short = 0
+      else
+        let l:is_bool = 0
+        let l:has_short = 1
+      endif
+    elseif l:name_pattern_count == 4
+      let l:is_bool = 1
+      let l:has_short = 1
+    endif
+    
+    let l:name = _[0]
+    if l:has_short
+      let __ = deepcopy(_)
+      call filter(__, 'v:val !~ "^no"')
+      let l:name_lengths = deepcopy(__)
+      call map(l:name_lengths, 'strlen(v:val)')
+      let l:name = __[index(l:name_lengths, max(l:name_lengths))]
+    else
+      let l:name = _[0]
+    endif
+      
+    let l:item = {'word': l:name}
+    if has_key(l:descriptions, l:name)
+      let l:menu = '(Option) ' . l:descriptions[l:name]
+      let l:item.menu = l:menu
+    endif
+    call add(l:items, deepcopy(l:item))
+    unlet l:item
+    
+    if l:is_bool
+      let l:noitem = {'word': 'no' . l:name}
+      if exists('l:menu')
+        let l:noitem.menu = l:menu
+      endif
+      call add(l:noitems, deepcopy(l:noitem))
+      unlet l:noitem
+    
+      let l:invitem = {'word': 'inv' . l:name}
+      if exists('l:menu')
+        let l:invitem.menu = l:menu
+      endif
+      call add(l:invitems, deepcopy(l:invitem))
+      unlet l:invitem
+    endif
+    if exists('l:menu')
+      unlet l:menu
     endif
   endfor
-
-  return map(filter(options, "v:val =~ '^\\h\\w*=\\?'"), "{
-        \ 'word' : substitute(v:val, '=$', '', ''), 'kind' : 'o',
-        \ }")
+  call extend(l:items, l:noitems)
+  call extend(l:items, l:invitems)
+  return l:items
 endfunction"}}}
 function! s:make_cache_features() "{{{
   let features = []
