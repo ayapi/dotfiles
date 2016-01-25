@@ -114,7 +114,7 @@ function! Tab2OrgAndWrite() abort
     else
       let writetxt = substitute(matched[1], '\t', repeat(' ', b:org_shiftwidth), 'g').matched[2]
     endif
-    call add(writetxts, txt)
+    call add(writetxts, writetxt)
     
     let line += 1
   endwhile
