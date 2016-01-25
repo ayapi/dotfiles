@@ -99,8 +99,8 @@ function! necovim#helper#autocmd_args(cur_text, complete_str) "{{{
 
   let list = []
   if len(args) == 2
-    let list += copy(s:global_candidates_list.augroups) +
-          \ copy(s:internal_candidates_list.autocmds)
+    let list += copy(s:internal_candidates_list.autocmds) +
+          \ copy(s:global_candidates_list.augroups)
   elseif len(args) == 3
     if args[1] ==# 'FileType'
       " Filetype completion.
@@ -1863,26 +1863,30 @@ function! s:make_cache_commands() "{{{
   return commands
 endfunction"}}}
 function! s:make_cache_autocmds() "{{{
-  let helpfile = expand(findfile('doc/autocmd.txt', &runtimepath))
-  if !filereadable(helpfile)
-    return []
-  endif
-
-  let lines = readfile(helpfile)
-  let autocmds = []
-  let start = match(lines, '^|BufNewFile|')
-  let end = match(lines, '^|User|', start)
-  let desc = ''
-  for lnum in range(end, start, -1)
-    let desc = substitute(lines[lnum], '^\s\+\ze', '', 'g') . ' ' . desc
-    let _ = matchlist(desc, '^|\(.\{-}\)|\s\+\S\+')
-    if !empty(_)
-      call add(autocmds, { 'word' : _[1], })
-      let desc = ''
+  let helpfiles = [
+        \ expand(findfile('doc/autocmd.txt', &runtimepath)),
+        \ expand("~/.vim/bundle/.neobundle/doc/autocmd.jax")]
+  for helpfile in helpfiles
+    if !filereadable(helpfile)
+      continue
     endif
+
+    let lines = readfile(helpfile)
+    let autocmds = []
+    let start = match(lines, '^|BufNewFile|')
+    let end = match(lines, '^|User|', start)
+    let desc = ''
+    for lnum in range(end, start, -1)
+      let desc = substitute(lines[lnum], '^\s\+\ze', '', 'g') . ' ' . desc
+      let _ = matchlist(desc, '^|\(.\{-}\)|\s\+\(.\+\)$')
+      if !empty(_)
+        call add(autocmds, { 'word' : _[1], 'menu' : '(AutoCmdEvent) ' . _[2]})
+        let desc = ''
+      endif
+    endfor
   endfor
 
-  return autocmds
+  return reverse(autocmds)
 endfunction"}}}
 
 function! s:get_cmdlist() "{{{
@@ -1993,7 +1997,7 @@ function! s:get_augrouplist() "{{{
 
   let keyword_list = []
   for group in split(redir . ' END', '\s\|\n')
-    call add(keyword_list, { 'word' : group })
+    call add(keyword_list, { 'word' : group, 'menu': '(augroup)' })
   endfor
   return keyword_list
 endfunction"}}}
