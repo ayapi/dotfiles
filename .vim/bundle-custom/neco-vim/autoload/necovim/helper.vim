@@ -1841,26 +1841,32 @@ function! s:make_cache_functions() "{{{
 \]
 endfunction"}}}
 function! s:make_cache_commands() "{{{
-  let helpfile = expand(findfile('doc/index.txt', &runtimepath))
-  if !filereadable(helpfile)
-    return []
-  endif
-
-  let lines = readfile(helpfile)
-  let commands = []
-  let start = match(lines, '^|:!|')
-  let end = match(lines, '^|:\~|', start)
-  for lnum in range(end, start, -1)
-    let desc = substitute(lines[lnum], '^\s\+\ze', '', 'g')
-    let _ = matchlist(desc, '^|:\(.\{-}\)|\s\+\S\+')
-    if !empty(_)
-      call add(commands, {
-            \ 'word' : _[1], 'kind' : 'c',
-            \ })
+  let helpfiles = [
+        \ expand(findfile('doc/index.txt', &runtimepath)),
+        \ expand("~/.vim/bundle/.neobundle/doc/index.jax")]
+  for helpfile in helpfiles
+    if !filereadable(helpfile)
+      continue
     endif
-  endfor
 
-  return commands
+    let lines = readfile(helpfile)
+    let commands = []
+    let start = match(lines, '^|:!|')
+    let end = match(lines, '^|:\~|', start)
+    let desc = ''
+    for lnum in range(end, start, -1)
+      let desc = substitute(lines[lnum], '^\s\+\ze', '', 'g') . desc
+      let _ = matchlist(desc, '^|:\(.\{-}\)|\(.\+\)$')
+      if !empty(_)
+        call add(commands, {
+              \ 'word' : _[1],
+              \ 'menu' : '(Command) ' . substitute(_[2], '^\s*:\S*\t*', '', 'g')
+              \ })
+        let desc = ''
+      endif
+    endfor
+  endfor
+  return reverse(commands)
 endfunction"}}}
 function! s:make_cache_autocmds() "{{{
   let helpfiles = [
