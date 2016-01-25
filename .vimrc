@@ -128,7 +128,11 @@ highlight cursorlinenr ctermfg=white ctermbg=none guifg=white guibg=none
 
 " statusline
 highlight StatusLine ctermfg=170 ctermbg=0 guifg=#d75fd7 guibg=#000000
-highlight StatusLineNC ctermfg=255 ctermbg=0 guifg=#eeeeee guibg=#000000
+highlight StatusLineNC ctermfg=235 ctermbg=255 guifg=#eeeeee guibg=#000000
+
+" vertical split line
+set fillchars+=vert:\ 
+highlight VertSplit ctermbg=235
 
 " indent style
 highlight CursorColumn ctermbg=236
