@@ -104,22 +104,21 @@ function! Tab2OrgAndWrite() abort
   endif
   let line = 1
   let last_line = line('$')
-  let flag = ''
+  let writetxts = []
   while line <= last_line
     let txt = getline(line)
-    let writetxt = ""
     let matched = matchlist(txt, '^\(\t\+\)\(.*\)$')
+    let writetxt = ""
     if len(matched) == 0
       let writetxt = txt
     else
       let writetxt = substitute(matched[1], '\t', repeat(' ', b:org_shiftwidth), 'g').matched[2]
     endif
-    
-    call writefile([writetxt], expand("<afile>"), flag)
+    call add(writetxts, txt)
     
     let line += 1
-    let flag = 'a'
   endwhile
+  call writefile(writetxts, expand("<afile>"), '')
   setlocal nomodified
 endfunction
 
