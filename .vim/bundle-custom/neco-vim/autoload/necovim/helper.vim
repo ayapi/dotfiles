@@ -1940,26 +1940,79 @@ function! s:get_cmdlist() "{{{
         let prototype = '[' . prototype . ']'
       elseif args == '+'
         let prototype = prototype . ' ...'
-      endif
+    endif
 
       let command_prototypes[word] = ' ' . repeat(' ', 16 - len(word)) . prototype
     else
       let command_prototypes[word] = ''
-    endif
+      endif
     let prototype = command_prototypes[word]
 
     call add(keyword_list, {
           \ 'word' : word, 'abbr' : word . prototype,
           \ 'description' : word . prototype, 'kind' : 'c'
           \})
-  endfor
+    endfor
   let s:global_candidates_list.command_prototypes = command_prototypes
   let s:global_candidates_list.command_completions = command_completions
 
   return keyword_list
 endfunction"}}}
+function! s:make_cache_vimvariables() "{{{
+  let helpfiles = [
+        \ expand(findfile('doc/eval.txt', &runtimepath)),
+        \ expand("~/.vim/bundle/.neobundle/doc/eval.jax")]
+  for helpfile in helpfiles
+    if !filereadable(helpfile)
+      continue
+    endif
+
+    let lines = readfile(helpfile)
+    let vars = []
+    let start = match(lines, '^v:beval_col')
+    let end = match(lines, '^=========', start)
+    let desc = ''
+    for lnum in range(end, start, -1)
+      if lines[lnum] !~ '\*v:.\+\*'
+        let desc = substitute(lines[lnum], '^\s\+\ze', '', 'g') . desc
+      endif
+      let _ = matchlist(desc, '^\(v:[a-z0-9_]*\)\s\+\(.\+\)$')
+      if !empty(_)
+        let l:trimmed_menu = join(split(_[2], '\zs')[:50], '')
+        let l:menu = matchstr(l:trimmed_menu, '^.*[\.。]')
+        if l:menu == ""
+          let l:menu = matchstr(_[2], '^.\{-}[\.。]')
+        endif
+        call add(vars, {
+              \ 'word' : _[1],
+              \ 'menu' : '(VimVar) ' . l:menu
+              \})
+        let desc = ''
+      endif
+    endfor
+  endfor
+
+  return reverse(vars)
+endfunction"}}}
 function! s:get_variablelist(dict, prefix) "{{{
   let kind_dict = ['0', '""', '()', '[]', '{}', '.']
+  if a:prefix == 'v:'
+    if !has_key(s:internal_candidates_list, 'vimvariables')
+      let s:internal_candidates_list.vimvariables = s:make_cache_vimvariables()
+    endif
+    let l:vimvars = []
+    for candidate in s:internal_candidates_list.vimvariables
+      let l:key = substitute(candidate.word, 'v:', '', '')
+      call add(l:vimvars, {
+            \ 'word': candidate.word,
+            \ 'kind': has_key(a:dict, l:key)
+                        \ ? kind_dict[type(a:dict[l:key])]
+                        \ : '?',
+            \ 'menu': candidate.menu
+            \})
+    endfor
+    return l:vimvars
+  endif
   return values(map(copy(a:dict), "{
         \ 'word' : a:prefix.v:key,
         \ 'kind' : kind_dict[type(v:val)],
