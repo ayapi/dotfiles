@@ -147,12 +147,10 @@ function! necovim#helper#colorscheme_args(cur_text, complete_str) "{{{
         \ 'fnamemodify(v:val, ":t:r")'))
 endfunction"}}}
 function! necovim#helper#command(cur_text, complete_str) "{{{
-  echomsg string(a:cur_text)
   if a:cur_text == '' ||
         \ a:cur_text =~ '^[[:digit:],[:space:][:tab:]$''<>]*\h\w*$'
     " Commands.
-    echomsg "Commands"
-
+  
     " Make cache.
     if s:check_global_candidates('commands')
       let s:global_candidates_list.commands = s:get_cmdlist()
@@ -165,7 +163,6 @@ function! necovim#helper#command(cur_text, complete_str) "{{{
           \ + copy(s:global_candidates_list.commands)
   else
     " Commands args.
-    echomsg "Commands args"
     let command = necovim#get_command(a:cur_text)
     let completion_name =
           \ necovim#helper#get_completion_name(command)
@@ -821,8 +818,6 @@ function! s:make_cache_functions() "{{{
                   \)
       if len(l:duplecate_funcs_ja) > 0
         let l:func_en.menu = l:duplecate_funcs_ja[0].menu
-      else
-        echomsg string(l:func_en["info"])
       endif
     endif
   endfor
