@@ -750,7 +750,7 @@ function! s:make_cache_functions() "{{{
       else
         let l:kind = join(map(l:types, 'l:type_names[v:val]'), '/')
       endif
-      call insert(functions, {
+      call insert(l:functions, {
             \ 'word' : substitute(l:func, '(\zs.\+)', '', ''),
             \ 'info' : substitute(l:func, '(\zs\s\+', '', ''),
             \ 'kind' : l:kind,
@@ -761,7 +761,68 @@ function! s:make_cache_functions() "{{{
     endif
   endfor
 
-  return functions
+  let l:helpfile = expand("~/.vim/bundle/.neobundle/doc/eval.jax")
+  if !filereadable(l:helpfile)
+    return l:functions
+  endif
+
+  let l:lines = readfile(l:helpfile)
+  let l:functions_ja = []
+  let l:start = match(l:lines, '^abs')
+  let l:end = match(l:lines, '^abs', l:start, 2)
+  let l:desc = ''
+  
+  for i in range(l:end-1, l:start, -1)
+    if l:lines[i] =~ '^libcall('
+      let l:func = 'libcall( {lib}, {func}, {arg})'
+    else
+      let l:func = matchstr(l:lines[i], '^\w\+(.\{-})')
+    endif
+    let l:desc = substitute(l:lines[i], '^\s*\(.\{-}\)\s*$', '\1', '') . l:desc
+    
+    if l:func != ''
+      if l:func =~ '^set.\+var'
+        let l:desc = l:desc[len(l:func):]
+      else
+        let l:desc = substitute(l:desc[len(l:func):], '^\s*\S\+\s\+\(.\+\)$', '\1', 'g')
+      endif
+      
+      let l:desc = substitute(l:desc, '[\t\n]', ' ', 'g')
+      let l:desc = substitute(l:desc, '\s\+', ' ', 'g')
+      let l:desc = substitute(l:desc, '^\s*\(.\{-}\)\s*$', '\1', '')
+      
+      call insert(l:functions_ja, {
+            \ 'word' : substitute(l:func, '(\zs.\+)', '', ''),
+            \ 'info' : substitute(l:func, '(\zs\s\+', '', ''),
+            \ 'menu' : l:desc,
+            \})
+      let desc = ''
+    endif
+  endfor
+
+  for l:func_en in l:functions
+    if l:func_en.word =~ '^winnr'
+      let l:pattern = 'v:val.word == "winnr()"'
+    else
+      let l:pattern = 'v:val.word == l:func_en.word'
+    endif
+    let l:funcs_ja = filter(deepcopy(l:functions_ja), l:pattern)
+    if len(l:funcs_ja) == 1
+      let l:func_en.menu = l:funcs_ja[0].menu
+    elseif len(l:funcs_ja) > 1
+      let l:duplecate_funcs_ja = filter(
+                  \ l:funcs_ja,
+                  \ 'v:val.info == l:func_en.info'
+                  \)
+      if len(l:duplecate_funcs_ja) > 0
+        let l:func_en.menu = l:duplecate_funcs_ja[0].menu
+      else
+        echomsg string(l:func_en["info"])
+      endif
+    endif
+  endfor
+  
+  return l:functions
 endfunction"}}}
 function! s:make_cache_commands() "{{{
   let helpfiles = [
