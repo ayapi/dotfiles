@@ -1020,8 +1020,7 @@ function! s:get_functionlist() "{{{
     let word = matchstr(line, '\h[[:alnum:]_:#.]*()\?')
     if word != ''
       let keyword_dict[word] = {
-            \ 'word' : word, 'abbr' : line,
-            \ 'description' : line,
+            \ 'word' : word, 'info' : line
             \}
 
       let function_prototypes[word] = orig_line[len(word):]

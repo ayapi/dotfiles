@@ -38,9 +38,57 @@ endfunction
 
 setlocal omnifunc=VimScriptOmniComplete
 
-if !exists("g:funcsnips.vim")
-  source ~/.vim/funcsnippets/vim.vim
-endif
+function! Doc2Snip(argstxt) abort
+  if a:argstxt == ''
+    return ''
+  endif
+
+  let l:argstxt = a:argstxt
+  let l:argstxt = substitute(l:argstxt, '^.\+(\(.*\))', '\1', '')
+  let l:argstxt = substitute(l:argstxt, '[^\[],\s\?\.\.\.', '[, ...]', 'g')
+  let l:argstxt = substitute(l:argstxt, ',\s\{-}\[', '[,', 'g')
+
+  if l:argstxt =~ '^\[' && len(substitute(l:argstxt, '[^\[]', '', 'g')) == 1
+    return '${1:#:' . substitute(l:argstxt, '\[\(.\+\)\]', '\1', '') . '}'
+  endif
+  
+  let l:sniptxt = ''
+  let l:in_argname = 0
+  let l:tab_count = 1
+  let l:depth = 0
+  for j in range(0, len(l:argstxt)-1)
+    let l:char = l:argstxt[j]
+    if l:char =~ '^[\[\],]$'
+      if l:in_argname == 1
+        let l:sniptxt .= repeat('\', l:depth) . '}'
+        let l:in_argname = 0
+      endif
+      
+      if l:char == ','
+        let l:sniptxt .= ', '
+      elseif l:char == ']'
+        let l:depth -= 1
+        let l:sniptxt .= repeat('\', l:depth) . '}'
+      elseif l:char == '['
+        let l:sniptxt .= '${' . l:tab_count . ':'
+        let l:tab_count += 1
+        let l:depth += 1
+      endif
+    else
+      if l:in_argname == 0
+        let l:sniptxt .= '${' . l:tab_count . ':'
+        let l:in_argname = 1
+        let l:tab_count += 1
+      endif
+      let l:sniptxt .= l:char
+    endif
+  endfor
+  if l:in_argname == 1
+    let l:sniptxt .= '}'
+  endif
+  
+  return l:sniptxt
+endfunction
 
 function! VimScriptExpandFunc() abort
   if !exists('b:completed_item') || empty(b:completed_item)
@@ -68,18 +116,15 @@ function! VimScriptExpandFunc() abort
     " function has any arguments
     return 1
   endif
-  
-  let l:matches = []
 
-  for snip in g:funcsnips["vim"]
-    let l:matched_list = matchlist(snip, '^\([^(]\+(\)\(.\+\)$')
-    if l:matched_list[1] == l:item.word
-      call add(l:matches, l:matched_list[2])
-    endif
-  endfor
+  let l:argstxt = l:item.info
+  let l:argstxt = substitute(l:argstxt, '[{} ]', '', 'g')
 
-  if len(l:matches) == 1
-    execute "inoremap <silent><expr> <F22> neosnippet#anonymous(\'".l:matches[0]."\')"
+  let l:sniptxt = Doc2Snip(l:argstxt) . ')'
+
+  if l:sniptxt != ''
+    execute "inoremap <silent><expr> <F22> " .
+          \	"neosnippet#anonymous(\'". l:sniptxt . "\')"
     call feedkeys("\<F22>")
   endif
   return 1
