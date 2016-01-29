@@ -73,6 +73,7 @@ NeoBundle 'junegunn/fzf.vim'
 NeoBundle 'tyru/caw.vim.git'
 NeoBundle 'airblade/vim-gitgutter'
 NeoBundle 'tpope/vim-sleuth'
+NeoBundle 'luochen1990/rainbow'
 " NeoBundle 'vheon/vim-cursormode'
 
 " color scheme
@@ -117,6 +118,23 @@ highlight Normal ctermfg=none ctermbg=none guifg=none guibg=none
 highlight VisualNOS cterm=none term=none gui=none
 highlight NonText cterm=none ctermfg=none gui=none
 highlight MatchParen cterm=none ctermbg=236 ctermfg=255 guibg=gray guifg=white
+
+" add random colors to braces
+let g:rainbow_active = 1
+let g:rainbow_conf = {
+    \   'guifgs': ['royalblue3', 'darkorange3', 'seagreen3', 'firebrick'],
+    \   'ctermfgs': [255, 219, 216, 226, 157, 117, 183],
+    \   'operators': '_,_',
+    \   'parentheses': ['start=/(/ end=/)/ fold', 'start=/\[/ end=/\]/ fold', 'start=/{/ end=/}/ fold'],
+    \   'separately': {
+    \       '*': {},
+    \       'vim': {
+    \           'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/', 'start=/{/ end=/}/ fold', 'start=/(/ end=/)/ containedin=vimFuncBody', 'start=/\[/ end=/\]/ containedin=vimFuncBody', 'start=/{/ end=/}/ fold containedin=vimFuncBody'],
+    \       },
+    \       'html': 0,
+    \       'css': 0,
+    \   }
+    \}
 
 " gutter
 set number
