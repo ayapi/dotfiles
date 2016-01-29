@@ -1149,6 +1149,46 @@ inoremap <C-g> <C-o>:call JumpToLine()<CR>
 snoremap <C-g> <C-g>v:call JumpToLine()<CR>
 nnoremap <C-g> :call JumpToLine()<CR>
 
+" toggle gutter
+function! SetGutter() abort
+  if !exists('b:gutter_state')
+    let b:gutter_state = &buftype == ''
+  endif
+  
+  if b:gutter_state == 0
+    setlocal nonumber
+    setlocal norelativenumber
+  elseif b:gutter_state == 1
+    setlocal number
+    setlocal norelativenumber
+  elseif b:gutter_state == 2
+    setlocal nonumber
+    setlocal relativenumber
+  endif
+endfunction
+
+augroup set_gutter
+  autocmd!
+  autocmd BufWinEnter * :call SetGutter()
+augroup END
+
+function! ToggleGutter() abort
+  if !exists('b:gutter_state')
+    let b:gutter_state = &buftype != ''
+  else
+    let b:gutter_state += 1
+    if b:gutter_state > 2
+      let b:gutter_state = 0
+    endif
+  endif
+  call SetGutter()
+endfunction
+
+noremap  <silent> <C-M-g> <C-c>:call ToggleGutter()<CR>
+inoremap <silent> <C-M-g> <C-o>:call ToggleGutter()<CR>
+snoremap <silent> <C-M-g> <C-g>v:call ToggleGutter()<CR>
+nnoremap <silent> <C-M-g> :call ToggleGutter()<CR>
+
 " [new tab]
 noremap <C-n> <C-c>:tabnew<CR>
 inoremap <C-n> <C-o>:tabnew<CR>
@@ -1227,19 +1267,6 @@ call MapAllMode("\<lt>M-Left>", "\<lt>C-w>h")
 
 " [move pane]
 " ref. http://stackoverflow.com/questions/2586984/how-can-i-swap-positions-of-two-open-files-in-splits-in-vim
-
-function! GutterToggle() abort
-  if &buftype == ''
-    set number
-  else
-    set nonumber
-  endif
-endfunction
-
-augroup gutter_toggle
-  autocmd!
-  autocmd BufWinEnter * :call GutterToggle()
-augroup END
 
 function! StashLoclist() abort
   let l:start_bufnr = bufnr("%")
