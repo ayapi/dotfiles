@@ -347,6 +347,9 @@ function! necovim#helper#mapping(cur_text, complete_str) "{{{
   elseif a:cur_text =~ ':<C-u>\?'
     let command = matchstr(a:cur_text, ':<C-u>\?\zs.*$')
     let list += necovim#helper#command(command, a:complete_str)
+  elseif a:cur_text =~ ':'
+    let command = matchstr(a:cur_text, ':\zs.*$')
+    let list += necovim#helper#command(command, a:complete_str)
   endif
 
   return list
