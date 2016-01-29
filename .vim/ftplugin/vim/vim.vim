@@ -109,8 +109,12 @@ function! VimScriptExpandFunc() abort
   endif
   
   " show vim-function help
-  execute "help " . substitute(l:item.word, '(.*)', '()', 'g')
-  wincmd p
+  try
+    execute "help " . substitute(l:item.word, '(.*)', '()', 'g')
+    wincmd p
+  catch /E149: /
+    " ignore error
+  endtry
   
   if l:item.word !~ '($'
     " function has any arguments
