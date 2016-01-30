@@ -878,9 +878,9 @@ autocmd VimLeave * call system("xsel -ib", getreg('+'))
 
 " format pasted text
 " ref. http://stackoverflow.com/questions/4312664/is-there-a-vim-command-to-select-pasted-text
-noremap  <C-v> "+gP`[v`]=
-inoremap <C-v> <C-o>:normal "+gP`[v`]=<CR>
-snoremap <C-v> <C-g>d:normal "+gP`[v`]=<CR>
+noremap  <C-v> "+gP`[v`]m`=``
+inoremap <C-v> <C-o>:normal "+gP`[v`]m`=``l<CR>
+snoremap <C-v> <C-g>d:normal "+gP`[v`]m`=``l<CR>
 
 " confirm message
 " ref. https://github.com/saihoooooooo/dotfiles/
