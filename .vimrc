@@ -750,8 +750,8 @@ snoremap <silent> <C-S-Right> <C-g>:call GoWord("l",0,1)<CR><C-g>
 snoremap <silent> <C-S-Left>  <C-g>:call GoWord("h",0,1)<CR><C-g>
 
 " when leaving select-mode
-snoremap <silent> <C-Right> <C-g>v:call GoWord("l")<Esc>i
-snoremap <silent> <C-Left>  <C-g>v:call GoWord("h")<Esc>i
+snoremap <silent> <C-Right> <C-g>v:call GoWord("l")<CR>
+snoremap <silent> <C-Left>  <C-g>v:call GoWord("h")<CR>
 
 " [delete word]
 noremap <silent> <C-Del> :call GoWord("l",1)<CR><C-g><Del>
@@ -836,14 +836,14 @@ snoremap <silent><expr> <S-Home> "\<C-o>".GetGoHomeCmd()
 snoremap <silent> <S-End> <C-g>:call GoEnd("gvg$")<CR><C-g>
 
 " when leaving select-mode
-snoremap <silent> <Down> <C-G>vgj<Esc>i
-snoremap <silent> <Up> <C-G>vgk<Esc>i
+snoremap <silent> <Down> <C-G>vgj
+snoremap <silent> <Up> <C-G>vgk
 if has('nvim')
-  snoremap <silent><expr> <Home> "\<C-G>v".GetGoHomeCmd()."\<Esc>i"
-  snoremap <silent> <End> <C-g>v:call GoEnd("g$")<Esc>i
+  snoremap <silent><expr> <Home> "\<C-G>v".GetGoHomeCmd()
+  snoremap <silent> <End> <C-g>v:call GoEnd("g$")<CR>
 else
-  snoremap <silent><expr> <kHome> "\<C-G>v".GetGoHomeCmd()."\<Esc>i"
-  snoremap <silent> <kEnd> <C-g>v:call GoEnd("g$")<Esc>i
+  snoremap <silent><expr> <kHome> "\<C-G>v".GetGoHomeCmd()
+  snoremap <silent> <kEnd> <C-g>v:call GoEnd("g$")<CR>
 endif
 
 " [scroll page up/down]
