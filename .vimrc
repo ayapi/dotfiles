@@ -1019,6 +1019,7 @@ function! SearchStart()
   autocmd! search_start
   augroup! search_start
   set hlsearch
+  normal zz
   call SearchHighlight()
 endfunction
 
