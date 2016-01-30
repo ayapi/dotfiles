@@ -876,10 +876,11 @@ inoremap <silent> <C-Up> <C-o>3<C-y>
 " http://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
 autocmd VimLeave * call system("xsel -ib", getreg('+'))
 
-" paste in select-mode, force back to insert-mode
-" ref. $VIMRUNTIME/autoload/paste.vim
-execute 'snoremap <script> <C-v> '. paste#paste_cmd['i']
-
+" format pasted text
+" ref. http://stackoverflow.com/questions/4312664/is-there-a-vim-command-to-select-pasted-text
+noremap  <C-v> "+gP`[v`]=
+inoremap <C-v> <C-o>:normal "+gP`[v`]=<CR>
+snoremap <C-v> <C-g>d:normal "+gP`[v`]=<CR>
 
 " confirm message
 " ref. https://github.com/saihoooooooo/dotfiles/
