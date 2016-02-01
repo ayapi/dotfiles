@@ -9,7 +9,7 @@ function! VimScriptOmniComplete(findstart, base)
   endif
   
   let l:candidates = call("necovim#gather_candidates",
-                        \ [substitute(l:input, '^\s\+', "", "g"), a:base])
+        \ [substitute(l:input, '^\s\+', "", "g") . a:base, a:base])
 
   if a:base == ""
     return l:candidates
