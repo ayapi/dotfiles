@@ -102,7 +102,7 @@ function! s:gather_candidates() abort
         elseif l:line =~ '^\s*$'
             return s:element_names+s:prop_names
         elseif l:line =~ '[+>]\S*$'
-            return s:element_names+s:prop_names
+            return s:element_names
         else
             let l:matches = matchlist(l:line, '^\s*\(\S\+\)\s\(.*\)$')
             if empty(l:matches)
