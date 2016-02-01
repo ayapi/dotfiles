@@ -171,19 +171,14 @@ function! necovim#helper#command(cur_text, complete_str) "{{{
     let cur_text = completion_name ==# 'command' ?
           \ a:cur_text[len(command):] : a:cur_text
 
-    let list = necovim#helper#get_command_completion(
-          \ command, cur_text, a:complete_str)
-
     if a:cur_text =~
           \'[[(,{]\|`=[^`]*$'
       " Expression.
-      if completion_name ==# 'function'
-        " Prevent duplecate candidates
-        let list += necovim#helper#var(a:cur_text, a:complete_str)
-      else
-        let list += necovim#helper#expression(
-            \ a:cur_text, a:complete_str)
-      endif
+      let list = necovim#helper#expression(
+          \ a:cur_text, a:complete_str)
+    else
+      let list = necovim#helper#get_command_completion(
+            \ command, cur_text, a:complete_str)
     endif
   endif
 
