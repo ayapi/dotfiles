@@ -29,7 +29,7 @@ function! StylusOmniComplete(findstart, base)
       return l:candidates
     endif
     
-    echomsg string(l:matches)
+    " echomsg string(l:matches)
     return l:matches
 endfunction
 
@@ -45,6 +45,35 @@ function! s:gather_candidates() abort
     endif
 
     let l:line = substitute(getline('.')[0: col('.') - 2], '^\s*', '', 'g')
+    
+    let l:last_closebracket_idx = strridx(l:line, ']')
+    let l:last_openbracket_idx = strridx(l:line, '[')
+    if l:last_closebracket_idx < l:last_openbracket_idx
+        let l:maybe_element = matchstr(l:line, '^\zs[^#\.\[]\+\ze')
+        if l:maybe_element == '&'
+            " look up parent selector
+            let l:lnum = line('.')
+            let l:current_indent = indent('.')
+            while indent(s:prevnonblanknoncomment(l:lnum)) >= l:current_indent
+                let l:lnum-=1
+            endwhile
+            let l:maybe_element = matchstr(getline(l:lnum), '^\s*\zs[^#\.\[]\+\ze')
+        endif
+        
+        let l:inner_brackets = matchstr(l:line, '\[\zs[^\]]\+\ze')
+        let l:pieces = split(l:inner_brackets, '=', 1)
+        
+        if len(l:pieces) == 2
+            return s:get_attribute_values(
+                        \ matchstr(l:pieces[0], '^[a-zA-Z-]\+'),
+                        \ l:maybe_element)
+        else
+            return s:get_attribute_names(
+                        \ matchstr(l:inner_brackets, '^[a-zA-Z-]\+'),
+                        \ l:maybe_element)
+        endif
+    endif
+    
     let l:special_chars = {
                 \ 'openbrace': '{',
                 \ 'closebrace': '}',
@@ -123,7 +152,46 @@ if !exists('g:xmldata_html5')
     runtime! autoload/xml/html5.vim
 endif
 
+function! s:get_attribute_names(...) abort "{{{
+    if len(a:000) >= 2 && a:000[1] != ''
+        let l:element = a:000[1]
+        if has_key(g:xmldata_html5, l:element)
+            return keys(g:xmldata_html5[l:element][1])
+        endif
+    endif
 
+    let l:all_attribute_names = []
+    for l:el in keys(g:xmldata_html5)
+        if l:el !~ '^vim'
+                    \ && type(g:xmldata_html5[l:el]) == 3
+                    \	&& len(g:xmldata_html5[l:el]) >= 2
+                    \ && type(g:xmldata_html5[l:el][1]) == 4
+            let l:all_attribute_names += keys(g:xmldata_html5[l:el][1])
+        endif
+    endfor
+    return uniq(l:all_attribute_names)
+endfunction "}}}
+function! s:get_attribute_values(attr, ...) abort "{{{
+    if len(a:000) >= 2 && a:000[1] != ''
+        let l:element = a:000[1]
+        if has_key(g:xmldata_html5, l:element)
+                    \	&& has_key(g:xmldata_html5[l:element][1], a:attr)
+            return g:xmldata_html5[l:element][1][a:attr]
+        endif
+    endif
+
+    let l:all_attribute_values = []
+    for l:el in keys(g:xmldata_html5)
+        if l:el !~ '^vim'
+                    \ && type(g:xmldata_html5[l:el]) == 3
+                    \	&& len(g:xmldata_html5[l:el]) >= 2
+                    \ && type(g:xmldata_html5[l:el][1]) == 4
+                    \ && has_key(g:xmldata_html5[l:el][1], a:attr)
+            let l:all_attribute_values += g:xmldata_html5[l:el][1][a:attr]
+        endif
+    endfor
+    return uniq(l:all_attribute_values)
+endfunction "}}}
 function! s:get_property_values(prop, vals) abort "{{{
     let prop = a:prop
     let vals = a:vals
@@ -662,10 +730,29 @@ function! s:get_atrule_values() abort "{{{
 
     return res + res2
 endfunction "}}}
-function! s:get_atrule_names() abort
+function! s:get_atrule_names() abort "{{{
     return ["charset", "page", "media", "import", "font-face", "namespace", "supports", "keyframes", "viewport", "document"]
-endfunction
-
+endfunction "}}}
+function s:prevnonblanknoncomment(lnum) "{{{
+    let lnum = a:lnum
+    while lnum > 1
+        let lnum = prevnonblank(lnum)
+        let line = getline(lnum)
+        if line =~ '\*/'
+            while lnum > 1 && line !~ '/\*'
+                let lnum -= 1
+            endwhile
+            if line =~ '^\s*/\*'
+                let lnum -= 1
+            else
+                break
+            endif
+        else
+            break
+        endif
+    endwhile
+    return lnum
+endfunction "}}}
 let s:element_names = filter(keys(g:xmldata_html5), 'v:val !~ "^vim"')
 let s:prop_names = split("all additive-symbols align-content align-items align-self animation animation-delay animation-direction animation-duration animation-fill-mode animation-iteration-count animation-name animation-play-state animation-timing-function backface-visibility background background-attachment background-blend-mode background-clip background-color background-image background-origin background-position background-repeat background-size block-size border border-block-end border-block-end-color border-block-end-style border-block-end-width border-block-start border-block-start-color border-block-start-style border-block-start-width border-bottom border-bottom-color border-bottom-left-radius border-bottom-right-radius border-bottom-style border-bottom-width border-collapse border-color border-image border-image-outset border-image-repeat border-image-slice border-image-source border-image-width border-inline-end border-inline-end-color border-inline-end-style border-inline-end-width border-inline-start border-inline-start-color border-inline-start-style border-inline-start-width border-left border-left-color border-left-style border-left-width border-radius border-right border-right-color border-right-style border-right-width border-spacing border-style border-top border-top-color border-top-left-radius border-top-right-radius border-top-style border-top-width border-width bottom box-decoration-break box-shadow box-sizing break-after break-before break-inside caption-side clear clip clip-path color columns column-count column-fill column-gap column-rule column-rule-color column-rule-style column-rule-width column-span column-width content counter-increment counter-reset cue cue-before cue-after cursor direction display empty-cells fallback filter flex flex-basis flex-direction flex-flow flex-grow flex-shrink flex-wrap float font font-family font-feature-settings font-kerning font-language-override font-size font-size-adjust font-stretch font-style font-synthesis font-variant font-variant-alternates font-variant-caps font-variant-east-asian font-variant-ligatures font-variant-numeric font-variant-position font-weight grid grid-area grid-auto-columns grid-auto-flow grid-auto-position grid-auto-rows grid-column grid-column-start grid-column-end grid-row grid-row-start grid-row-end grid-template grid-template-areas grid-template-rows grid-template-columns height hyphens image-rendering image-resolution image-orientation ime-mode inline-size isolation justify-content left letter-spacing line-break line-height list-style list-style-image list-style-position list-style-type margin margin-block-end margin-block-start margin-bottom margin-inline-end margin-inline-start margin-left margin-right margin-top marks mask mask-type max-block-size max-height max-inline-size max-width max-zoom min-block-size min-height min-inline-size min-width min-zoom mix-blend-mode negative object-fit object-position offset-block-end offset-block-start offset-inline-end offset-inline-start opacity order orientation orphans outline outline-color outline-offset outline-style outline-width overflow overflow-wrap overflow-x overflow-y pad padding padding-block-end padding-block-start padding-bottom padding-inline-end padding-inline-start padding-left padding-right padding-top page-break-after page-break-before page-break-inside pause-before pause-after pause perspective perspective-origin pointer-events position prefix quotes range resize rest rest-before rest-after right ruby-align ruby-merge ruby-position scroll-behavior scroll-snap-coordinate scroll-snap-destination scroll-snap-points-x scroll-snap-points-y scroll-snap-type scroll-snap-type-x scroll-snap-type-y shape-image-threshold shape-margin shape-outside speak speak-as suffix symbols system table-layout tab-size text-align text-align-last text-combine-upright text-decoration text-decoration-color text-decoration-line text-emphasis text-emphasis-color text-emphasis-position text-emphasis-style text-indent text-orientation text-overflow text-rendering text-shadow text-transform text-underline-position top touch-action transform transform-box transform-origin transform-style transition transition-delay transition-duration transition-property transition-timing-function unicode-bidi unicode-range user-zoom vertical-align visibility voice-balance voice-duration voice-family voice-pitch voice-rate voice-range voice-stress voice-volume white-space widows width will-change word-break word-spacing word-wrap writing-mode z-index zoom")
 let s:pseudo_element_names = ["first-line", "first-letter", "before", "after", "selection", "backdrop"]
