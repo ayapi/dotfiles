@@ -147,10 +147,14 @@ function! s:gather_candidates() abort
         return ['important']
     elseif l:borders[max(keys(l:borders))] == 'atrule'
         let l:afterat = matchstr(l:line, '.*@\zs.*')
-
         if l:afterat =~ '\s'
             return s:get_atrule_values(l:line)
         endif
+
+        if l:line =~ '^\s*\S\+[\s:].*$'
+            return s:get_property_lookup(line('.'))
+        endif
+        
         return s:get_atrule_names()
     endif
     return []
@@ -160,6 +164,21 @@ if !exists('g:xmldata_html5')
     runtime! autoload/xml/html5.vim
 endif
 
+function! s:get_property_lookup(lnum) abort
+    let l:lnum = a:lnum - 1
+    let l:props = []
+    while indent(s:prevnonblanknoncomment(l:lnum)) > 0
+        let l:pieces = split(getline(l:lnum))
+        if len(l:pieces) >= 2
+                    \	&& l:pieces[0] =~ '^\s*[a-zA-Z-]\+$'
+                    \ && index(s:prop_names, l:pieces[0]) >= 0
+            let l:prop_name = l:pieces[0]
+            call add(l:props, l:prop_name)
+        endif
+        let l:lnum-=1
+    endwhile
+    return l:props
+endfunction
 function! s:get_element_name_from_selector_line(line) abort
     let l:selector_pieces = split(a:line, '[+> ]\+')
     return matchstr(
