@@ -31,6 +31,11 @@ endfunction
 
 setlocal omnifunc=VimScriptOmniComplete
 
+augroup necovim
+  autocmd!
+  autocmd CursorHoldI * call necovim#helper#make_cache()
+augroup END
+
 function! Doc2Snip(argstxt) abort
   if a:argstxt == ''
     return ''
