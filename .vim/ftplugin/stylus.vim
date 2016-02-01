@@ -34,17 +34,23 @@ function! StylusOmniComplete(findstart, base)
 endfunction
 
 function! s:gather_candidates() abort
+    let l:line = substitute(getline('.')[0: col('.') - 2], '^\s*', '', 'g')
+    
     let l:before_start_lines = join(getline(1, line('.') - 1), '')
                 \	. getline('.')[0 : col('.') - 2]
     
     let l:last_closeparens_idx = strridx(l:before_start_lines, ')')
     let l:last_openparens_idx = strridx(l:before_start_lines, '(')
     if l:last_closeparens_idx < l:last_openparens_idx
-        " function args. currently not care
-        return []
+                \ && stridx(l:line, '(') == -1
+        " concat continuation lines
+        let l:lnum = line('.')-1
+        while (l:lnum >= 1 && stridx(l:line, '(') < 0)
+            let l:lnum = s:prevnonblanknoncomment(l:lnum)
+            let l:line = getline(l:lnum) . l:line
+            let l:lnum -= 1
+        endwhile
     endif
-
-    let l:line = substitute(getline('.')[0: col('.') - 2], '^\s*', '', 'g')
     
     let l:last_closebracket_idx = strridx(l:line, ']')
     let l:last_openbracket_idx = strridx(l:line, '[')
@@ -95,7 +101,7 @@ function! s:gather_candidates() abort
             let l:borders[l:idx] = l:char_name
         endif
     endfor
-    echomsg string(l:borders)
+    " echomsg string(l:borders)
 
     if len(l:borders) == 0 || l:borders[max(keys(l:borders))] =~ 
                 \ '^\%(openbrace\|semicolon\|opencomm\|closecomm\|plus\|lt\)$'
@@ -143,7 +149,7 @@ function! s:gather_candidates() abort
         let l:afterat = matchstr(l:line, '.*@\zs.*')
 
         if l:afterat =~ '\s'
-            return s:get_atrule_values()
+            return s:get_atrule_values(l:line)
         endif
         return s:get_atrule_names()
     endif
@@ -662,7 +668,8 @@ function! s:get_property_values(prop, vals) abort "{{{
     let values = wide_keywords + values
     return values
 endfunction "}}}
-function! s:get_atrule_values() abort "{{{
+function! s:get_atrule_values(line) abort "{{{
+    let line = a:line
     let atrulename = matchstr(line, '.*@\zs[a-zA-Z-]\+\ze')
 
     if atrulename == 'media'
@@ -720,6 +727,8 @@ function! s:get_atrule_values() abort "{{{
 
     endif
 
+    let res = []
+    let res2 = []
     for m in values
         if m =~? '^'.entered_atruleafter
             if entered_atruleafter =~? '^"' && m =~? '^"'
@@ -727,7 +736,7 @@ function! s:get_atrule_values() abort "{{{
             endif
             if b:after =~? '"' && stridx(m, '"') > -1
                 let m = m[0:stridx(m, '"')-1]
-            endif 
+            endif
             call add(res, m)
         elseif m =~? entered_atruleafter
             if m =~? '^"'
