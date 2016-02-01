@@ -49,7 +49,7 @@ function! s:gather_candidates() abort
     let l:last_closebracket_idx = strridx(l:line, ']')
     let l:last_openbracket_idx = strridx(l:line, '[')
     if l:last_closebracket_idx < l:last_openbracket_idx
-        let l:maybe_element = matchstr(l:line, '^\zs[^#\.\[]\+\ze')
+        let l:maybe_element = s:get_element_name_from_selector_line(l:line)
         if l:maybe_element == '&'
             " look up parent selector
             let l:lnum = line('.')
@@ -57,7 +57,9 @@ function! s:gather_candidates() abort
             while indent(s:prevnonblanknoncomment(l:lnum)) >= l:current_indent
                 let l:lnum-=1
             endwhile
-            let l:maybe_element = matchstr(getline(l:lnum), '^\s*\zs[^#\.\[]\+\ze')
+            let l:maybe_element = s:get_element_name_from_selector_line(
+                                                        \ getline(l:lnum)
+                                                        \)
         endif
         
         let l:inner_brackets = matchstr(l:line, '\[\zs[^\]]\+\ze')
@@ -152,6 +154,13 @@ if !exists('g:xmldata_html5')
     runtime! autoload/xml/html5.vim
 endif
 
+function! s:get_element_name_from_selector_line(line) abort
+    let l:selector_pieces = split(a:line, '[+> ]\+')
+    return matchstr(
+                \ l:selector_pieces[len(l:selector_pieces)-1],
+                \ '^\zs[^:#\.\[]\+\ze'
+                \)
+endfunction
 function! s:get_attribute_names(...) abort "{{{
     if len(a:000) >= 2 && a:000[1] != ''
         let l:element = a:000[1]
@@ -733,7 +742,7 @@ endfunction "}}}
 function! s:get_atrule_names() abort "{{{
     return ["charset", "page", "media", "import", "font-face", "namespace", "supports", "keyframes", "viewport", "document"]
 endfunction "}}}
-function s:prevnonblanknoncomment(lnum) "{{{
+function! s:prevnonblanknoncomment(lnum) "{{{
     let lnum = a:lnum
     while lnum > 1
         let lnum = prevnonblank(lnum)
@@ -790,3 +799,5 @@ let s:charset_values = [
             \ '"IBM01144";', '"IBM01145";', '"IBM01146";', '"IBM01147";', '"IBM01148";', '"IBM01149";', '"Big5-HKSCS";', '"IBM1047";', '"PTCP154";', '"Amiga-1251";', 
             \ '"KOI7-switched";', '"BRF";', '"TSCII";', '"windows-1250";', '"windows-1251";', '"windows-1252";', '"windows-1253";', '"windows-1254";', '"windows-1255";', 
             \ '"windows-1256";', '"windows-1257";', '"windows-1258";', '"TIS-620";']
+
+" vim: foldmethod=marker
