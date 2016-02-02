@@ -119,9 +119,11 @@ function! s:gather_candidates() abort
             let l:prop_values = s:get_property_values(
                         \ tolower(l:matches[1]),
                         \ l:matches[2])
+            
             if !empty(l:prop_values)
-                return l:prop_values
+                return l:prop_values + s:get_stylus_builtin_funcs()
             endif
+            return s:get_stylus_builtin_funcs()
         endif
         return []
     elseif l:borders[max(keys(l:borders))] == 'colon'
@@ -131,7 +133,7 @@ function! s:gather_candidates() abort
                         \ matchstr(l:line, '.*:\s*\zs.*')
                         \)
         if !empty(l:prop_values)
-            return l:prop_values
+            return l:prop_values + s:get_stylus_builtin_funcs()
         endif
 
         if l:line =~ '[^:]:[a-zA-Z-]*$'
@@ -164,6 +166,28 @@ if !exists('g:xmldata_html5')
     runtime! autoload/xml/html5.vim
 endif
 
+let s:dict_path = substitute(fnamemodify(expand('<sfile>'), ':h'), '\\', '/', 'g')
+function! s:get_stylus_builtin_funcs() abort
+    if exists('s:stylus_builtin_funcs')
+        return s:stylus_builtin_funcs
+    endif
+    
+    let s:stylus_builtin_funcs = []
+    for l:line in readfile(s:dict_path . '/bifs.dict')
+        let _ = split(l:line, '\t')
+        echomsg len(_)
+        if len(_) < 2
+            call add(_, '')
+        endif
+        call add(s:stylus_builtin_funcs, {
+                    \ 'word': substitute(_[0], '(\zs.\+)', '', ''),
+                    \ 'info': substitute(_[0], '(\zs\s\+', '', ''),
+                    \ 'menu': _[1],
+                    \ 'dup' : 1
+                    \})
+    endfor
+    return s:stylus_builtin_funcs
+endfunction
 function! s:get_property_lookup(lnum) abort
     let l:lnum = a:lnum - 1
     let l:props = []

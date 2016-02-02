@@ -1,0 +1,95 @@
+red(color)	Return the red component of the given `color`
+red(color, value)	Set the red component to the optional second `value` argument
+green(color)	Return the green component of the given `color`
+green(color, value)	Set the green component to the optional second `value` argument
+blue(color)	Return the blue component of the given `color`
+blue(color, value)	Set the blue component to the optional second `value` argument
+alpha(color)	Return the alpha component of the given `color`
+alpha(color, value)	Set the alpha component to the optional second `value` argument
+dark(color)	Check if `color` is dark
+light(color)	Check if `color` is light
+hue(color)	Return the hue of the given `color`
+hue(color, value)	Set the hue component to the optional second `value` argument
+saturation(color)	Return the saturation of the given `color`
+saturation(color, value)	Set the saturation component to the optional second `value` argument
+lightness(color)	Return the lightness of the given `color`
+lightness(color, value)	Set the lightness component to the optional second `value` argument
+push(expr, args[, ...])	Push the given `args` to `expr`
+append(expr, args[, ...])	Push the given `args` to `expr`
+pop(expr)	Pop a value from `expr`
+shift(expr)	Shift an element from `expr`
+unshift(expr, args[, ...])	Unshift the given `args` to `expr`
+prepend(expr, args[, ...])	Unshift the given `args` to `expr`
+keys(pairs)	Return keys in the given `pairs`
+values(pairs)	Return values in the given `pairs`
+list-separator(list)	Return the separator of the given `list`
+typeof(node)	Return type of `node` as a string
+type-of(node)	Return type of `node` as a string
+type(node)	Return type of `node` as a string
+unit(unit)	Return a string for the type of `unit` or an empty string
+unit(unit, type)	Assign the given `type` without unit conversion
+match(pattern, string)	Test if `string` matches the given `pattern`
+abs(unit)
+ceil(unit)
+floor(unit)
+round(unit)
+sin(angle)	Returns the value of sine for the given `angle`
+cos(angle)	Returns the value of cosine for the given `angle`
+tan(angle)	Returns the value of tangent for the given `angle`
+min(a, b)
+max(a, b)
+even(unit)
+odd(unit)
+sum(nums)
+avg(nums)
+range(start, stop[, step])	Returns a list of units from `start` to `stop` (included) by given `step`
+base-convert(num, base[, width])	Returns a `Literal` `num` converted to the provided `base`
+join(delim, vals[, ...])	Join the given `vals` with `delim`
+hsla(color)	Convert the given `color` to an `HSLA` node
+hsla(h,s,l,a)	Convert the given h,s,l,a component values to an `HSLA` node
+hsl(color)	Convert the given `color` to an `HSLA` node
+hsl(h,s,l)	Convert the given `h,s,l` component values to an `HSLA` node
+rgba(r,g,b,a)	Return `RGBA` from the r,g,b,a channels
+rgba(color, a)	rovide a `color` to tweak the alpha
+rgb(r,g,b)	Return a `RGBA` from the r,g,b channels
+rgb(color)	Cast to an `RGBA` node
+blend(top[, bottom])	Blends the given `top` color over the `bottom` one using the normal blending
+lighten(color, amount)	Lighten the given `color` by `amount`
+darken(color, amount)	Darken the given `color` by `amount`
+desaturate(color, amount)	Desaturate the given `color` by `amount`
+saturate(color, amount)	Saturate the given `color` by `amount`
+complement(color)	Gives the complementary color
+invert(color)	Inverts the color
+spin(color, amount)	Spins hue of the given `color` by `amount`
+grayscale(color)	Gives the grayscale equivalent of the given color
+mix(color1, color2[, amount])	Mix two colors by a given amount
+tint(color, amount)	Mix the given color with white
+shade(color, amount)	Mix the given color with black
+luminosity(color)	Returns the relative luminance of the given `color`
+contrast(top[, bottom])	Returns the contrast ratio object between `top` and `bottom` colors
+transparentify(top[, bottom, alpha])	Returns the transparent version of the given `top` color
+unquote(str|ident)	Unquote the given `str` and returned as a `Literal` node
+convert(str)	Like `unquote()` but tries to convert the given `str` to a Stylus node
+s(fmt, ...)	format string much like C's `sprintf()`
+basename(path[, ext])	Returns the basename of `path`
+dirname(path)	Returns the dirname of `path`
+extname(path)	Returns the filename extension of `path` including the dot
+pathjoin(...)	Peform a path join
+current-media()	Returns the string of the current block's `@media` rule
++cache(keys...)	Allows you to create your own “cachable” mixins
++prefix-classes(prefix)	For prefixing the classes inside any given Stylus' block
+lookup(name)	Allows to lookup a variable with a given name, passed as a string
+define(name, expr)	Allows to create or overwrite a variable with a given name, passed as a string, onto current scope
+operate(op, left, right)	Perform the given `op` on the `left` and `right` operands
+length([expr])	Returns the length of parenthesized expressions
+selector()	Returns the compiled current selector or `&` if called at root level
+selector-exists(selector)	Returns true if the given selector exists
+warn(msg)	Warn with the given error `msg`, does not exit
+error(msg)	Exits with the given error `msg`
+last(expr)	Return the _last_ value in the given `expr`
+p(expr)	Inspect the given `expr`
+opposite-position(positions)	Return the opposites of the given `positions`
+image-size(path)	Returns the `width` and `height` of the image found at `path`
+add-property(name, expr)	Adds property `name`, with the given `expr` to the closest block
+json(path[, options])	Convert a .json file into stylus variables or an object
+use(path)	Use any given js-plugin at given `path`
