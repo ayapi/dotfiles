@@ -2,3 +2,4 @@
 /.vim/bundle
 /.mlterm/msg.log
 /.mlterm/challenge
+node_modules

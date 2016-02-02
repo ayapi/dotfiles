@@ -1,0 +1,14 @@
+{
+  "name": "neovim-html2jade",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ayp",
+  "license": "ISC",
+  "dependencies": {
+    "html2jade": "^0.8.4"
+  }
+}
