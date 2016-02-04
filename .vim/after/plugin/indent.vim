@@ -15,15 +15,36 @@ augroup save_indent_size
   autocmd BufWriteCmd * call Tab2OrgAndWrite()
 augroup END
 
+let s:indent_fallback = {
+      \ '_': 4,
+      \ 'javascript': 2,
+      \ 'jade': 2,
+      \ 'stylus': 2,
+      \ 'python': 4,
+      \ 'java': 4,
+      \ 'zsh': 2
+      \}
+function! GetIndentFallback() abort
+  if &filetype == '' || !has_key(s:indent_fallback, &filetype)
+    return s:indent_fallback._
+  endif
+  return s:indent_fallback[&filetype]
+endfunction
+
 function! SaveIndentSize() abort
-  if &shiftwidth == 16  && &expandtab == 0
-    " hard-tab detected by tpope/vim-sleuth
+  if &diff || &filetype == "help" || &buftype != ''
     let b:noconvertindent = 1
-    " TODO: set default shiftwidth value filetype specific
-    setlocal shiftwidth=8
-    setlocal tabstop=8
-  elseif &diff || &filetype == "help" || &buftype != ''
-    let b:noconvertindent = 1
+  elseif &shiftwidth == 16
+    if &expandtab == 0
+      " hard-tab detected by tpope/vim-sleuth
+      let b:noconvertindent = 1
+      setlocal shiftwidth=2
+      setlocal tabstop=2
+    else
+      let l:fallback = GetIndentFallback()
+      setlocal shiftwidth=l:fallback
+      setlocal tabstop=l:fallback
+    endif
   endif
 
   let b:org_shiftwidth = getbufvar("", "&shiftwidth", 8)
