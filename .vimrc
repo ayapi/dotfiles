@@ -876,11 +876,21 @@ inoremap <silent> <C-Up> <C-o>3<C-y>
 " http://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
 autocmd VimLeave * call system("xsel -ib", getreg('+'))
 
-" format pasted text
-" ref. http://stackoverflow.com/questions/4312664/is-there-a-vim-command-to-select-pasted-text
-noremap  <C-v> "+gP`[v`]m`=``
-inoremap <C-v> <C-o>:normal "+gP`[v`]m`=``l<CR>
-snoremap <C-v> <C-g>d:normal "+gP`[v`]m`=``l<CR>
+" convert indent before paste, and select pasted text
+function! ConvertIndentPaste() abort
+  let l:clipboard = getreg('+')
+  let l:converted = ConvertIndent(l:clipboard)
+  call setreg('j', l:converted, 'c')
+  normal! "jgP`[v`]
+endfunction
+
+function! MapConvertIndentPaste() abort
+  noremap  <silent><buffer> <C-v> :call ConvertIndentPaste()<CR><C-g>
+  inoremap <silent><buffer> <C-v> <C-g>u<C-o>:call ConvertIndentPaste()<CR>l<C-g>
+  snoremap <silent><buffer> <C-v> <C-g>d:call ConvertIndentPaste()<CR>l<C-g>
+endfunction
+
+autocmd FileType * if &buftype == '' | call MapConvertIndentPaste() | endif
 
 " confirm message
 " ref. https://github.com/saihoooooooo/dotfiles/
@@ -974,6 +984,8 @@ nnoremap <F12> :call SaveAs()<CR>
 " [undo/redo]
 vnoremap <C-z> <C-c>u
 vnoremap <C-y> <C-c><C-r>
+snoremap <C-z> <C-c>u
+snoremap <C-y> <C-c><C-r>
 inoremap <expr> <C-z>   pumvisible() ? "\<C-e>\<C-o>u" : "\<C-o>u"
 
 " [open]
