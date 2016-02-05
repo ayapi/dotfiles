@@ -865,13 +865,16 @@ function! ConvertIndentPaste() abort
   let l:clipboard = getreg('+')
   let l:converted = ConvertIndent(l:clipboard)
   call setreg('j', l:converted, 'c')
-  normal! "jgP`[v`]
+  normal! "jgP
+  if l:converted =~ '[\r?\n]'
+    normal! `[v`]l
+  endif
 endfunction
 
 function! MapConvertIndentPaste() abort
-  noremap  <silent><buffer> <C-v> :call ConvertIndentPaste()<CR><C-g>
-  inoremap <silent><buffer> <C-v> <C-g>u<C-o>:call ConvertIndentPaste()<CR>l<C-g>
-  snoremap <silent><buffer> <C-v> <C-g>d:call ConvertIndentPaste()<CR>l<C-g>
+  noremap  <silent><buffer> <C-v> :call ConvertIndentPaste()<CR>
+  inoremap <silent><buffer> <C-v> <C-g>u<C-o>:call ConvertIndentPaste()<CR>
+  snoremap <silent><buffer> <C-v> <C-g>d:call ConvertIndentPaste()<CR>
 endfunction
 
 autocmd FileType * if &buftype == '' | call MapConvertIndentPaste() | endif
