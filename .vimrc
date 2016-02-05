@@ -122,7 +122,7 @@ highlight MatchParen cterm=none ctermbg=236 ctermfg=255 guibg=gray guifg=white
 " add random colors to braces
 let g:rainbow_active = 1
 let g:rainbow_conf = {
-    \   'guifgs': ['royalblue3', 'darkorange3', 'seagreen3', 'firebrick'],
+    \   'guifgs': ['#FFFFFF', '#ffafff', '#ffaf87', '#afffaf', '#87d7ff', '#d7afff'],
     \   'ctermfgs': [255, 219, 216, 226, 157, 117, 183],
     \   'operators': '_,_',
     \   'parentheses': ['start=/(/ end=/)/ fold', 'start=/\[/ end=/\]/ fold', 'start=/{/ end=/}/ fold'],
@@ -151,14 +151,14 @@ highlight cursorlinenr ctermfg=white ctermbg=none guifg=white guibg=none
 
 " statusline
 highlight StatusLine ctermfg=170 ctermbg=0 guifg=#d75fd7 guibg=#000000
-highlight StatusLineNC ctermfg=235 ctermbg=255 guifg=#eeeeee guibg=#000000
+highlight StatusLineNC ctermfg=236 ctermbg=240 guifg=#303030 guibg=#585858
 
 " vertical split line
 set fillchars+=vert:\ 
-highlight VertSplit ctermbg=235
+highlight VertSplit ctermbg=236 guibg=#303030
 
 " indent style
-highlight CursorColumn ctermbg=236
+highlight CursorColumn ctermbg=236 guibg=#303030
 
 " search
 highlight Search cterm=none ctermfg=0 ctermbg=81 gui=none guifg=#000000 guibg=#5fd7ff
@@ -167,7 +167,7 @@ highlight IncSearch cterm=none ctermfg=0 ctermbg=222 gui=none guifg=#000000 guib
 " whitespaces
 highlight link TrailSpace Error
 highlight link WideSpace Error
-highlight Error ctermbg=197 ctermfg=0
+highlight Error ctermbg=197 ctermfg=0 guibg=#ff005f guifg=#000000
 
 " ref. http://vim.wikia.com/wiki/Highlight_unwanted_spaces#Highlighting_with_the_syntax_command
 function! SetWhiteSpaceSyntax() abort
@@ -220,23 +220,7 @@ highlight DiffText    ctermfg=16  ctermbg=222 guifg=#000000 guibg=#ffd787
 if has('nvim')
   highlight TermCursor ctermfg=251 ctermbg=0 guifg=#c6c6c6 guibg=#000000
   highlight TermCursorNC ctermfg=251 ctermbg=0 guifg=#c6c6c6 guibg=#000000
-
-  let g:terminal_color_0="#1B1D1E"
-  let g:terminal_color_1="#FF0044"
-  let g:terminal_color_2="#A6E22E"
-  let g:terminal_color_3="#f4bf75"
-  let g:terminal_color_4="#266C98"
-  let g:terminal_color_5="#AC0CB1"
-  let g:terminal_color_6="#AE81FF"
-  let g:terminal_color_7="#CCCCCC"
-  let g:terminal_color_8="#808080"
-  let g:terminal_color_9="#F92672"
-  let g:terminal_color_10="#A6E22E"
-  let g:terminal_color_11="#E6DB74"
-  let g:terminal_color_12="#7070F0"
-  let g:terminal_color_13="#D63AE1"
-  let g:terminal_color_14="#66D9EF"
-  let g:terminal_color_15="#F8F8F2"
+  source ~/.vim/nvim-term-colors.vim
 endif
 
 if &term =~ "mlterm"
