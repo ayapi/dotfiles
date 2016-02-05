@@ -1046,6 +1046,10 @@ inoremap <C-r> <Esc>:%s///gc<Left><Left><Left><Left>
 nnoremap <C-r> :%s///gc<Left><Left><Left><Left>
 snoremap <C-r> <C-g>:s/\%V\%V//gc<Left><Left><Left><Left><Left><Left><Left>
 
+" for replace with new line
+" <C-Enter> = <F23> in my keysym
+cnoremap <F23> <C-v><C-m>
+
 " [revert]
 " <C-S-r> = <F11> in my keysym
 inoremap <F11> <C-o>:GitGutterRevertHunk<CR>

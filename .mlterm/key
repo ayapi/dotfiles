@@ -8,6 +8,7 @@ Shift+Next=UNUSED
 Shift+F1=UNUSED
 Shift+F2=UNUSED
 
+Control+Return="\x1b[23;2~"
 Control+Tab="\x1b[27;5;9~"
 Control+Shift+ISO_Left_Tab="\x1b[27;6;9~"
 Mod3+Tab="\x1b[27;3;9~"
