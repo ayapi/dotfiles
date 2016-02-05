@@ -388,7 +388,7 @@ endfunction
 augroup vertguide
   autocmd!
   autocmd CursorMoved,CursorMovedI,WinEnter * call VerticalGuide()
-  autocmd WinLeave,BufWinLeave * setlocal nocursorcolumn
+  autocmd WinLeave,BufWinLeave,TermOpen * setlocal nocursorcolumn
 augroup END
 
 " ------------------------------------
