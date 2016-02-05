@@ -11,20 +11,19 @@ plugin.functionSync('ConvertIndent', (nvim, args, cb) => {
   }
   
   const tabbed = text.split(/(\r?\n)/).map((v) => {
-    if (/^[\r\n]$/.test(v)) {
+    if (/^\r?\n$/.test(v)) {
       return v;
     }
     
-    let matched = v.match(/^( +)(.*)$/);
+    const matched = v.match(/^( +)(.*)$/);
     if (!matched) {
       return v;
     }
     
     const indent = detected.indent || '  ';
-    const spaces = new RegExp(indent, 'g');
     return (matched[1]
       .replace(/\t/g, indent)
-      .replace(spaces, '\t')
+      .replace(new RegExp(indent, 'g'), '\t')
       .replace(' ', '')
       + matched[2]);
   }).join('');
