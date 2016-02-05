@@ -171,8 +171,10 @@ function! necovim#helper#command(cur_text, complete_str) "{{{
     let cur_text = completion_name ==# 'command' ?
           \ a:cur_text[len(command):] : a:cur_text
 
-    if a:cur_text =~
-          \'[[(,{]\|`=[^`]*$'
+    " echomsg completion_name
+    
+    if completion_name != 'autocmd_args'
+          \ && a:cur_text =~ '[[(,{]\|`=[^`]*$'
       " Expression.
       let list = necovim#helper#expression(
           \ a:cur_text, a:complete_str)
