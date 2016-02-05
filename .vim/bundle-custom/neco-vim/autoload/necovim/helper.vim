@@ -97,29 +97,27 @@ function! necovim#helper#autocmd_args(cur_text, complete_str) "{{{
     let s:internal_candidates_list.autocmds = s:make_cache_autocmds()
   endif
 
+  let args_count = len(args)
+  let has_group = 0
+  if args_count >= 3
+    let augroup_names = map(copy(s:get_augrouplist()), 'v:val.word')
+    if index(augroup_names, args[1]) >= 0
+      let args_count -= 1
+      let has_group = 1
+    endif
+  endif
+
   let list = []
-  if len(args) == 2
+  if args_count == 2
     let list += copy(s:internal_candidates_list.autocmds) +
           \ copy(s:global_candidates_list.augroups)
-  elseif len(args) == 3
-    if args[1] ==# 'FileType'
+  elseif args_count == 3
+    if args[1 + has_group] ==# 'FileType'
       " Filetype completion.
       let list +=
             \ necovim#helper#filetype(
             \   a:cur_text, a:complete_str)
     endif
-
-    let list += s:internal_candidates_list.autocmds
-  elseif len(args) == 4
-    if args[2] ==# 'FileType'
-      " Filetype completion.
-      let list += necovim#helper#filetype(
-            \ a:cur_text, a:complete_str)
-    endif
-
-    let list += necovim#helper#command(
-          \ args[3], a:complete_str)
-    let list += s:make_completion_list(['nested'])
   else
     let command = args[3] =~ '^*' ?
           \ join(args[4:]) : join(args[3:])
@@ -172,6 +170,8 @@ function! necovim#helper#command(cur_text, complete_str) "{{{
           \ a:cur_text[len(command):] : a:cur_text
 
     " echomsg completion_name
+    " echomsg command
+    " echomsg cur_text
     
     if completion_name != 'autocmd_args'
           \ && a:cur_text =~ '[[(,{]\|`=[^`]*$'

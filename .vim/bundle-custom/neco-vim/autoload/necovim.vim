@@ -52,7 +52,7 @@ function! necovim#get_complete_position(input) "{{{
   if complete_pos < 0
     " Use args pattern.
     let [complete_pos, complete_str] =
-          \ necovim#match_word(a:input, '[^\s,]\+$')
+          \ necovim#match_word(a:input, '\[^\s,]\+$')
   endif
 
   return complete_pos
