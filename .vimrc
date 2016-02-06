@@ -483,6 +483,9 @@ for k in split('>);}]"`','\zs')
   exec "inoremap <expr> ".k." '<C-g>u".k."<C-r>=pumvisible() ? \"\\<lt>C-e>\" : \"\"<CR>'"
 endfor
 
+" <C-CR>
+inoremap <silent><expr> <F23> '<C-g>u<C-r>=pumvisible() ? "\<lt>C-e>\<lt>CR>" : "\<lt>CR>"<CR>'
+
 " for other insert-mode keybinds
 " close completion popup menu before key
 function! IMapWithClosePopup(before, after, ...)
