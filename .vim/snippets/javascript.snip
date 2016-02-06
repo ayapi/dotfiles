@@ -1,126 +1,125 @@
 snippet import
 options head
-  import ${0:#:name} from '${1:#:module-name}';
+	import ${0:#:name} from '${1:#:module-name}';
 
 snippet class
 options head
-  class ${1:#:name} {
-    constructor (${2:#:arguments}) {
-      ${0:TARGET}
-    }
-  }
+	class ${1:#:name} {
+		constructor (${2:#:arguments}) {
+			${0:TARGET}
+		}
+	}
 
 snippet extends
 options word
-  extends ${0:#:parent-class-name}
+	extends ${0:#:parent-class-name}
 
 snippet super
 options word
-  super(${0:#:arguments});
+	super(${0:#:arguments});
 
 snippet arrow-function
 options word
-  (${1}) => {
-    ${0:TARGET}
-  }
+	(${1}) => {
+		${0:TARGET}
+	}
 
 snippet function
 options word
-  function ${1:#:name}(${2:#:arguments}) {
-    ${0:TARGET}
-  }
+	function ${1:#:name}(${2:#:arguments}) {
+		${0:TARGET}
+	}
 
 snippet if
 options head
-  if (${1:#:condition}) {
-    ${0:TARGET}
-  }
+	if (${1:#:condition}) {
+		${0:TARGET}
+	}
 
 snippet elseif
 options word
-  elseif (${1:#:condition}) {
-    ${0:TARGET}
-  }
+	elseif (${1:#:condition}) {
+		${0:TARGET}
+	}
 
 snippet else
 options word
-  else {
-    ${0:TARGET}
-  }
+	else {
+		${0:TARGET}
+	}
 
 snippet for
 options head
-  for (let ${1:i}=0; $1 < ${2:#:Array}.length; ++$1) {
-    ${0:TARGET}
-  }
+	for (let ${1:i}=0; $1 < ${2:#:Array}.length; ++$1) {
+		${0:TARGET}
+	}
 
 snippet for-in
 options head
-  for (let ${1:i} in ${2:#:Array}) {
-    ${0:TARGET}
-  }
+	for (let ${1:i} in ${2:#:Array}) {
+		${0:TARGET}
+	}
 
 snippet for-of
 options head
-  for (let ${1:i} of ${2:#:Array}) {
-    ${0:TARGET}
-  }
+	for (let ${1:i} of ${2:#:Array}) {
+		${0:TARGET}
+	}
 
 snippet while
 options head
-  while (${1:#:condition}) {
-    ${0:TARGET}
-  }
+	while (${1:#:condition}) {
+		${0:TARGET}
+	}
 
 snippet do-while
 options head
-  do {
-    ${0:TARGET}
-  } while (${1:#:condition})
+	do {
+		${0:TARGET}
+	} while (${1:#:condition})
 
 snippet switch
 options head indent
-  switch (${1:#:var}) {
-    case ${2:#:val}:
-      ${0:TARGET}
-      break;
-  }
+	switch (${1:#:var}) {
+		case ${2:#:val}:
+			${0:TARGET}
+			break;
+	}
 
 snippet case
 options head indent
-  case ${1:#:val}:
-    ${0:TARGET}
-    break;
+	case ${1:#:val}:
+		${0:TARGET}
+		break;
 
 snippet try-catch
 options head
-  try {
-    ${1:TARGET}
-  } catch (err) {
-    ${2:// handle error}
-  }
+	try {
+		${1:TARGET}
+	} catch (err) {
+		${2:// handle error}
+	}
 
 snippet try-catch-finally
 options head
-  try {
-    ${1:TARGET}
-  } catch (err) {
-    ${2:// handle error}
-  } finally {
-    ${3}
-  }
+	try {
+		${1:TARGET}
+	} catch (err) {
+		${2:// handle error}
+	} finally {
+		${3}
+	}
 
 snippet finally
 options word
-  finally {
-    ${0:TARGET}
-  }
+	finally {
+		${0:TARGET}
+	}
 
 snippet throw-new-error
 options word
-  throw new Error('${0:TARGET}')
+	throw new Error('${0:TARGET}')
 
 snippet use-strict
 options head
-  'use strict';
-
+	'use strict';
