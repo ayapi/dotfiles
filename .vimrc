@@ -877,7 +877,7 @@ function! ConvertIndentPaste() abort
   call setreg('j', l:converted, 'c')
   normal! "jgP
   if l:converted =~ '[\r?\n]'
-    normal! `[v`]l
+    execute "normal! `[v`]l\<C-g>"
   endif
 endfunction
 
