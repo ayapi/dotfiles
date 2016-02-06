@@ -92,8 +92,6 @@ filetype plugin indent on
 " this will conveniently prompt you to install them.
 NeoBundleCheck
 
-autocmd BufNewFile,BufReadPost *.pegjs set filetype=pegjs
-
 " ------------------------------------
 " appearance
 " ------------------------------------
@@ -323,15 +321,21 @@ let g:neosnippet#scope_aliases['vim'] = 'vim,vim-functions'
 let g:neosnippet#disable_runtime_snippets = {'_' : 1}
 let g:funcsnips = {}
 
-autocmd FileType stylus setlocal omnifunc=StylusOmniComplete
+augroup stylusomni
+  autocmd!
+  autocmd FileType stylus setlocal omnifunc=StylusOmniComplete
+augroup END
 
 " ------------------------------------
 " Indent Styles
 " ------------------------------------
 
 set noautoindent
-autocmd FileType stylus,jade setlocal indentexpr=
-autocmd FileType stylus setlocal autoindent
+augroup indentexpr
+  autocmd!
+  autocmd FileType stylus,jade setlocal indentexpr=
+  autocmd FileType stylus setlocal autoindent
+augroup END
 
 " ref. http://rcmdnk.github.io/blog/2014/07/14/computer-vim/
 set breakindent
@@ -858,7 +862,10 @@ inoremap <silent> <C-Up> <C-o>3<C-y>
 " [cut/copy/paste]
 " Prevent Vim from clearing the clipboard on exit
 " http://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
-autocmd VimLeave * call system("xsel -ib", getreg('+'))
+augroup xsel
+  autocmd!
+  autocmd VimLeave * call system("xsel -ib", getreg('+'))
+augroup END
 
 " convert indent before paste, and select pasted text
 function! ConvertIndentPaste() abort
@@ -877,7 +884,11 @@ function! MapConvertIndentPaste() abort
   snoremap <silent><buffer> <C-v> <C-g>d:call ConvertIndentPaste()<CR>
 endfunction
 
-autocmd FileType * if &buftype == '' | call MapConvertIndentPaste() | endif
+augroup convertpaste
+  autocmd!
+  autocmd FileType * if &buftype == '' | call MapConvertIndentPaste() | endif
+augroup END
+
 
 " confirm message
 " ref. https://github.com/saihoooooooo/dotfiles/
