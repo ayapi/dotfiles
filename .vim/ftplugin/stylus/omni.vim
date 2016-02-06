@@ -44,6 +44,7 @@ function! s:gather_candidates() abort
     if l:last_closeparens_idx < l:last_openparens_idx
                 \ && stridx(l:line, '(') == -1
         " concat continuation lines
+        " TODO: nested parens
         let l:lnum = line('.')-1
         while (l:lnum >= 1 && stridx(l:line, '(') < 0)
             let l:lnum = s:prevnonblanknoncomment(l:lnum)
@@ -106,9 +107,12 @@ function! s:gather_candidates() abort
     if len(l:borders) == 0 || l:borders[max(keys(l:borders))] =~ 
                 \ '^\%(openbrace\|semicolon\|opencomm\|closecomm\|plus\|lt\)$'
         if col('.') == 1
-            return s:element_names
+            return s:get_ids_and_classes_from_visible_buffers()
+                        \ +s:element_names
         elseif l:line =~ '^\s*$'
-            return s:element_names+s:prop_names
+            return s:get_ids_and_classes_from_visible_buffers()
+                        \ +s:element_names
+                        \ +s:prop_names
         elseif l:line =~ '[+>]\S*$'
             return s:element_names
         else
@@ -202,6 +206,27 @@ function! s:get_property_lookup(lnum) abort
         let l:lnum-=1
     endwhile
     return l:props
+endfunction
+function! s:get_ids_and_classes_from_visible_buffers() abort
+    let l:list = []
+    for l:win_nr in range(1, winnr('$'))
+        let l:buf_nr = winbufnr(l:win_nr)
+        let l:buf_name = bufname(l:buf_nr)
+        if l:buf_name !~ '\.jade$'
+            continue
+        endif
+        let l:list += GetIdsAndClassesFromJade(
+                    \ join(getbufline(l:buf_nr, 1, '$'), "\n"),
+                    \ resolve(l:buf_name)
+                    \)
+    endfor
+    if !exists('s:id_and_class_names') || empty(s:id_and_class_names)
+        let s:id_and_class_names = []
+    endif
+    if !empty(l:list)
+        let s:id_and_class_names = l:list
+    endif
+    return s:id_and_class_names
 endfunction
 function! s:get_element_name_from_selector_line(line) abort
     let l:selector_pieces = split(a:line, '[+> ]\+')
