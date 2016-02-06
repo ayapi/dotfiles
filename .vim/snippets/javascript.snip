@@ -6,9 +6,9 @@ snippet class
 options head
   class ${1:#:name} {
     constructor (${2:#:arguments}) {
-  		${0:TARGET}
+      ${0:TARGET}
     }
-	}
+  }
 
 snippet extends
 options word
@@ -21,14 +21,14 @@ options word
 snippet arrow-function
 options word
   (${1}) => {
-		${0:TARGET}
-	}
+    ${0:TARGET}
+  }
 
 snippet function
 options word
   function ${1:#:name}(${2:#:arguments}) {
-		${0:TARGET}
-	}
+    ${0:TARGET}
+  }
 
 snippet if
 options head
@@ -79,7 +79,7 @@ options head
   } while (${1:#:condition})
 
 snippet switch
-options head
+options head indent
   switch (${1:#:var}) {
     case ${2:#:val}:
       ${0:TARGET}
@@ -87,7 +87,7 @@ options head
   }
 
 snippet case
-options head
+options head indent
   case ${1:#:val}:
     ${0:TARGET}
     break;

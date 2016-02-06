@@ -122,6 +122,8 @@ endfunction
 function! Tab2OrgAndWrite() abort
   if exists('b:noconvertindent') || !exists('b:org_shiftwidth')
     call writefile(getline(1, '$'), expand("<afile>"), "b")
+    setlocal nomodified
+    return
   endif
   let line = 1
   let last_line = line('$')
