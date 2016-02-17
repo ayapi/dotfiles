@@ -1145,7 +1145,7 @@ let g:caw_i_sp_blank = ' '
 " <C-_> means `ctrl+/`
 nnoremap <silent> <C-_> :call CommentToggleWrap()<CR>
 inoremap <silent> <C-_> <C-o>:call CommentToggleWrap()<CR>
-vmap <C-_> <Plug>(caw:i:toggle)gvV
+vmap <C-_> <Plug>(caw:i:toggle)gv
 
 " [jump to line]
 " ref. http://vim.wikia.com/wiki/Jump_to_a_line_number
