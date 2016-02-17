@@ -378,7 +378,7 @@ endfunction
 " ---------------------------------
 set nocursorcolumn
 function! VerticalGuide() abort
-  if &buftype != ""
+  if &buftype != "" || &filetype == 'markdown'
     setlocal nocursorcolumn
     return
   endif
