@@ -59,12 +59,14 @@ NeoBundle 'gorodinskiy/vim-coloresque'
 NeoBundle 'digitaltoad/vim-jade'
 NeoBundle 'wavded/vim-stylus'
 
-NeoBundle 'junegunn/fzf', {
-  \ 'build': {
-  \   'others': '$HOME/.vim/bundle/fzf/install'
-  \   }
-  \ }
-NeoBundle 'junegunn/fzf.vim'
+if !has('win32')
+  NeoBundle 'junegunn/fzf', {
+    \ 'build': {
+    \   'others': '$HOME/.vim/bundle/fzf/install'
+    \   }
+    \ }
+  NeoBundle 'junegunn/fzf.vim'
+endif
 
 " NeoBundle 'kana/vim-submode'
 " NeoBundle 'Shougo/unite.vim'
@@ -106,16 +108,15 @@ set updatetime=500
 " syntax highlight
 if has('nvim')
   " let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-else
+elseif !has('gui_running')
   set t_Co=256
 endif
-let g:rehash256 = 1
+if !has('gui_running')
+  let g:rehash256 = 1
+endif
 syntax on
 colorscheme molokai
-highlight Normal ctermfg=none ctermbg=none guifg=none guibg=none
-highlight VisualNOS cterm=none term=none gui=none
-highlight NonText cterm=none ctermfg=none gui=none
-highlight MatchParen cterm=none ctermbg=236 ctermfg=255 guibg=gray guifg=white
+source ~/.vim/highlight.vim
 
 " add random colors to braces
 let g:rainbow_active = 1
@@ -137,35 +138,18 @@ let g:rainbow_conf = {
 " gutter
 set number
 set numberwidth=1
-highlight LineNr ctermbg=none guibg=none
 let g:gitgutter_realtime = 1
 let g:gitgutter_eager = 1
 let g:gitgutter_sign_column_always = 1
 let g:gitgutter_max_signs = 9999
 let g:gitgutter_diff_args = '--ignore-all-space'
 set cursorline
-highlight cursorline cterm=none ctermbg=none ctermfg=none gui=none guibg=none guifg=none
-highlight cursorlinenr ctermfg=white ctermbg=none guifg=white guibg=none
-
-" statusline
-highlight StatusLine ctermfg=170 ctermbg=0 guifg=#d75fd7 guibg=#000000
-highlight StatusLineNC ctermfg=236 ctermbg=240 guifg=#303030 guibg=#585858
 
 " vertical split line
 set fillchars+=vert:\ 
-highlight VertSplit ctermbg=236 guibg=#303030
 
-" indent style
-highlight CursorColumn ctermbg=236 guibg=#303030
-
-" search
-highlight Search cterm=none ctermfg=0 ctermbg=81 gui=none guifg=#000000 guibg=#5fd7ff
-highlight IncSearch cterm=none ctermfg=0 ctermbg=222 gui=none guifg=#000000 guibg=#ffd787
-
-" whitespaces
 highlight link TrailSpace Error
 highlight link WideSpace Error
-highlight Error ctermbg=197 ctermfg=0 guibg=#ff005f guifg=#000000
 
 " ref. http://vim.wikia.com/wiki/Highlight_unwanted_spaces#Highlighting_with_the_syntax_command
 function! SetWhiteSpaceSyntax() abort
@@ -193,10 +177,6 @@ set shortmess+=c "supress 'Pattern not found' message
 "   autocmd!
 "   autocmd CompleteDone * :pclose
 " augroup END
-highlight Pmenu ctermbg=234 ctermfg=255 guibg=#1c1c1c guifg=#eeeeee
-highlight PmenuSel ctermbg=205 ctermfg=0 guibg=#ff5faf guifg=#000000
-highlight PmenuSbar ctermbg=233 guibg=#121212
-highlight PmenuThumb ctermbg=236 guibg=#303030
 
 " markdown
 let g:pandoc#modules#disabled=["spell","chdir","menu","formatting","command","bibliographies", "folding"]
@@ -209,10 +189,6 @@ let g:pandoc#syntax#codeblocks#embeds#langs = ["javascript", "python", "bash=sh"
 if &diff 
   set diffopt=filler,context:1000000,horizontal
 endif
-highlight DiffAdd     ctermfg=154 ctermbg=237 guifg=#afff00 guibg=#3a3a3a
-highlight DiffDelete  ctermfg=197 ctermbg=237 guifg=#ff005f guibg=#3a3a3a
-highlight DiffChange  ctermfg=222 ctermbg=237 guifg=#ffd787 guibg=#3a3a3a
-highlight DiffText    ctermfg=16  ctermbg=222 guifg=#000000 guibg=#ffd787
 
 " terminal-mode
 if has('nvim')
@@ -244,6 +220,10 @@ else
 endif
 unlet s:local_session_directory
 let g:session_autosave_silent=1
+
+if has('win32')
+  set undodir=~/.vimundo/
+endif
 
 " ------------------------------------
 " Git cooperation
@@ -392,7 +372,10 @@ endfunction
 augroup vertguide
   autocmd!
   autocmd CursorMoved,CursorMovedI,WinEnter * call VerticalGuide()
-  autocmd WinLeave,BufWinLeave,TermOpen * setlocal nocursorcolumn
+  autocmd WinLeave,BufWinLeave * setlocal nocursorcolumn
+  if has('nvim')
+    autocmd TermOpen * setlocal nocursorcolumn
+  endif
 augroup END
 
 " ------------------------------------
@@ -746,7 +729,9 @@ call IMapWithClosePopup("<C-Del>","\\<C-o>:call GoWord(\\\"l\\\", 1)\\<CR>\\<C-g
 " <C-BS> is <C-h> in urxvt
 noremap <silent> <C-h> :call GoWord("h",1)<CR><C-g><Del>
 call IMapWithClosePopup("<C-h>","\\<C-o>:call GoWord(\\\"h\\\", 1)\\<CR>\\<C-g>\\<Del>")
-
+" for gvim
+noremap <silent> <C-BS> :call GoWord("h",1)<CR><C-g><Del>
+call IMapWithClosePopup("<C-BS>","\\<C-o>:call GoWord(\\\"h\\\", 1)\\<CR>\\<C-g>\\<Del>")
 
 " <Home> --------------------------
 "     console.log('ayp')
@@ -790,22 +775,17 @@ function! GoEnd(cmd) range
 " general move
 nnoremap <silent> <Down> gj
 nnoremap <silent> <Up> gk
-if has('nvim')
-  nnoremap <silent><expr> <Home> GetGoHomeCmd()
-  nnoremap <silent> <End> :call GoEnd("g$")<CR>
-else
-  nnoremap <silent><expr> <kHome> GetGoHomeCmd()
-  nnoremap <silent> <kEnd> :call GoEnd("g$")<CR>
-endif
+nnoremap <silent><expr> <Home> GetGoHomeCmd()
+nnoremap <silent> <End> :call GoEnd("g$")<CR>
+nnoremap <silent><expr> <kHome> GetGoHomeCmd()
+nnoremap <silent> <kEnd> :call GoEnd("g$")<CR>
+
 inoremap <silent> <expr> <Down>  pumvisible() ? "\<Down>" : "\<C-o>gj"
 inoremap <silent> <expr> <Up>    pumvisible() ? "\<Up>" : "\<C-o>gk"
-if has('nvim')
-  call IMapWithClosePopup("<Home>", "\\<C-o>:execute printf(\\\"normal! %s\\\", GetGoHomeCmd())\\<CR>")
-  call IMapWithClosePopup("<End>", "\\<C-o>:call GoEnd(\\\"g$\\\")\\<CR>")
-else
-  call IMapWithClosePopup("<kHome>","\\<C-o>:execute printf(\\\"normal! %s\\\", GetGoHomeCmd())\\<CR>")
-  call IMapWithClosePopup("<kEnd>", "\\<C-o>:call GoEnd(\\\"g$\\\")\\<CR>")
-endif
+call IMapWithClosePopup("<Home>", "\\<C-o>:execute printf(\\\"normal! %s\\\", GetGoHomeCmd())\\<CR>")
+call IMapWithClosePopup("<End>", "\\<C-o>:call GoEnd(\\\"g$\\\")\\<CR>")
+call IMapWithClosePopup("<kHome>","\\<C-o>:execute printf(\\\"normal! %s\\\", GetGoHomeCmd())\\<CR>")
+call IMapWithClosePopup("<kEnd>", "\\<C-o>:call GoEnd(\\\"g$\\\")\\<CR>")
 
 " when entering select-mode
 call IMapWithClosePopup("<S-Down>", "\\<C-o>vgj\\<C-g>")
@@ -823,13 +803,10 @@ snoremap <silent> <S-End> <C-g>:call GoEnd("gvg$")<CR><C-g>
 " when leaving select-mode
 snoremap <silent> <Down> <C-G>vgj
 snoremap <silent> <Up> <C-G>vgk
-if has('nvim')
-  snoremap <silent><expr> <Home> "\<C-G>v".GetGoHomeCmd()
-  snoremap <silent> <End> <C-g>v:call GoEnd("g$")<CR>
-else
-  snoremap <silent><expr> <kHome> "\<C-G>v".GetGoHomeCmd()
-  snoremap <silent> <kEnd> <C-g>v:call GoEnd("g$")<CR>
-endif
+snoremap <silent><expr> <Home> "\<C-G>v".GetGoHomeCmd()
+snoremap <silent> <End> <C-g>v:call GoEnd("g$")<CR>
+snoremap <silent><expr> <kHome> "\<C-G>v".GetGoHomeCmd()
+snoremap <silent> <kEnd> <C-g>v:call GoEnd("g$")<CR>
 
 " [scroll page up/down]
 " on 1st page, <PageUp> should move cursor to 1st line.
@@ -881,11 +858,12 @@ function! MapConvertIndentPaste() abort
   snoremap <silent><buffer> <C-v> <C-g>d:call ConvertIndentPaste()<CR>
 endfunction
 
-augroup convertpaste
-  autocmd!
-  autocmd FileType * if &buftype == '' | call MapConvertIndentPaste() | endif
-augroup END
-
+if has('nvim')
+  augroup convertpaste
+    autocmd!
+    autocmd FileType * if &buftype == '' | call MapConvertIndentPaste() | endif
+  augroup END
+endif
 
 " confirm message
 " ref. https://github.com/saihoooooooo/dotfiles/
@@ -984,12 +962,14 @@ snoremap <C-y> <C-c><C-r>
 inoremap <expr> <C-z>   pumvisible() ? "\<C-e>\<C-o>u" : "\<C-o>u"
 
 " [open]
-function! FilesFromRoot() abort
-  call fzf#vim#files("/", {'options': '-q '.getcwd()[1:], 'down': '~40%'})
-endfunction
-noremap <C-o> <C-c>:call FilesFromRoot()<CR>
-inoremap <C-o> <C-o>:call FilesFromRoot()<CR>
-nnoremap <C-o> :call FilesFromRoot()<CR>
+if !has('win32')
+  function! FilesFromRoot() abort
+    call fzf#vim#files("/", {'options': '-q '.getcwd()[1:], 'down': '~40%'})
+  endfunction
+  noremap <C-o> <C-c>:call FilesFromRoot()<CR>
+  inoremap <C-o> <C-o>:call FilesFromRoot()<CR>
+  nnoremap <C-o> :call FilesFromRoot()<CR>
+endif
 
 " [quit]
 noremap <C-q> <Esc>:confirm quitall<CR>
@@ -1142,11 +1122,17 @@ endfunction
 let g:caw_i_sp_blank = ' '
 
 " [comment toggle]
-" <C-_> means `ctrl+/`
-nnoremap <silent> <C-_> :call CommentToggleWrap()<CR>
-inoremap <silent> <C-_> <C-o>:call CommentToggleWrap()<CR>
-vmap <C-_> <Plug>(caw:i:toggle)gv
-
+" TODO: not working on gvim
+if has("gui_running")
+  nnoremap <silent> <C-/> :call CommentToggleWrap()<CR>
+  inoremap <silent> <C-/> <C-o>:call CommentToggleWrap()<CR>
+  vmap <C-/> <Plug>(caw:i:toggle)gv
+else
+  " <C-_> means `ctrl+/`
+  nnoremap <silent> <C-_> :call CommentToggleWrap()<CR>
+  inoremap <silent> <C-_> <C-o>:call CommentToggleWrap()<CR>
+  vmap <C-_> <Plug>(caw:i:toggle)gv
+endif
 " [jump to line]
 " ref. http://vim.wikia.com/wiki/Jump_to_a_line_number
 " ref. http://vim.wikia.com/wiki/User_input_from_a_script
@@ -1203,9 +1189,9 @@ snoremap <silent> <C-M-g> <C-g>v:call ToggleGutter()<CR>
 nnoremap <silent> <C-M-g> :call ToggleGutter()<CR>
 
 " [new tab]
-noremap <C-n> <C-c>:tabnew<CR>
-inoremap <C-n> <C-o>:tabnew<CR>
-nnoremap <C-n> :tabnew<CR>
+noremap <C-t> <C-c>:tabnew<CR>
+inoremap <C-t> <C-o>:tabnew<CR>
+nnoremap <C-t> :tabnew<CR>
 
 " [close current tab]
 noremap <C-w> <C-c>:confirm tabclose<CR>
@@ -1219,41 +1205,53 @@ nnoremap <C-w> :confirm tabclose<CR>
 
 " [show next tab]
 " vim xterm <C-Tab> esc seq
-if has('nvim')
-  noremap <C-Tab> <C-c>:tabnext<CR>i
+if has('nvim') || has('gui_running')
+  noremap <C-Tab> <C-c>:tabnext<CR>
   inoremap <C-Tab> <C-o>:tabnext<CR>
-  nnoremap <C-Tab> :tabnext<CR>i
+  nnoremap <C-Tab> :tabnext<CR>
 else
-  noremap [27;5;9~ <C-c>:tabnext<CR>i
+  noremap [27;5;9~ <C-c>:tabnext<CR>
   inoremap [27;5;9~ <C-o>:tabnext<CR>
-  nnoremap [27;5;9~ :tabnext<CR>i
+  nnoremap [27;5;9~ :tabnext<CR>
 endif
   
 " [show prev tab]
 " xterm <C-S-Tab> esc seq
-if has('nvim')
-  noremap <C-S-Tab> <C-c>:tabNext<CR>i
+if has('nvim') || has('gui_running')
+  noremap <C-S-Tab> <C-c>:tabNext<CR>
   inoremap <C-S-Tab> <C-o>:tabNext<CR>
-  nnoremap <C-S-Tab> :tabNext<CR>i
+  nnoremap <C-S-Tab> :tabNext<CR>
 else
-  noremap [27;6;9~ <C-c>:tabNext<CR>i
+  noremap [27;6;9~ <C-c>:tabNext<CR>
   inoremap [27;6;9~ <C-o>:tabNext<CR>
-  nnoremap [27;6;9~ :tabNext<CR>i
+  nnoremap [27;6;9~ :tabNext<CR>
 endif
 
 " TODO: "move tab" keymaps arent working in neovim
 " [move tab to left]
+if has('nvim') || has('gui_running')
+  noremap <C-S-PageUp> <C-c>:tabmove -1<CR>
+  inoremap <C-S-PageUp> <C-o>:tabmove -1<CR>
+  nnoremap <C-S-PageUp> :tabmove -1<CR>
+else
 " xterm <C-S-PageUp> esc seq
-noremap [5;6~ <C-c>:tabmove -1<CR>
-inoremap [5;6~ <C-o>:tabmove -1<CR>
-nnoremap [5;6~ :tabmove -1<CR>
+  noremap [5;6~ <C-c>:tabmove -1<CR>
+  inoremap [5;6~ <C-o>:tabmove -1<CR>
+  nnoremap [5;6~ :tabmove -1<CR>
+endif
 
 " [move tab to right]
-" xterm <C-S-PageDown> esc seq
-noremap [6;6~ <C-c>:tabmove +1<CR>
-inoremap [6;6~ <C-o>:tabmove +1<CR>
-nnoremap [6;6~ :tabmove +1<CR>
-
+if has('nvim') || has('gui_running')
+  noremap <C-S-PageDown> <C-c>:tabmove +1<CR>
+  inoremap <C-S-PageDown> <C-o>:tabmove +1<CR>
+  nnoremap <C-S-PageDown> :tabmove +1<CR>
+else
+  " xterm <C-S-PageDown> esc seq
+  noremap [6;6~ <C-c>:tabmove +1<CR>
+  inoremap [6;6~ <C-o>:tabmove +1<CR>
+  nnoremap [6;6~ :tabmove +1<CR>
+endif
+  
 function! MapAllMode(lhs, rhs) abort
   execute "noremap \<silent> ".a:lhs." \<C-c>".a:rhs
   execute "inoremap \<silent> ".a:lhs." \<C-o>".a:rhs
