@@ -443,6 +443,7 @@ set t_kr=[C
 set t_kl=[D
 
 source $VIMRUNTIME/mswin.vim
+let g:neosnippet#disable_select_mode_mappings = 0
 let g:unite_enable_start_insert=1
 set whichwrap+=~
 
@@ -570,6 +571,7 @@ inoremap <silent> <S-tab> <C-o><<<C-g>u
 " snip mode       : clear markers
 " after search    : clear highlight
 " exists sub-pane : close sub-pane
+" select mode     : exit select mode
 " 
 " sub-pane means,
 " 'Location List', 'Scratch Preview'
@@ -594,15 +596,7 @@ endfunction
 noremap <silent> <Esc> :silent! call ClearSearch()<CR>:silent lclose \| pclose<CR>
 nnoremap <silent> <Esc> :silent! call ClearSearch()<CR>:silent lclose \| pclose<CR>i
 inoremap <silent><expr> <Esc> VariousClear()
-
-
-" below code doesnt work
-" maybe caused by vim's select-mode default behavior,
-" <Esc> key captured for 'leaving select-mode'
-" so i cant map <Esc> in select-mode
-
-" snoremap <silent> <Esc> <C-g>vi<C-r>=VariousClear()
-
+snoremap <silent> <Esc> <C-g>vi
 
 set virtualedit=onemore
 
