@@ -1,5 +1,6 @@
 /.vim/.netrwhist
 /.vim/bundle
+/.vim/plugged
 /.mlterm/msg.log
 /.mlterm/challenge
 node_modules

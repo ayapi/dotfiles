@@ -1,3 +1,4 @@
 .vimsessions/
 .idea/
 *.iml
+*.swp

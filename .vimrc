@@ -4,95 +4,93 @@ scriptencoding utf-8
 " Note: Skip initialization for vim-tiny or vim-small.
 if 0 | endif
 
-" filetype plugin on
-" set omnifunc=syntaxcomplete#Complete
-
+" ref. http://qiita.com/jiminko/items/f4b337ab41db751388f7
 if has('vim_starting')
-  if &compatible
-    set nocompatible               " Be iMproved
-  endif
-
-  " Required:
-  set runtimepath+=~/.vim/bundle/neobundle.vim/
+  set runtimepath+=~/.vim/plugged/vim-plug
+  if !isdirectory(expand('~/.vim/plugged/vim-plug'))
+    echo 'install vim-plug...'
+    if has('win32')
+      call system('mkdir ' . $HOME . '\.vim\plugged\vim-plug')
+    else
+      call system('mkdir -p ~/.vim/plugged/vim-plug')
+    endif
+    call system('git clone https://github.com/junegunn/vim-plug.git '
+          \	. $HOME . '/.vim/plugged/vim-plug/autoload')
+  end
 endif
 
-call neobundle#begin(expand('~/.vim/bundle/'))
-NeoBundleFetch 'Shougo/neobundle.vim'
-
-" My Bundles here:
-" Refer to |:NeoBundle-examples|.
-" Note: You don't set neobundle setting in .gvimrc!
-
-NeoBundle 'vim-jp/vimdoc-ja'
-NeoBundle 'xolox/vim-session', {
-  \   'depends' : 'xolox/vim-misc',
-  \ }
-
+call plug#begin('~/.vim/plugged')
+Plug 'junegunn/vim-plug', {'dir': '~/.vim/plugged/vim-plug/autoload'}
+Plug 'vim-jp/vimdoc-ja'
+Plug 'xolox/vim-misc' | Plug 'xolox/vim-session'
 if has('nvim')
-  NeoBundle 'neovim/node-host'
+  Plug 'neovim/node-host'
 endif
-
-NeoBundle 'Shougo/neosnippet.vim'
-" NeoBundle 'Shougo/neosnippet-snippets'
-" NeoBundle 'honza/vim-snippets'
-
-NeoBundle "Shougo/neco-vim", {
-\   "base" : "~/.vim/bundle-custom",
-\   "type" : "nosync"
-\}
-
-NeoBundle 'ternjs/tern_for_vim', {
-  \ 'build': {
-  \   'others': 'npm install'
-  \ }
-  \}
-NeoBundle 'davidhalter/jedi-vim', {
-  \ 'build' :{
-  \   'others': 'git submodule update --init'
-  \ }
-  \}
-
-NeoBundle 'othree/html5.vim'
-NeoBundle 'hail2u/vim-css3-syntax'
-NeoBundle 'othree/csscomplete.vim'
-NeoBundle 'gorodinskiy/vim-coloresque'
-NeoBundle 'digitaltoad/vim-jade'
-NeoBundle 'wavded/vim-stylus'
-
+Plug 'tyru/caw.vim'
+Plug 'airblade/vim-gitgutter'
+Plug 'tpope/vim-sleuth'
 if !has('win32')
-  NeoBundle 'junegunn/fzf', {
-    \ 'build': {
-    \   'others': '$HOME/.vim/bundle/fzf/install'
-    \   }
-    \ }
-  NeoBundle 'junegunn/fzf.vim'
+  Plug 'junegunn/fzf', {'do': '$HOME/.vim/plugged/fzf/install'}
+  Plug 'junegunn/fzf.vim'
 endif
+Plug 'Shougo/neosnippet.vim'
+Plug 'Shougo/neco-vim',
+      \ {'dir': '~/.vim/bundle-custom/neco-vim',
+      \ 'frozen': 1, 'for': 'vim'}
+Plug 'ternjs/tern_for_vim',
+      \ {'do': 'npm install', 'for': 'javascript'}
+Plug 'davidhalter/jedi-vim',
+      \ {'do': 'git submodule update --init', 'for': 'python'}
+Plug 'digitaltoad/vim-jade', {'for': 'jade'}
+Plug 'wavded/vim-stylus', {'for': 'stylus'}
+Plug 'alunny/pegjs-vim', {'for': 'pegjs'}
+Plug 'vim-pandoc/vim-pandoc'
+Plug 'vim-pandoc/vim-pandoc-syntax'
+Plug 'othree/html5.vim'
+Plug 'hail2u/vim-css3-syntax'
+Plug 'othree/csscomplete.vim'
+Plug 'gorodinskiy/vim-coloresque'
 
-" NeoBundle 'kana/vim-submode'
-" NeoBundle 'Shougo/unite.vim'
-" NeoBundle 'Shougo/unite-outline'
-" NeoBundle 'Shougo/neomru.vim'
-NeoBundle 'tyru/caw.vim.git'
-NeoBundle 'airblade/vim-gitgutter'
-NeoBundle 'tpope/vim-sleuth'
-NeoBundle 'luochen1990/rainbow'
-" NeoBundle 'vheon/vim-cursormode'
+Plug 'luochen1990/rainbow'
+Plug 'dpy-/molokai'
+call plug#end()
 
-" color scheme
-NeoBundle 'tomasr/molokai'
-
-NeoBundle 'alunny/pegjs-vim'
-"NeoBundle 'vim-pandoc/vim-pandoc'
-"NeoBundle 'vim-pandoc/vim-pandoc-syntax'
-
-call neobundle#end()
-
-" Required:
 filetype plugin indent on
 
-" If there are uninstalled bundles found on startup,
-" this will conveniently prompt you to install them.
-NeoBundleCheck
+" ref. http://qiita.com/b4b4r07/items/fa9c8cceb321edea5da0
+let s:plug = {"plugs": get(g:, 'plugs', {})}
+function! s:plug.is_installed(name)
+  return has_key(self.plugs, a:name) ? isdirectory(self.plugs[a:name].dir) : 0
+endfunction
+
+function! s:plug.check_installation()
+  if empty(self.plugs)
+    return
+  endif
+
+  let list = []
+  for [name, spec] in items(self.plugs)
+    if !isdirectory(spec.dir)
+      call add(list, spec.uri)
+    endif
+  endfor
+
+  if len(list) > 0
+    let unplugged = map(list, 'substitute(v:val, "^.*github\.com/\\(.*/.*\\)\.git$", "\\1", "g")')
+
+    " Ask whether installing plugs like NeoBundle
+    echomsg 'Not installed plugs: ' . string(unplugged)
+    if confirm('Install plugs now?', "yes\nNo", 2) == 1
+      PlugInstall
+    endif
+  endif
+endfunction
+
+augroup check-plug
+  autocmd!
+  autocmd VimEnter * if !argc() | call s:plug.check_installation() | endif
+augroup END
+
 
 " ------------------------------------
 " appearance
