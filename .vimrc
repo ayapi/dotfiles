@@ -113,6 +113,7 @@ if !has('gui_running')
   let g:rehash256 = 1
 endif
 syntax on
+let g:molokai_italic = 0
 colorscheme molokai
 source ~/.vim/highlight.vim
 
