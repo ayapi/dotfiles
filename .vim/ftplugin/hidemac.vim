@@ -73,7 +73,7 @@ function! s:load_keywords() abort"{{{
     let l:lines = s:get_html_lines(l:file)
     let l:desc = ''
     let l:start = match(l:lines, '<TABLE')
-    let l:end = match(l:lines, '</TABLE>')
+    let l:end = len(l:lines) - 1
     for l:lnum in range(l:end, l:start, -1)
       let l:line = l:lines[l:lnum]
       let l:word = matchstr(l:line, '^ \s<TD VALIGN=TOP><NOBR>.*<B>\zs[^<]\+\ze</B>')
