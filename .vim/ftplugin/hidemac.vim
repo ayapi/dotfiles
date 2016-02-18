@@ -549,18 +549,16 @@ function! s:functions(...) abort"{{{
   if a:0 == 0 || a:1 == '' || a:1 == '?'
     return copy(g:hidemac_builtin.functions.candidates)
   endif
-  let l:type = substitute('#$', a:1, '', '')
   if a:1 =~ '[$#]'
-    return filter(copy(g:hidemac_builtin.functions.candidates), 'v:val.kind != l:type')
+    return filter(copy(g:hidemac_builtin.functions.candidates), 'v:val.kind == a:1')
   endif
 endfunction"}}}
 function! s:keywords(...) abort"{{{
   if a:0 == 0 || a:1 == '' || a:1 == '?'
     return copy(g:hidemac_builtin.keywords.candidates)
   endif
-  let l:type = substitute('#$', a:1, '', '')
   if a:1 =~ '[$#]'
-    return filter(copy(g:hidemac_builtin.keywords.candidates), 'v:val.kind != l:type')
+    return filter(copy(g:hidemac_builtin.keywords.candidates), 'v:val.kind == a:1')
   endif
 endfunction"}}}
 function! s:expressions(...) abort"{{{
