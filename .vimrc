@@ -1121,11 +1121,11 @@ endfunction
 let g:caw_i_sp_blank = ' '
 
 " [comment toggle]
-" TODO: not working on gvim
 if has("gui_running")
-  nnoremap <silent> <C-/> :call CommentToggleWrap()<CR>
-  inoremap <silent> <C-/> <C-o>:call CommentToggleWrap()<CR>
-  vmap <C-/> <Plug>(caw:i:toggle)gv
+  nnoremap <silent> <C-\> :call CommentToggleWrap()<CR>
+  inoremap <silent> <C-\> <C-o>:call CommentToggleWrap()<CR>
+  " TODO: not working on gvim?
+  vmap <C-\> <Plug>(caw:i:toggle)gv
 else
   " <C-_> means `ctrl+/`
   nnoremap <silent> <C-_> :call CommentToggleWrap()<CR>
