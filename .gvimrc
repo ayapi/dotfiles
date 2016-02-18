@@ -18,7 +18,7 @@ set guioptions-=b
 set linespace=4
 
 if has('win32')
-  set guifont=ＭＳ\ ゴシック:h11:cSHIFTJIS
+  set guifont=ＭＳ\ ゴシック:h9:cSHIFTJIS
 
   " gvim起動したら速攻最大化する
   augroup maximize
