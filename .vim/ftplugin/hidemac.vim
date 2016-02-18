@@ -957,12 +957,13 @@ function! s:special_functions.dllfunc(i, args) abort"{{{
       let l:i = l:i - 1
       let l:id_specified = 1
     endif
+    echomsg 'id_specified: ' . l:id_specified
   endif
   if !l:id_specified
     " loaddll文のdllをみっける
     for l:lnum in range(line('.'), 1, -1) + range(line('$'), line('.') + 1, -1)
       let l:line = getline(l:lnum)
-      let l:loaddll_arg = matchstr(l:line, 'loaddll\s\zs[^;]\{-}\ze;', 0, l:i)
+      let l:loaddll_arg = matchstr(l:line, 'loaddll\s\zs[^;]\{-}\ze;')
       if l:loaddll_arg != ''
         let l:dll_pattern = '"\zs[^\.]\{-}\ze\.dll"'
         if l:loaddll_arg =~ '^\$'
