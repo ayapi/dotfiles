@@ -1,73 +1,3 @@
-" message文
-" question文
-" beep文
-" play,
-" playsync文
-" debuginfo文
-" showvars文
-" title文
-" run，
-" runsync
-" ，runsync2文
-" runex文
-" endmacro,
-"  endmacroall文
-" execmacro文
-" disabledraw，
-" enabledraw文
-" disablebreak文
-" disableinvert,
-"  enableinvert文
-" if文
-" while文
-" break文
-" continue文
-" goto文
-" disableerrormsg,
-"  enableerrormsg文
-" disablehistory文
-" inputpos文
-" menu，
-" mousemenu,
-" menuarray,
-" mousemenuarray文
-" writeinistr文，
-" writeininum文
-" openreg文
-" createreg文
-" deletereg文
-" writeregstr文,
-" writeregnum文
-" writeregbinary文
-" getregbinary
-" closereg文
-" configset文
-" config文
-" configcolor文
-" saveconfig文
-" envchanged文
-" loadkeyassign文
-" savekeyassign文
-" loadhilight文
-" savehilight文
-" loadbookmark文
-" savebookmark文
-" setfontchangemode文
-" setcompatiblemode文
-" setfloatmode文
-" seterrormode文
-" setwindowsize文
-" setwindowpos文
-" showwindow文
-" setmonitor文
-" setfocus文
-" begingroupundo文
-" endgroupundo文
-" deletefile文
-" findspecial文
-" setstaticvariable文
-" 
-
 let s:chm_filename = "hidemac_html.chm"
 function! s:set_hidemac_chm_dir() abort
   if exists("g:hidemac_chm_dir") && filereadable(g:hidemac_chm_dir . '\' . s:chm_filename)
@@ -241,8 +171,22 @@ function! s:get_cmd_statements() abort
   return l:list
 endfunction
 
+let s:other_statements = {
+      \ 'openreg': 'レジストリをオープンする',
+      \ 'createreg': 'サブキーが存在しない場合新たに作成してレジストリをオープンする',
+      \ 'enableerrormsg': 'disableerrormsgを元に戻す',
+      \ 'menu': 'コンマ区切りで項目を指定し、文字カーソルの近くにポップアップメニューを表示',
+      \ 'mousemenu': 'コンマ区切りで項目を指定し、マウスカーソルの近くにポップアップメニューを表示',
+      \ 'menuarray': '配列変数で項目を指定し、文字カーソルの近くにポップアップメニューを表示',
+      \ 'mousemenuarray': '配列変数で項目を指定し、マウスカーソルの近くにポップアップメニューを表示',
+      \ 'envchanged': 'レジストリから設定内容を再読込みし、秀丸エディタの設定を更新',
+      \ 'writeregstr': 'レジストリにREG_SZ型の値を書き込む',
+      \ 'writeregnum': 'レジストリにREG_DWORD型の値を書き込む'
+      \}
+
 function! s:get_other_statements() abort
   let l:list = []
+  let l:debug = []
   for l:num in range(9, 15)
     let l:padded_num = l:num == 9 ? '09' : l:num
     for l:file in glob(s:hidemac_extract_dir . '\html\'	. l:padded_num . '0_*.html', 1, 1)
@@ -251,16 +195,36 @@ function! s:get_other_statements() abort
       if l:title_line !~ '文$'
         continue
       endif
-      for l:word in split(substitute(l:title_line, '文', '', 'g'), '[,，]')
+      let l:words = split(substitute(l:title_line, '文', '', 'g'), '[,，]')
+      for l:word in l:words
         let l:word = s:trim(l:word)
+        if has_key(s:other_statements, l:word)
+          let l:desc = s:other_statements[l:word]
+        else
+          let l:desc = matchstr(l:lines, l:word . '文*は')
+          if l:desc == ''
+            let l:desc = matchstr(l:lines, join(l:words, '[, ，]') . '文*は')
+          endif
+          if l:desc != ''
+            let l:desc = matchstr(l:desc, l:word . '文*は、*\zs.\{-}\ze。')
+          else
+            let l:desc = matchstr(matchstr(l:lines, '。'), '^\zs.\{-}\ze。')
+          endif
+        endif
+        let l:desc = s:trim(s:remove_tags(l:desc))
+        
+        call add(l:debug, l:word . ':' . l:desc)
         call add(l:list, {
             \ 'word' : l:word,
+            \ 'menu' : '(Statement) ' . l:desc
             \})
       endfor
     endfor
   endfor
-  
-  " add 'goto'
+
+  call add(l:list, {
+        \ 'word': 'goto',
+        \	'menu': '(Statement) マクロの処理を任意の場所に移動させる'})
   return l:list
 endfunction
 
