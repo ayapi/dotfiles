@@ -262,6 +262,7 @@ endfunction
 function! s:variables() abort
   let l:list = []
   let l:in_other_sub = 0
+  let l:call_found = 0
   for l:lnum in range(line('.') - 1, 1, -1)
     let l:line = getline(l:lnum)
     
@@ -274,6 +275,10 @@ function! s:variables() abort
     if l:line =~ '^\s*return' "subroutine end
       let l:in_other_sub = 1
     endif
+
+    if !l:call_found && l:line =~ '^\s*call .*;' && !l:in_other_sub
+      let l:call_found = 1
+    endif
     
     if l:line =~ '^\s*[$#]'
       if l:in_other_sub && l:line =~ '^\s*[$#]\{2\}' " local var in other sub
@@ -282,6 +287,9 @@ function! s:variables() abort
       call add(l:list, {'word': matchstr(l:line, '^\s*\zs[$#][^ \=]*\ze')})
     endif
   endfor
+  if l:call_found
+    let l:list = l:list + [{'word': '$$return'}, {'word': '##return'}]
+  endif
   return l:list
 endfunction
 
