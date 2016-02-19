@@ -254,7 +254,33 @@ function! s:keywords() abort
 endfunction
 
 function! s:expressions() abort
-  return s:keywords() + s:functions()
+  return s:variables() + s:keywords() + s:functions()
+endfunction
+
+function! s:variables() abort
+  let l:list = []
+  let l:in_other_sub = 0
+  for l:lnum in range(line('.') - 1, 1, -1)
+    let l:line = getline(l:lnum)
+    
+    if l:line =~ ':\s*$' "label
+      if l:in_other_sub == 0
+        let l:in_other_sub = 1
+      endif
+    endif
+    
+    if l:line =~ '^\s*return' "subroutine end
+      let l:in_other_sub = 1
+    endif
+    
+    if l:line =~ '^\s*[$#]'
+      if l:in_other_sub && l:line =~ '^\s*[$#]\{2\}' " local var in other sub
+        continue
+      endif
+      call add(l:list, {'word': matchstr(l:line, '^\s*\zs[$#][^ \=]*\ze')})
+    endif
+  endfor
+  return l:list
 endfunction
 
 function! s:gather_candidates(ctx, cur_text) abort
@@ -262,10 +288,10 @@ function! s:gather_candidates(ctx, cur_text) abort
   " echomsg 'cur:' . a:cur_text . ':(' . len(a:cur_text) .')'
   " echomsg 'spl:' . len(split(a:ctx, '[^a-zA-Z0-9]\+', 1))
   
-  if len(split(a:ctx, '[^a-zA-Z0-9]\+', 1)) == 1
+  if len(split(a:ctx, '[^a-zA-Z0-9_#$]\+', 1)) == 1
     " 行頭
     " 文、変数
-    return s:statements()
+    return s:variables() + s:statements()
   else
     " 関数、変数、キーワード
     return s:expressions()
@@ -276,7 +302,7 @@ function! HidemacOmniComplete(findstart, base)
   if a:findstart
     let l:line = getline('.')
     let l:start = col('.') - 1
-    while l:start >= 0 && l:line[l:start - 1] =~ '\%(\k\|-\)'
+    while l:start >= 0 && l:line[l:start - 1] =~ '\%(\k\|[$#_]\)'
       let l:start -= 1
     endwhile
     let b:cur_text = l:line[l:start :]
