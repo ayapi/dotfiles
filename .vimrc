@@ -222,6 +222,7 @@ let g:session_autosave_silent=1
 
 if has('win32')
   set undodir=~/.vimundo/
+  set nobackup
 endif
 
 " ------------------------------------
