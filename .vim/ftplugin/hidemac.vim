@@ -72,6 +72,26 @@ function! s:get_keywords() abort
   return l:list
 endfunction
 
+function! s:get_functions() abort
+  let l:list = []
+  let l:sjis_html = join(readfile(s:hidemac_extract_dir . '\html\070_Function.html', 'b'))
+  let l:utf8_html = iconv(l:sjis_html, 'cp932', 'utf-8')
+  let l:lines = split(l:utf8_html, "\r", 1)
+  let l:start = match(l:lines, '<TABLE') + 1
+  let l:end = match(l:lines, '</TABLE>') - 1
+  for l:lnum in range(l:start, l:end, 1)
+    let l:line = l:lines[l:lnum]
+    let _ = matchlist(l:line, '<A HREF="\([^\"]\+\)">\([^<]\+\)</A><NOBR></TD><TD>\([^<]\+\)</TD>')
+    let l:func = matchlist(_[2], '^\(.*\)( \(.*\) )')
+    call add(l:list, {
+          \ 'word' : l:func[1] . '(',
+          \ 'info' : l:func[1] . '(' . l:func[2] . ')',
+          \ 'menu' : _[3]
+          \})
+  endfor
+  return l:list
+endfunction
+
 call s:set_hidemac_chm_dir()
 call s:set_hidemac_doc_dir()
 call s:chm2html()
