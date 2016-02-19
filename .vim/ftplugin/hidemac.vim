@@ -292,6 +292,32 @@ function! s:gather_candidates(ctx, cur_text) abort
     " 行頭
     " 文、変数
     return s:variables() + s:statements()
+  elseif a:ctx =~ '^}'
+    " ブロックが閉じてる直後
+    if a:ctx =~ '^}\s*else\s$'
+      " } else if
+      return [{
+            \ 'word': 'if',
+            \ 'menu': '(Statement) その直後にある条件式が０以外の場合に次のコマンドを実行します。'
+            \}]
+    else
+      " 閉じたブロックの開始地点をみにぃく
+      let l:lnum = line('.') - 1
+      if l:lnum < 1
+        return []
+      endif
+      for l:lnum in range(l:lnum, 1, -1)
+        let l:line = getline(l:lnum)
+        if l:line =~ '\s*{\s*$' && l:line !~ '^\s*//'
+          break
+        endif
+      endfor
+      if l:line =~ 'if\s*([^)]\+)\s*{\s*$'
+        " ifブロックを閉じた直後だった
+        return [{'word': 'else', 'menu': '(Statement)'}]
+      endif
+      return []
+    endif
   else
     " 関数、変数、キーワード
     return s:expressions()
