@@ -44,13 +44,22 @@ function! s:trim(str) abort
   return substitute(a:str, '^[\s　]\+', '', '')
 endfunction
 
+function! s:get_html_lines(fullpath_or_filename) abort
+  if a:fullpath_or_filename =~ '\'
+    let l:path = a:fullpath_or_filename
+  else
+    let l:path = s:hidemac_extract_dir . '\html\' . a:fullpath_or_filename
+  endif
+  let l:sjis_html = join(readfile(l:path, 'b'))
+  let l:utf8_html = iconv(l:sjis_html, 'cp932', 'utf-8')
+  return split(l:utf8_html, "\r", 1)
+endfunction
+
 function! s:get_keywords() abort
   let l:list = []
   for l:file in glob(s:hidemac_extract_dir . '\html\060_Keyword_*.html', 1, 1)
-    let l:sjis_html = join(readfile(l:file, 'b'))
-    let l:utf8_html = iconv(l:sjis_html, 'cp932', 'utf-8')
+    let l:lines = s:get_html_lines(l:file)
     let l:desc = ''
-    let l:lines = split(l:utf8_html, "\r", 1)
     let l:start = match(l:lines, '<TABLE')
     let l:end = match(l:lines, '</TABLE>')
     for l:lnum in range(l:end, l:start, -1)
@@ -72,20 +81,57 @@ function! s:get_keywords() abort
   return l:list
 endfunction
 
+function! s:some_match(str, patterns) abort
+  for pat in a:patterns
+    if a:str =~ pat
+      return 1
+    endif
+  endfor
+  return 0
+endfunction
+
 function! s:get_functions() abort
   let l:list = []
-  let l:sjis_html = join(readfile(s:hidemac_extract_dir . '\html\070_Function.html', 'b'))
-  let l:utf8_html = iconv(l:sjis_html, 'cp932', 'utf-8')
-  let l:lines = split(l:utf8_html, "\r", 1)
+  let l:lines = s:get_html_lines('070_Function.html')
   let l:start = match(l:lines, '<TABLE') + 1
   let l:end = match(l:lines, '</TABLE>') - 1
+  let l:type_num_desc = ['数値取得', '状態を取得']
+  let l:type_num_detail = ['返す値は数値', '数値を取得します', '0 を返します', 'ハンドルを取得します', 'コードを返します']
+  let l:type_str_detail = ['返\(す\|り\)値は\(基本的に\)\?文字列', '文字列を取得します', '文字列を返します']
   for l:lnum in range(l:start, l:end, 1)
     let l:line = l:lines[l:lnum]
     let _ = matchlist(l:line, '<A HREF="\([^\"]\+\)">\([^<]\+\)</A><NOBR></TD><TD>\([^<]\+\)</TD>')
+    let l:desc = _[3]
     let l:func = matchlist(_[2], '^\(.*\)( \(.*\) )')
+    
+    let l:type = '?'
+    if l:desc =~ '文字列取得'
+      let l:type = '$'
+    elseif s:some_match(l:desc, l:type_num_desc)
+      let l:type = '#'
+    elseif l:func[1] =~ '\(index\|handle\|order\|mode\)$'
+          \	|| l:func[1] =~ '^find\(window\|hidemaru\)'
+          \	|| l:func[1] =~ 'event'
+          \ || l:func[1] == 'sendmessage'
+      let l:type ='#'
+    elseif index(['gettext2', 'tolower', 'toupper', 'getenv', 'dderequest'], l:func[1]) >= 0
+      let l:type = '$'
+    else
+      let l:detail_filename = _[1]
+      if l:detail_filename =~ '^070_Function_'
+        let l:detail = join(s:get_html_lines(l:detail_filename))
+        if s:some_match(l:detail, l:type_num_detail) && !s:some_match(l:detail, l:type_str_detail)
+          let l:type = '#'
+        elseif !s:some_match(l:detail, l:type_num_detail)	&& s:some_match(l:detail, l:type_str_detail)
+          let l:type = '$'
+        endif
+      endif
+    endif
+    
     call add(l:list, {
           \ 'word' : l:func[1] . '(',
           \ 'info' : l:func[1] . '(' . l:func[2] . ')',
+          \ 'kind' : l:type,
           \ 'menu' : _[3]
           \})
   endfor
