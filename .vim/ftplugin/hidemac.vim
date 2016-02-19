@@ -1,3 +1,73 @@
+" message文
+" question文
+" beep文
+" play,
+" playsync文
+" debuginfo文
+" showvars文
+" title文
+" run，
+" runsync
+" ，runsync2文
+" runex文
+" endmacro,
+"  endmacroall文
+" execmacro文
+" disabledraw，
+" enabledraw文
+" disablebreak文
+" disableinvert,
+"  enableinvert文
+" if文
+" while文
+" break文
+" continue文
+" goto文
+" disableerrormsg,
+"  enableerrormsg文
+" disablehistory文
+" inputpos文
+" menu，
+" mousemenu,
+" menuarray,
+" mousemenuarray文
+" writeinistr文，
+" writeininum文
+" openreg文
+" createreg文
+" deletereg文
+" writeregstr文,
+" writeregnum文
+" writeregbinary文
+" getregbinary
+" closereg文
+" configset文
+" config文
+" configcolor文
+" saveconfig文
+" envchanged文
+" loadkeyassign文
+" savekeyassign文
+" loadhilight文
+" savehilight文
+" loadbookmark文
+" savebookmark文
+" setfontchangemode文
+" setcompatiblemode文
+" setfloatmode文
+" seterrormode文
+" setwindowsize文
+" setwindowpos文
+" showwindow文
+" setmonitor文
+" setfocus文
+" begingroupundo文
+" endgroupundo文
+" deletefile文
+" findspecial文
+" setstaticvariable文
+" 
+
 let s:chm_filename = "hidemac_html.chm"
 function! s:set_hidemac_chm_dir() abort
   if exists("g:hidemac_chm_dir") && filereadable(g:hidemac_chm_dir . '\' . s:chm_filename)
@@ -142,7 +212,7 @@ function! s:get_functions() abort
   return l:list
 endfunction
 
-function! s:get_cmdstatements() abort
+function! s:get_cmd_statements() abort
   let l:list = []
   for l:file in glob(s:hidemac_extract_dir . '\html\080_CmdStatement_*.html', 1, 1)
     if l:file !~ '080_CmdStatement_[^_]\+\.html'
@@ -163,11 +233,34 @@ function! s:get_cmdstatements() abort
       let l:desc = s:remove_tags(l:desc)
       call add(l:list, {
             \ 'word' : l:word,
-            \ 'menu' : '(CmdStatement) ' . s:trim(l:desc)
+            \ 'menu' : '(Statement) ' . s:trim(l:desc)
             \})
       let desc = ''
     endfor
   endfor
+  return l:list
+endfunction
+
+function! s:get_other_statements() abort
+  let l:list = []
+  for l:num in range(9, 15)
+    let l:padded_num = l:num == 9 ? '09' : l:num
+    for l:file in glob(s:hidemac_extract_dir . '\html\'	. l:padded_num . '0_*.html', 1, 1)
+      let l:lines = s:get_html_lines(l:file)
+      let l:title_line = s:remove_tags(matchstr(l:lines, '<TITLE>'))
+      if l:title_line !~ '文$'
+        continue
+      endif
+      for l:word in split(substitute(l:title_line, '文', '', 'g'), '[,，]')
+        let l:word = s:trim(l:word)
+        call add(l:list, {
+            \ 'word' : l:word,
+            \})
+      endfor
+    endfor
+  endfor
+  
+  " add 'goto'
   return l:list
 endfunction
 
