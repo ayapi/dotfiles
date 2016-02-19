@@ -231,3 +231,77 @@ endfunction
 call s:set_hidemac_chm_dir()
 call s:set_hidemac_doc_dir()
 call s:chm2html()
+
+function! s:statements() abort
+  if !exists('g:hidemac#builtin#statements')
+    let g:hidemac#builtin#statements = s:get_cmd_statements() + s:get_other_statements()
+  endif
+  return g:hidemac#builtin#statements
+endfunction
+
+function! s:functions() abort
+  if !exists('g:hidemac#builtin#functions')
+    let g:hidemac#builtin#functions = s:get_functions()
+  endif
+  return g:hidemac#builtin#functions
+endfunction
+
+function! s:keywords() abort
+  if !exists('g:hidemac#builtin#keywords')
+    let g:hidemac#builtin#keywords = s:get_keywords()
+  endif
+  return g:hidemac#builtin#keywords
+endfunction
+
+function! s:expressions() abort
+  return s:keywords() + s:functions()
+endfunction
+
+function! s:gather_candidates(ctx, cur_text) abort
+  " echomsg 'ctx:' . a:ctx . ':(' . len(a:ctx) .')'
+  " echomsg 'cur:' . a:cur_text . ':(' . len(a:cur_text) .')'
+  " echomsg 'spl:' . len(split(a:ctx, '[^a-zA-Z0-9]\+', 1))
+  
+  if len(split(a:ctx, '[^a-zA-Z0-9]\+', 1)) == 1
+    " 行頭
+    " 文、変数
+    return s:statements()
+  else
+    " 関数、変数、キーワード
+    return s:expressions()
+  endif
+endfunction
+
+function! HidemacOmniComplete(findstart, base)
+  if a:findstart
+    let l:line = getline('.')
+    let l:start = col('.') - 1
+    while l:start >= 0 && l:line[l:start - 1] =~ '\%(\k\|-\)'
+      let l:start -= 1
+    endwhile
+    let b:cur_text = l:line[l:start :]
+    let b:ctx = l:line[0: l:start - 1]
+    return l:start
+  endif
+  
+  let l:candidates = s:gather_candidates(substitute(b:ctx, '^\s\+', "", "g"), b:cur_text)
+
+  if a:base == ""
+    return l:candidates
+  endif
+
+  let l:matches = []
+  for k in l:candidates
+    if strpart(k.word, 0, strlen(a:base)) ==# a:base
+      call add(l:matches, k)
+    endif
+  endfor
+  
+  if len(l:matches) == 0
+    return l:candidates
+  endif
+
+  return l:matches
+endfunction
+
+setlocal omnifunc=HidemacOmniComplete
