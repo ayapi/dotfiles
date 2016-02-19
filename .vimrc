@@ -1189,9 +1189,9 @@ snoremap <silent> <C-M-g> <C-g>v:call ToggleGutter()<CR>
 nnoremap <silent> <C-M-g> :call ToggleGutter()<CR>
 
 " [new tab]
-noremap <C-t> <C-c>:tabnew<CR>
-inoremap <C-t> <C-o>:tabnew<CR>
-nnoremap <C-t> :tabnew<CR>
+noremap <C-n> <C-c>:tabnew<CR>
+inoremap <C-n> <C-o>:tabnew<CR>
+nnoremap <C-n> :tabnew<CR>
 
 " [close current tab]
 noremap <C-w> <C-c>:confirm tabclose<CR>
