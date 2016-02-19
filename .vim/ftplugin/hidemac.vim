@@ -222,10 +222,12 @@ function! s:get_other_statements() abort
     endfor
   endfor
 
-  call add(l:list, {
-        \ 'word': 'goto',
-        \	'menu': '(Statement) マクロの処理を任意の場所に移動させる'})
-  return l:list
+  return l:list + [
+        \{'word': 'refreshdatetime',
+        \ 'menu': '(Statement) 日付と時刻を表すキーワードの値を更新する'},
+        \{'word': 'goto',
+        \	'menu': '(Statement) マクロの処理を任意の場所に移動させる'}
+        \]
 endfunction
 
 call s:set_hidemac_chm_dir()
@@ -283,6 +285,38 @@ function! s:variables() abort
   return l:list
 endfunction
 
+function! s:get_after_block(ctx) abort
+  if strridx(a:ctx, '(') > strridx(a:ctx, ')')
+    " else ifの条件のかくカッコの中にぃる
+    return s:expressions()
+  elseif a:ctx =~ '^}\s*else\s$'
+    " } else ってかぃたとこ
+    return [{
+          \ 'word': 'if',
+          \ 'menu': '(Statement) その直後にある条件式が０以外の場合に次のコマンドを実行します。'
+          \}]
+  elseif a:ctx =~ '^}\s*$'
+    " } ってだけかぃたとこ
+    " 閉じたブロックの開始地点をみにぃく
+    let l:lnum = line('.') - 1
+    if l:lnum < 1
+      return []
+    endif
+    for l:lnum in range(l:lnum, 1, -1)
+      let l:line = getline(l:lnum)
+      if l:line =~ '\s*{\s*$' && l:line !~ '^\s*//'
+        break
+      endif
+    endfor
+    if l:line =~ 'if\s*([^)]\+)\s*{\s*$'
+      " ifブロックを閉じた直後だった
+      return [{'word': 'else', 'menu': '(Statement)'}]
+    endif
+    return []
+  endif
+  return []
+endfunction
+
 function! s:gather_candidates(ctx, cur_text) abort
   " echomsg 'ctx:' . a:ctx . ':(' . len(a:ctx) .')'
   " echomsg 'cur:' . a:cur_text . ':(' . len(a:cur_text) .')'
@@ -292,32 +326,9 @@ function! s:gather_candidates(ctx, cur_text) abort
     " 行頭
     " 文、変数
     return s:variables() + s:statements()
-  elseif a:ctx =~ '^}'
-    " ブロックが閉じてる直後
-    if a:ctx =~ '^}\s*else\s$'
-      " } else if
-      return [{
-            \ 'word': 'if',
-            \ 'menu': '(Statement) その直後にある条件式が０以外の場合に次のコマンドを実行します。'
-            \}]
-    else
-      " 閉じたブロックの開始地点をみにぃく
-      let l:lnum = line('.') - 1
-      if l:lnum < 1
-        return []
-      endif
-      for l:lnum in range(l:lnum, 1, -1)
-        let l:line = getline(l:lnum)
-        if l:line =~ '\s*{\s*$' && l:line !~ '^\s*//'
-          break
-        endif
-      endfor
-      if l:line =~ 'if\s*([^)]\+)\s*{\s*$'
-        " ifブロックを閉じた直後だった
-        return [{'word': 'else', 'menu': '(Statement)'}]
-      endif
-      return []
-    endif
+  elseif a:ctx =~ '^}\s'
+    " ブロックが閉じてる後
+    return s:get_after_block(a:ctx)
   else
     " 関数、変数、キーワード
     return s:expressions()
