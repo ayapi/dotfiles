@@ -41,7 +41,11 @@ function! s:chm2html() abort
 endfunction
 
 function! s:trim(str) abort
-  return substitute(a:str, '^[\s　]\+', '', '')
+  return substitute(a:str, '^[ \t　]\+', '', 'g')
+endfunction
+
+function! s:remove_tags(str) abort
+  return substitute(a:str, '<[^>]\+>', '', 'g')
 endfunction
 
 function! s:get_html_lines(fullpath_or_filename) abort
@@ -69,7 +73,7 @@ function! s:get_keywords() abort
         let l:desc = substitute(l:line, '^\s\+\ze', '', 'g') . l:desc
         continue
       endif
-      let l:desc = substitute(l:desc, '<[^>]\+>', '', 'g')
+      let l:desc = s:remove_tags(l:desc)
       let l:menu = s:trim(matchstr(l:desc, '^.\{-}[\.。]'))
       call add(l:list, {
             \ 'word' : l:word,
@@ -134,6 +138,35 @@ function! s:get_functions() abort
           \ 'kind' : l:type,
           \ 'menu' : _[3]
           \})
+  endfor
+  return l:list
+endfunction
+
+function! s:get_cmdstatements() abort
+  let l:list = []
+  for l:file in glob(s:hidemac_extract_dir . '\html\080_CmdStatement_*.html', 1, 1)
+    if l:file !~ '080_CmdStatement_[^_]\+\.html'
+      continue
+    endif
+    let l:lines = s:get_html_lines(l:file)
+    let l:desc = ''
+    let l:start = match(l:lines, '<TABLE')
+    let l:end = match(l:lines, '</TABLE>', 0, 1)
+    for l:lnum in range(l:end, l:start, -1)
+      let l:line = l:lines[l:lnum]
+      if l:line =~ '^ \s<TD VALIGN=TOP><NOBR>'
+        let l:word = s:trim(substitute(l:line, '<[^>]\+>', '', 'g'))
+      else
+        let l:desc = substitute(l:line, '^\s\+\ze', '', 'g') . l:desc
+        continue
+      endif
+      let l:desc = s:remove_tags(l:desc)
+      call add(l:list, {
+            \ 'word' : l:word,
+            \ 'menu' : '(CmdStatement) ' . s:trim(l:desc)
+            \})
+      let desc = ''
+    endfor
   endfor
   return l:list
 endfunction
