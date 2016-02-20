@@ -246,10 +246,16 @@ function! s:get_other_statements() abort
         \{'word': 'refreshdatetime',
         \ 'menu': '(Statement) 日付と時刻を表すキーワードの値を更新する'},
         \{'word': 'goto',
-        \	'menu': '(Statement) マクロの処理を任意の場所に移動させる'}
+        \	'menu': '(Statement) マクロの処理を任意の場所に移動させる'},
+        \{'word': 'call',
+        \	'menu': '(Statement) サブルーチンを呼ぶ'},
+        \{'word': 'return',
+        \	'menu': '(Statement) サブルーチンから復帰する'}
         \]
   let l:dict['refreshdatetime'] = []
   let l:dict['goto'] = []
+  let l:dict['call'] = []
+  let l:dict['return'] = []
   return [l:candidates, l:dict]
 endfunction
 
@@ -265,17 +271,14 @@ function! s:load_statements() abort
 endfunction
 
 function! s:statements() abort
-  call s:load_statements()
   return g:hidemac_builtin.statements.candidates
 endfunction
 
 function! s:functions() abort
-  call s:load_functions()
   return g:hidemac_builtin.functions.candidates
 endfunction
 
 function! s:keywords() abort
-  call s:load_keywords()
   return g:hidemac_builtin.keywords.candidates
 endfunction
 
@@ -358,7 +361,7 @@ function! s:gather_candidates(ctx, cur_text) abort
     " 行頭かセミコロン直後
     " 文、変数
     return s:variables() + s:statements()
-  elseif a:ctx =~ '^}\s'
+  elseif a:ctx =~ '^}\s*'
     " ブロックが閉じてる後
     return s:get_after_block(a:ctx)
   else
@@ -370,6 +373,9 @@ endfunction
 call s:set_hidemac_chm_dir()
 call s:set_hidemac_doc_dir()
 call s:chm2html()
+call s:load_statements()
+call s:load_functions()
+call s:load_keywords()
 
 function! HidemacOmniComplete(findstart, base)
   if a:findstart
