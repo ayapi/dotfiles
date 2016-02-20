@@ -81,8 +81,20 @@ function! s:load_keywords() abort
       endif
       let l:desc = s:remove_tags(l:desc)
       let l:menu = s:trim(matchstr(l:desc, '^.\{-}[\.。]'))
+      
+      let l:type = '#'
+      if l:file =~ 'DateTime'
+        if index(['tickcount', 'dayofweeknum'], l:word) == -1
+          let l:type = '$'
+        endif
+      elseif l:file=~ 'File' || l:word =~ 'buffer$'
+            \ || index(['getclipboard', 'fontname', 'fontcharset'], l:word) >= 0
+        let l:type = '$'
+      endif
+      
       call add(l:candidates, {
             \ 'word' : l:word,
+            \ 'kind' : l:type,
             \ 'menu' : '(Keyword) ' . l:menu
             \})
       call add(l:list, l:word)
