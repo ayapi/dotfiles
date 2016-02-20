@@ -441,6 +441,7 @@ inoremap <C-\> <Nop>
 " else
 "   <C-e> end completion-mode
 
+inoremap <silent> <expr> <C-Space> '<C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>" : "\<lt>C-e>"<CR>'
 " <C-Space> is <Nul> in vim
 inoremap <silent> <expr> <Nul> '<C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>" : "\<lt>C-e>"<CR>'
 
