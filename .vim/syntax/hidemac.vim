@@ -13,11 +13,11 @@ for name in keys(g:hidemac_builtin.statements.data) + ['loaddll']
     if index(['if', 'else', 'while'], name) >= 0
         continue
     endif
-    execute 'syntax match hidemacStatement "\(^\s*\|;\s*\)\@<=' . name . '\(\k\)\@!"'
+    execute 'syntax match hidemacStatement "\(^\s*\|;\s*\|\(if\|while\)\s*([^)]\+)\s*{*\s*\)\@<=' . name . '\(\k\)\@!"'
 endfor
 
 for name in g:hidemac_builtin.keywords.data
-    execute 'syntax match hidemacSpecial "\(^\s*\|;\s*\|\k\)\@<!' . name . '\(\k\)\@!"'
+    execute 'syntax match hidemacSpecial "\(^\s*\|;\s*\|\k\|\(if\|while\)\s*([^)]\+)\s*{*\s*\)\@<!' . name . '\(\k\)\@!"'
 endfor
 
 for name in keys(g:hidemac_builtin.functions.data) + ['loaddll']
