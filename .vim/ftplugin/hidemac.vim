@@ -1,3 +1,5 @@
+let g:hidemac_builtin = get(g:, 'hidemac_builtin', {})
+
 let s:chm_filename = "hidemac_html.chm"
 function! s:set_hidemac_chm_dir() abort
   if exists("g:hidemac_chm_dir") && filereadable(g:hidemac_chm_dir . '\' . s:chm_filename)
@@ -59,7 +61,11 @@ function! s:get_html_lines(fullpath_or_filename) abort
   return split(l:utf8_html, "\r", 1)
 endfunction
 
-function! s:get_keywords() abort
+function! s:load_keywords() abort
+  if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'keywords')
+    return
+  endif
+  let l:candidates = []
   let l:list = []
   for l:file in glob(s:hidemac_extract_dir . '\html\060_Keyword_*.html', 1, 1)
     let l:lines = s:get_html_lines(l:file)
@@ -75,14 +81,18 @@ function! s:get_keywords() abort
       endif
       let l:desc = s:remove_tags(l:desc)
       let l:menu = s:trim(matchstr(l:desc, '^.\{-}[\.。]'))
-      call add(l:list, {
+      call add(l:candidates, {
             \ 'word' : l:word,
             \ 'menu' : '(Keyword) ' . l:menu
             \})
+      call add(l:list, l:word)
       let desc = ''
     endfor
   endfor
-  return l:list
+  let g:hidemac_builtin.keywords = {
+        \ 'candidates': l:candidates,
+        \ 'data': l:list
+        \}
 endfunction
 
 function! s:some_match(str, patterns) abort
@@ -94,8 +104,12 @@ function! s:some_match(str, patterns) abort
   return 0
 endfunction
 
-function! s:get_functions() abort
-  let l:list = []
+function! s:load_functions() abort
+  if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'functions')
+    return
+  endif
+  let l:candidates = []
+  let l:dict = {}
   let l:lines = s:get_html_lines('070_Function.html')
   let l:start = match(l:lines, '<TABLE') + 1
   let l:end = match(l:lines, '</TABLE>') - 1
@@ -132,18 +146,23 @@ function! s:get_functions() abort
       endif
     endif
     
-    call add(l:list, {
+    call add(l:candidates, {
           \ 'word' : l:func[1] . '(',
           \ 'info' : l:func[1] . '(' . l:func[2] . ')',
           \ 'kind' : l:type,
           \ 'menu' : _[3]
           \})
+    let l:dict[l:func[1]] = []
   endfor
-  return l:list
+  let g:hidemac_builtin.functions = {
+        \ 'candidates': l:candidates,
+        \ 'data': l:dict
+        \}
 endfunction
 
 function! s:get_cmd_statements() abort
-  let l:list = []
+  let l:candidates = []
+  let l:dict = {}
   for l:file in glob(s:hidemac_extract_dir . '\html\080_CmdStatement_*.html', 1, 1)
     if l:file !~ '080_CmdStatement_[^_]\+\.html'
       continue
@@ -161,14 +180,15 @@ function! s:get_cmd_statements() abort
         continue
       endif
       let l:desc = s:remove_tags(l:desc)
-      call add(l:list, {
+      call add(l:candidates, {
             \ 'word' : l:word,
             \ 'menu' : '(Statement) ' . s:trim(l:desc)
             \})
+      let l:dict[l:word] = []
       let desc = ''
     endfor
   endfor
-  return l:list
+  return [l:candidates, l:dict]
 endfunction
 
 let s:other_statements = {
@@ -185,8 +205,8 @@ let s:other_statements = {
       \}
 
 function! s:get_other_statements() abort
-  let l:list = []
-  let l:debug = []
+  let l:candidates = []
+  let l:dict = {}
   for l:num in range(9, 15)
     let l:padded_num = l:num == 9 ? '09' : l:num
     for l:file in glob(s:hidemac_extract_dir . '\html\'	. l:padded_num . '0_*.html', 1, 1)
@@ -213,46 +233,50 @@ function! s:get_other_statements() abort
         endif
         let l:desc = s:trim(s:remove_tags(l:desc))
         
-        call add(l:debug, l:word . ':' . l:desc)
-        call add(l:list, {
+        call add(l:candidates, {
             \ 'word' : l:word,
             \ 'menu' : '(Statement) ' . l:desc
             \})
+        let l:dict[l:word] = []
       endfor
     endfor
   endfor
-
-  return l:list + [
+  
+  let l:candidates = l:candidates + [
         \{'word': 'refreshdatetime',
         \ 'menu': '(Statement) 日付と時刻を表すキーワードの値を更新する'},
         \{'word': 'goto',
         \	'menu': '(Statement) マクロの処理を任意の場所に移動させる'}
         \]
+  let l:dict['refreshdatetime'] = []
+  let l:dict['goto'] = []
+  return [l:candidates, l:dict]
 endfunction
 
-call s:set_hidemac_chm_dir()
-call s:set_hidemac_doc_dir()
-call s:chm2html()
+function! s:load_statements() abort
+  if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'statements')
+    return
+  endif
+  let g:hidemac_builtin.statements = {}
+  let [l:cmd_candidates, l:cmd_data] = s:get_cmd_statements()
+  let [l:other_candidates, l:other_data] = s:get_other_statements()
+  let g:hidemac_builtin.statements.candidates = l:cmd_candidates + l:other_candidates
+  let g:hidemac_builtin.statements.data = extend(l:cmd_data, l:other_data)
+endfunction
 
 function! s:statements() abort
-  if !exists('g:hidemac#builtin#statements')
-    let g:hidemac#builtin#statements = s:get_cmd_statements() + s:get_other_statements()
-  endif
-  return g:hidemac#builtin#statements
+  call s:load_statements()
+  return g:hidemac_builtin.statements.candidates
 endfunction
 
 function! s:functions() abort
-  if !exists('g:hidemac#builtin#functions')
-    let g:hidemac#builtin#functions = s:get_functions()
-  endif
-  return g:hidemac#builtin#functions
+  call s:load_functions()
+  return g:hidemac_builtin.functions.candidates
 endfunction
 
 function! s:keywords() abort
-  if !exists('g:hidemac#builtin#keywords')
-    let g:hidemac#builtin#keywords = s:get_keywords()
-  endif
-  return g:hidemac#builtin#keywords
+  call s:load_keywords()
+  return g:hidemac_builtin.keywords.candidates
 endfunction
 
 function! s:expressions() abort
@@ -260,7 +284,7 @@ function! s:expressions() abort
 endfunction
 
 function! s:variables() abort
-  let l:list = []
+  let l:candidates = []
   let l:in_other_sub = 0
   let l:call_found = 0
   for l:lnum in range(line('.') - 1, 1, -1)
@@ -284,13 +308,13 @@ function! s:variables() abort
       if l:in_other_sub && l:line =~ '^\s*[$#]\{2\}' " local var in other sub
         continue
       endif
-      call add(l:list, {'word': matchstr(l:line, '^\s*\zs[$#][^ \=]*\ze')})
+      call add(l:candidates, {'word': matchstr(l:line, '^\s*\zs[$#][^ \=]*\ze')})
     endif
   endfor
   if l:call_found
-    let l:list = l:list + [{'word': '$$return'}, {'word': '##return'}]
+    let l:candidates = l:candidates + [{'word': '$$return'}, {'word': '##return'}]
   endif
-  return l:list
+  return l:candidates
 endfunction
 
 function! s:get_after_block(ctx) abort
@@ -343,6 +367,10 @@ function! s:gather_candidates(ctx, cur_text) abort
   endif
 endfunction
 
+call s:set_hidemac_chm_dir()
+call s:set_hidemac_doc_dir()
+call s:chm2html()
+
 function! HidemacOmniComplete(findstart, base)
   if a:findstart
     let l:line = getline('.')
@@ -363,15 +391,11 @@ function! HidemacOmniComplete(findstart, base)
 
   let l:matches = []
   for k in l:candidates
-    if strpart(k.word, 0, strlen(a:base)) ==# a:base
+    if strpart(k.word, 0, strlen(a:base)) == a:base
       call add(l:matches, k)
     endif
   endfor
   
-  if len(l:matches) == 0
-    return l:candidates
-  endif
-
   return l:matches
 endfunction
 
