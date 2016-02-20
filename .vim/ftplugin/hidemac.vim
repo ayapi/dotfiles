@@ -354,8 +354,8 @@ function! s:gather_candidates(ctx, cur_text) abort
   " echomsg 'cur:' . a:cur_text . ':(' . len(a:cur_text) .')'
   " echomsg 'spl:' . len(split(a:ctx, '[^a-zA-Z0-9]\+', 1))
   
-  if len(split(a:ctx, '[^a-zA-Z0-9_#$]\+', 1)) == 1
-    " 行頭
+  if len(split(a:ctx, '[^a-zA-Z0-9_#$]\+', 1)) == 1 || a:ctx =~ ';\s*$'
+    " 行頭かセミコロン直後
     " 文、変数
     return s:variables() + s:statements()
   elseif a:ctx =~ '^}\s'
