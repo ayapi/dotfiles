@@ -201,15 +201,24 @@ let s:other_statements = {
       \ 'mousemenuarray': '配列変数で項目を指定し、マウスカーソルの近くにポップアップメニューを表示',
       \ 'envchanged': 'レジストリから設定内容を再読込みし、秀丸エディタの設定を更新',
       \ 'writeregstr': 'レジストリにREG_SZ型の値を書き込む',
-      \ 'writeregnum': 'レジストリにREG_DWORD型の値を書き込む'
+      \ 'writeregnum': 'レジストリにREG_DWORD型の値を書き込む',
+      \ 'begingroupundo': 'やり直しのグループ化を開始する',
+      \ 'endgroupundo': 'やり直しのグループ化を終了する',
       \}
 
 function! s:get_other_statements() abort
   let l:candidates = []
   let l:dict = {}
   for l:num in range(9, 15)
-    let l:padded_num = l:num == 9 ? '09' : l:num
-    for l:file in glob(s:hidemac_extract_dir . '\html\'	. l:padded_num . '0_*.html', 1, 1)
+    if l:num == 9
+      let l:doc_num = '090'
+    elseif l:num == 15
+      let l:doc_num = '15[05]'
+    else
+      let l:doc_num = l:num . '0'
+    endif
+    
+    for l:file in glob(s:hidemac_extract_dir . '\html\'	. l:doc_num . '_*.html', 1, 1)
       let l:lines = s:get_html_lines(l:file)
       let l:title_line = s:remove_tags(matchstr(l:lines, '<TITLE>'))
       if l:title_line !~ '文$'
