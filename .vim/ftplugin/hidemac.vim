@@ -303,8 +303,19 @@ function! s:keywords() abort
   return g:hidemac_builtin.keywords.candidates
 endfunction
 
-function! s:expressions() abort
-  return s:variables() + s:keywords() + s:functions()
+function! s:expressions(...) abort
+  if a:0 == 0 || a:1 == '' || a:1 == '?'
+    return s:variables() + s:keywords() + s:functions()
+  endif
+  if a:1 == '#'
+    return filter(copy(s:variables()), 'v:val.word =~ "^#"')
+            \ + filter(copy(s:keywords()), 'v:val.kind != "$"')
+            \ + filter(copy(s:functions()), 'v:val.kind != "$"')
+  elseif a:1 == '$'
+    return filter(copy(s:variables()), 'v:val.word =~ "^\\$"')
+            \ + filter(copy(s:keywords()), 'v:val.kind != "#"')
+            \ + filter(copy(s:functions()), 'v:val.kind != "#"')
+  endif
 endfunction
 
 function! s:variables() abort
@@ -373,9 +384,9 @@ function! s:get_after_block(ctx) abort
   return []
 endfunction
 
+let s:str_patterns = {'''': '''.\{-}\(\\\)\@<!''', '"': '".\{-}\(\\\)\@<!"'}
 function! s:get_context(line) abort
   let l:line = a:line
-  let l:patterns = {'''': '''.\{-}\(\\\)\@<!''', '"': '".\{-}\(\\\)\@<!"'}
   let l:str_ranges = []
   let l:i = 0
   while 1
@@ -389,7 +400,7 @@ function! s:get_context(line) abort
     endif
     " 開ぃてたから、閉じるとこをさがす
     let l:q = l:line[l:q_open_pos]
-    let l:q_close_pos = matchend(l:line, l:patterns[l:q], l:q_open_pos)
+    let l:q_close_pos = matchend(l:line, s:str_patterns[l:q], l:q_open_pos)
     if l:q_close_pos == -1
       " 閉じてなぃっぽぃ
       call add(l:str_ranges, [l:q_open_pos, len(l:line)+1])
@@ -443,6 +454,95 @@ function! s:get_context(line) abort
   return s:trim(l:line[l:head_position: ])
 endfunction
 
+function! s:stash_strings(line) abort
+  let l:line = a:line
+  while 1
+    " ダブルクオートかクオートがひらくとこをさがす
+    let l:q_open_pos = match(l:line, '\(\\\)\@<!["'']')
+    if l:q_open_pos == -1
+      break
+    endif
+    " 開ぃてたから、閉じるとこまでを置き換ぇる
+    let l:q = l:line[l:q_open_pos]
+    let l:line = substitute(l:line, s:str_patterns[l:q], '$$str')
+  endwhile
+  return l:line
+endfunction
+
+function! s:get_last_type(ctx) abort
+  let l:line = s:stash_strings(a:ctx)
+  let l:type = '?'
+  while len(l:line) >= 0
+    if l:line !~ ')\s*$'
+      let l:ks = split(l:line, '[^a-zA-Z0-9_$#\.]\+')
+      if len(l:ks) == 0
+        " なんかへんみたぃだからぁきらめる
+        break
+      endif
+      let l:k = l:ks[len(l:ks) - 1]
+      " キーワードか変数かリテラルかゎかんなぃのをゲットした
+      " echomsg 'what?: ' . l:k
+      
+      if l:k =~ '^[0-9x.]\+$'
+        return '#'
+      elseif l:k =~ '^\$'
+        return '$'
+      elseif l:k =~ '^#'
+        return '#'
+      else
+        for data in s:keywords()
+          if data.word == l:k
+            return data.kind
+          endif
+        endfor
+      endif
+      break
+    else
+      let l:level = 0
+      let l:last_pos = len(l:line) - 1
+      let l:max_level = 0
+      for i in range(l:last_pos, 0, -1)
+        let l:char = l:line[i]
+        " echomsg 'char:' . l:char
+        
+        let l:cur_level = l:level
+        if l:char == ')'
+          let l:cur_level = l:cur_level + 1
+        elseif l:char == '('
+          let l:cur_level = l:cur_level - 1
+        endif
+        " echomsg 'level:' . l:level
+        " echomsg 'curlevel:' . l:cur_level
+        
+        if l:level > 0 && l:cur_level == 0
+          break
+        endif
+        if l:max_level < l:cur_level
+          let l:max_level = l:cur_level
+        endif
+        let l:level = l:cur_level
+      endfor
+      
+      " echomsg 'before open brace:' . l:line[:i-1]
+      let l:function_name = matchstr(l:line[:i-1], '[a-zA-Z0-9_$#]\+$')
+      if l:function_name == ''
+        " カッコの正体が関数じゃなかった
+        let l:line = substitute(l:line, ')\s*$', '', '')
+      else
+        " echomsg 'funcname:' . l:function_name
+        for data in s:functions()
+          if data.word == l:function_name . '('
+            return data.kind
+          endif
+        endfor
+        " 関数っぽぃものだけど型の情報がなぃょ
+        break
+      endif
+    endif
+  endwhile
+  return l:type
+endfunction
+
 function! s:gather_candidates(cur_line, cur_text) abort
   let l:ctx = s:get_context(a:cur_line)
   echomsg 'ctx: ' . l:ctx
@@ -457,14 +557,17 @@ function! s:gather_candidates(cur_line, cur_text) abort
     " 関数、変数、キーワード
     if l:ctx =~ '#\k\+\s*=\s*$'
       " 数値型変数に代入するとこ
-      return filter(copy(s:variables()), 'v:val.word =~ "^#"')
-            \ + filter(copy(s:keywords()), 'v:val.kind != "$"')
-            \ + filter(copy(s:functions()), 'v:val.kind != "$"')
+      return s:expressions('#')
     elseif l:ctx =~ '$\k\+\s*=\s*$'
       " 文字列型変数に代入するとこ
-      return filter(copy(s:variables()), 'v:val.word =~ "^\\$"')
-            \ + filter(copy(s:keywords()), 'v:val.kind != "#"')
-            \ + filter(copy(s:functions()), 'v:val.kind != "#"')
+      return s:expressions('$')
+    elseif l:ctx =~ '\([-*/%<>!^]\|<=\|>=\|\(&\)\@<!&\|\(|\)\@<!|\)\s*$'
+      " - * / % < > ! ^ <= >= & |
+      " 数値型だけでできるっぽぃ演算子の直後
+      return s:expressions('#')
+    elseif l:ctx =~ '\(+\|!=\|==\)\s*$'
+      " 文字列型かもしれなぃ演算子の直後
+      return s:expressions(s:get_last_type(substitute(l:ctx, '\(+\|!=\|==\)\s*$', '', '')))
     endif
     " 関数か文のパラメーターとか書こーとしてる
     return s:expressions()
