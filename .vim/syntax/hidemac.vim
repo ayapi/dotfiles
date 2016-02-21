@@ -43,7 +43,7 @@ syn keyword hidemacTodo		contained TODO FIXME XXX
 syn cluster hidemacCommentGroup	contains=hidemacTodo,hidemacBadContinuation
 
 syn region	hidemacString		start=+L\="+ skip=+\\\\\|\\"+ end=+"+ contains=hidemacSpecial,hidemacFormat,@Spell extend
-syn region	hidemacCharacter		start=+L\='+ skip=+\\\\\|\\"+ end=+'+ contains=hidemacSpecial,hidemacFormat,@Spell extend
+syn region	hidemacCharacter		start=+L\='+ skip=+\\\\\|\\'+ end=+'+ contains=hidemacSpecial,hidemacFormat,@Spell extend
 
 syn case ignore
 syn match hidemacNumbers	display transparent "\<\d\|\.\d" contains=hidemacNumber,hidemacFloat,hidemacOctalError,hidemacOctal

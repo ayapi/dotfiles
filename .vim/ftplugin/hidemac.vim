@@ -345,7 +345,7 @@ function! s:get_after_block(ctx) abort
   if strridx(a:ctx, '(') > strridx(a:ctx, ')')
     " else ifの条件のかくカッコの中にぃる
     return s:expressions()
-  elseif a:ctx =~ '^}\s*else\s$'
+  elseif a:ctx =~ '^}\s*else\s\+$'
     " } else ってかぃたとこ
     return [{
           \ 'word': 'if',
@@ -360,11 +360,11 @@ function! s:get_after_block(ctx) abort
     endif
     for l:lnum in range(l:lnum, 1, -1)
       let l:line = getline(l:lnum)
-      if l:line =~ '\s*{\s*$' && l:line !~ '^\s*//'
+      if l:line =~ '\s*{\s*' && l:line !~ '^\s*//'
         break
       endif
     endfor
-    if l:line =~ 'if\s*([^)]\+)\s*{\s*$'
+    if l:line =~ 'if\s*([^)]\+)\s*{\s*'
       " ifブロックを閉じた直後だった
       return [{'word': 'else', 'menu': '(Statement)'}]
     endif
@@ -373,19 +373,86 @@ function! s:get_after_block(ctx) abort
   return []
 endfunction
 
-function! s:gather_candidates(ctx, cur_text) abort
-  " echomsg 'ctx:' . a:ctx . ':(' . len(a:ctx) .')'
-  " echomsg 'cur:' . a:cur_text . ':(' . len(a:cur_text) .')'
-  " echomsg 'spl:' . len(split(a:ctx, '[^a-zA-Z0-9]\+', 1))
+function! s:get_context(line) abort
+  let l:line = a:line
+  let l:patterns = {'''': '''.\{-}\(\\\)\@<!''', '"': '".\{-}\(\\\)\@<!"'}
+  let l:str_ranges = []
+  let l:i = 0
+  while 1
+    if l:i >= len(l:line)
+      break
+    endif
+    " ダブルクオートかクオートがひらくとこをさがす
+    let l:q_open_pos = match(l:line, '\(\\\)\@<!["'']', l:i)
+    if l:q_open_pos == -1
+      break
+    endif
+    " 開ぃてたから、閉じるとこをさがす
+    let l:q = l:line[l:q_open_pos]
+    let l:q_close_pos = matchend(l:line, l:patterns[l:q], l:q_open_pos)
+    if l:q_close_pos == -1
+      " 閉じてなぃっぽぃ
+      call add(l:str_ranges, [l:q_open_pos, len(l:line)+1])
+      break
+    endif
+    " 閉じられてた
+    call add(l:str_ranges, [l:q_open_pos, l:q_close_pos])
+    let l:i = l:q_close_pos + 1
+  endwhile
+
+  let l:i = 0
+  let l:sep_pattern = '\(;\s*\|\(if\|while\)\s*([^)]\+)\s*{*\s*\|else\s{*\s*\)'
+  let l:head_position = 0
+  while 1
+    if l:i >= len(l:line)
+      break
+    endif
+    " echomsg l:line[l:i :]
+    let l:sep_start = match(l:line, l:sep_pattern, l:i)
+    if l:sep_start == -1
+      break
+    endif
+    let l:sep_end = matchend(l:line, l:sep_pattern, l:i)
+    if len(l:str_ranges) == 0
+      let l:i = l:sep_end
+      continue
+    endif
+    " echomsg 'matchstr:' . matchstr(l:line, l:sep_pattern, l:i)
+    let l:match = 1
+    for [qd_open, qd_close] in l:str_ranges
+      " echomsg 'qd_open :' . qd_open
+      " echomsg 'qd_close:' . qd_close
+      " echomsg 'sep_start:' . l:sep_start
+      " echomsg 'sep_end :' . l:sep_end
+      if !(qd_close <= l:sep_start	|| l:sep_end <= qd_open
+            \ || (l:sep_start <= qd_open && qd_close <= l:sep_end))
+        let l:match = 0
+        break
+      endif
+    endfor
+    " echomsg 'match:' . l:match
+    if !l:match
+      let l:i = qd_close + 1
+      continue
+    endif
+    let l:head_position = l:sep_end
+    let l:i = l:sep_end
+  endwhile
+
+  " echomsg l:head_position . '/' . len(l:line)
+  return s:trim(l:line[l:head_position: ])
+endfunction
+
+function! s:gather_candidates(cur_line, cur_text) abort
+  let l:ctx = s:get_context(a:cur_line)
+  echomsg 'ctx: ' . l:ctx
   
-  if len(split(a:ctx, '[^a-zA-Z0-9_#$]\+', 1)) == 1 || a:ctx =~ ';\s*$'
-        \	|| a:ctx =~ '\(if\|while\)\s*([^)]\+)\s*{*\s*'
-    " 行頭かセミコロン直後かif/whileの直後
+  if len(split(l:ctx, '[^a-zA-Z0-9_#$]\+', 1)) == 1
     " 文、変数
     return s:variables() + s:statements()
-  elseif a:ctx =~ '^}\s*'
+  elseif l:ctx =~ '^}\s*'
     " ブロックが閉じてる後
-    return s:get_after_block(a:ctx)
+    return s:get_after_block(l:ctx)
   else
     " 関数、変数、キーワード
     return s:expressions()
@@ -407,11 +474,11 @@ function! HidemacOmniComplete(findstart, base)
       let l:start -= 1
     endwhile
     let b:cur_text = l:line[l:start :]
-    let b:ctx = l:line[0: l:start - 1]
+    let b:cur_line = l:line[0: l:start - 1]
     return l:start
   endif
   
-  let l:candidates = s:gather_candidates(substitute(b:ctx, '^\s\+', "", "g"), b:cur_text)
+  let l:candidates = s:gather_candidates(substitute(b:cur_line, '^\s\+', "", "g"), b:cur_text)
 
   if a:base == ""
     return l:candidates
