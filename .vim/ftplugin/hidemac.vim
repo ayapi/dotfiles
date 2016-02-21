@@ -127,7 +127,7 @@ function! s:load_functions() abort
   let l:end = match(l:lines, '</TABLE>') - 1
   let l:type_num_desc = ['数値取得', '状態を取得']
   let l:type_num_detail = ['返す値は数値', '数値を取得します', '0 を返します', 'ハンドルを取得します', 'コードを返します']
-  let l:type_str_detail = ['返\(す\|り\)値は\(基本的に\)\?文字列', '文字列を取得します', '文字列を返します']
+  let l:type_str_detail = ['返\(す\|り\)値は文字列', '文字列を取得します', '文字列を返します']
   for l:lnum in range(l:start, l:end, 1)
     let l:line = l:lines[l:lnum]
     let _ = matchlist(l:line, '<A HREF="\([^\"]\+\)">\([^<]\+\)</A><NOBR></TD><TD>\([^<]\+\)</TD>')
@@ -164,7 +164,13 @@ function! s:load_functions() abort
           \ 'kind' : l:type,
           \ 'menu' : _[3]
           \})
-    let l:dict[l:func[1]] = []
+    
+    let l:arg_types = map(split(l:func[2], ', '), 'v:val =~ "^s" ? "$" : "#"')
+    let l:dict[l:func[1]] = {
+          \ 'type': l:type,
+          \ 'arg_labels': l:func[2],
+          \ 'arg_types': l:arg_types
+          \}
   endfor
   let g:hidemac_builtin.functions = {
         \ 'candidates': l:candidates,
@@ -469,6 +475,45 @@ function! s:stash_strings(line) abort
   return l:line
 endfunction
 
+function! s:analyze_brace(line, target_level) abort
+  let l:level = 0
+  let l:last_pos = len(a:line) - 1
+  let l:comma_count = 0
+  for i in range(l:last_pos, 0, -1)
+    let l:char = a:line[i]
+    " echomsg 'char:' . l:char
+    
+    let l:cur_level = l:level
+    if l:char == ')'
+      let l:cur_level = l:cur_level + 1
+    elseif l:char == '('
+      let l:cur_level = l:cur_level - 1
+    endif
+    " echomsg 'level:' . l:level
+    " echomsg 'curlevel:' . l:cur_level
+    
+    if l:char == ',' && l:cur_level == a:target_level + 1
+      let l:comma_count = l:comma_count + 1
+    endif
+    if l:level > a:target_level && l:cur_level == a:target_level
+      break
+    endif
+    let l:level = l:cur_level
+  endfor
+  return [i, l:comma_count]
+endfunction
+
+function! s:analyze_function(line, ...) abort
+  " デフォでゎ、ぃま引数をかぃてる関数の名前を取る
+  let l:target_level = -1
+  if a:0 == 1 && a:1 == 'last'
+    " lastだと、もぅかきぉゎってカーソルょり左にぁる中で最も右の関数の名前
+    let l:target_level = 0
+  endif
+  let [l:pos, l:comma_count] = s:analyze_brace(a:line, l:target_level)
+  return [matchstr(a:line[: l:pos - 1], '[a-zA-Z0-9_$#]\+$'), l:comma_count]
+endfunction
+
 function! s:get_last_type(ctx) abort
   let l:line = s:stash_strings(a:ctx)
   let l:type = '?'
@@ -498,43 +543,15 @@ function! s:get_last_type(ctx) abort
       endif
       break
     else
-      let l:level = 0
-      let l:last_pos = len(l:line) - 1
-      let l:max_level = 0
-      for i in range(l:last_pos, 0, -1)
-        let l:char = l:line[i]
-        " echomsg 'char:' . l:char
-        
-        let l:cur_level = l:level
-        if l:char == ')'
-          let l:cur_level = l:cur_level + 1
-        elseif l:char == '('
-          let l:cur_level = l:cur_level - 1
-        endif
-        " echomsg 'level:' . l:level
-        " echomsg 'curlevel:' . l:cur_level
-        
-        if l:level > 0 && l:cur_level == 0
-          break
-        endif
-        if l:max_level < l:cur_level
-          let l:max_level = l:cur_level
-        endif
-        let l:level = l:cur_level
-      endfor
-      
-      " echomsg 'before open brace:' . l:line[:i-1]
-      let l:function_name = matchstr(l:line[:i-1], '[a-zA-Z0-9_$#]\+$')
+      let [l:function_name, l:unused] = s:analyze_function(l:line, 'last')
       if l:function_name == ''
         " カッコの正体が関数じゃなかった
         let l:line = substitute(l:line, ')\s*$', '', '')
       else
         " echomsg 'funcname:' . l:function_name
-        for data in s:functions()
-          if data.word == l:function_name . '('
-            return data.kind
-          endif
-        endfor
+        if has_key(g:hidemac_builtin.functions.data, l:function_name)
+          return g:hidemac_builtin.functions.data[l:function_name].type
+        endif
         " 関数っぽぃものだけど型の情報がなぃょ
         break
       endif
@@ -547,31 +564,45 @@ function! s:gather_candidates(cur_line, cur_text) abort
   let l:ctx = s:get_context(a:cur_line)
   echomsg 'ctx: ' . l:ctx
   
-  if len(split(l:ctx, '[^a-zA-Z0-9_#$]\+', 1)) == 1
+  let l:ks = split(l:ctx, '[^a-zA-Z0-9_#$]\+', 1)
+  if len(l:ks) == 1
     " 文、変数
     return s:variables() + s:statements()
   elseif l:ctx =~ '^}\s*'
     " ブロックが閉じてる後
     return s:get_after_block(l:ctx)
+  elseif l:ctx =~ '#\k\+\s*=\s*$'
+    " 数値型変数に代入するとこ
+    return s:expressions('#')
+  elseif l:ctx =~ '$\k\+\s*=\s*$'
+    " 文字列型変数に代入するとこ
+    return s:expressions('$')
+  elseif l:ctx =~ '\([-*/%<>!^]\|<=\|>=\|\(&\)\@<!&\|\(|\)\@<!|\)\s*$'
+    " - * / % < > ! ^ <= >= & |
+    " 数値型だけでできるっぽぃ演算子の直後
+    return s:expressions('#')
+  elseif l:ctx =~ '\(+\|!=\|==\)\s*$'
+    " 文字列型かもしれなぃ演算子の直後
+    return s:expressions(s:get_last_type(substitute(l:ctx, '\(+\|!=\|==\)\s*$', '', '')))
   else
-    " 関数、変数、キーワード
-    if l:ctx =~ '#\k\+\s*=\s*$'
-      " 数値型変数に代入するとこ
-      return s:expressions('#')
-    elseif l:ctx =~ '$\k\+\s*=\s*$'
-      " 文字列型変数に代入するとこ
-      return s:expressions('$')
-    elseif l:ctx =~ '\([-*/%<>!^]\|<=\|>=\|\(&\)\@<!&\|\(|\)\@<!|\)\s*$'
-      " - * / % < > ! ^ <= >= & |
-      " 数値型だけでできるっぽぃ演算子の直後
-      return s:expressions('#')
-    elseif l:ctx =~ '\(+\|!=\|==\)\s*$'
-      " 文字列型かもしれなぃ演算子の直後
-      return s:expressions(s:get_last_type(substitute(l:ctx, '\(+\|!=\|==\)\s*$', '', '')))
+    " 関数か文の引数
+    let l:line = s:stash_strings(l:ctx)
+    let [l:function_name, l:comma_count] = s:analyze_function(l:line)
+    if l:function_name != '' && has_key(g:hidemac_builtin.functions.data, l:function_name)
+      " 関数の引数
+      let l:arg_types = g:hidemac_builtin.functions.data[l:function_name].arg_types
+      if l:comma_count >= len(l:arg_types)
+        return []
+      endif
+      return s:expressions(
+          \ g:hidemac_builtin.functions.data[l:function_name].arg_types[l:comma_count]
+          \)
+    elseif has_key(g:hidemac_builtin.statements.data, l:ks[0])
+      " 文の引数かく場面なんだけどまだ演算子とか関数とかゎかぃてなぃ系
+      return s:expressions()
     endif
-    " 関数か文のパラメーターとか書こーとしてる
-    return s:expressions()
   endif
+  return s:expressions()
 endfunction
 
 call s:set_hidemac_chm_dir()
