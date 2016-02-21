@@ -455,6 +455,18 @@ function! s:gather_candidates(cur_line, cur_text) abort
     return s:get_after_block(l:ctx)
   else
     " 関数、変数、キーワード
+    if l:ctx =~ '#\k\+\s*=\s*$'
+      " 数値型変数に代入するとこ
+      return filter(copy(s:variables()), 'v:val.word =~ "^#"')
+            \ + filter(copy(s:keywords()), 'v:val.kind != "$"')
+            \ + filter(copy(s:functions()), 'v:val.kind != "$"')
+    elseif l:ctx =~ '$\k\+\s*=\s*$'
+      " 文字列型変数に代入するとこ
+      return filter(copy(s:variables()), 'v:val.word =~ "^\\$"')
+            \ + filter(copy(s:keywords()), 'v:val.kind != "#"')
+            \ + filter(copy(s:functions()), 'v:val.kind != "#"')
+    endif
+    " 関数か文のパラメーターとか書こーとしてる
     return s:expressions()
   endif
 endfunction
