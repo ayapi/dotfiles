@@ -9,18 +9,18 @@ endif
 
 syntax iskeyword @,48-57,192-255,$,#,_
 
-for name in keys(g:hidemac_builtin.statements.data) + ['loaddll']
+for name in keys(g:hidemac_builtin.statements.data)
     if index(['if', 'else', 'while'], name) >= 0
         continue
     endif
     execute 'syntax match hidemacStatement "\(^\s*\|;\s*\|\(if\|while\)\s*([^)]\+)\s*{*\s*\)\@<=' . name . '\(\k\)\@!"'
 endfor
 
-for name in g:hidemac_builtin.keywords.data
+for name in keys(g:hidemac_builtin.keywords.data)
     execute 'syntax match hidemacSpecial "\(^\s*\|;\s*\|\k\|\(if\|while\)\s*([^)]\+)\s*{*\s*\)\@<!' . name . '\(\k\)\@!"'
 endfor
 
-for name in keys(g:hidemac_builtin.functions.data) + ['loaddll']
+for name in keys(g:hidemac_builtin.functions.data)
     execute 'syntax match hidemacFunction "\(\k\)\@<!' . name . '\((\)\@="'
 endfor
 

@@ -66,7 +66,7 @@ function! s:load_keywords() abort
     return
   endif
   let l:candidates = []
-  let l:list = []
+  let l:dict = {}
   for l:file in glob(s:hidemac_extract_dir . '\html\060_Keyword_*.html', 1, 1)
     let l:lines = s:get_html_lines(l:file)
     let l:desc = ''
@@ -97,13 +97,13 @@ function! s:load_keywords() abort
             \ 'kind' : l:type,
             \ 'menu' : '(Keyword) ' . l:menu
             \})
-      call add(l:list, l:word)
+      let l:dict[l:word] = {'type': l:type}
       let desc = ''
     endfor
   endfor
   let g:hidemac_builtin.keywords = {
         \ 'candidates': l:candidates,
-        \ 'data': l:list
+        \ 'data': l:dict
         \}
 endfunction
 
@@ -196,6 +196,96 @@ function! s:some_match(str, patterns) abort
     endif
   endfor
   return 0
+endfunction
+
+function! s:load_dlls() abort
+  if !exists('g:hidemac_builtin')
+        \	|| !has_key(g:hidemac_builtin, 'functions')
+        \ || !has_key(g:hidemac_builtin, 'statements')
+        \ || !has_key(g:hidemac_builtin, 'keywords')
+    echoerr "めんどぃからload_dllゎほかのビルトインをロードしてからにして"
+    return
+  endif
+  
+  let l:lines = s:get_html_lines('200_Dll.html')
+  let l:start = match(l:lines, '<DL>')
+  let l:end = match(l:lines, '</DL>')
+  let l:html = join(l:lines[l:start : l:end], "\r")
+  
+  let l:pos = 0
+  let l:len = len(l:html)
+  
+  let l:dt_pattern = '<DT CLASS="SUBTITLE2">\zs.\{-}\ze\r'
+  let l:categories_ja = ['文', '関数', '値']
+  let l:categories_en = ['Statement', 'Function', 'Keyword']
+  
+  while 1
+    let l:left = match(l:html, l:dt_pattern, l:pos)
+    if l:left == -1
+      break
+    endif
+    let l:right = matchend(l:html, l:dt_pattern, l:pos)
+    let l:pos = l:right + 1
+
+    let l:txt = l:html[l:left : l:right - 1]
+    let l:word = matchstr(l:txt, '[a-z]\+')
+    let l:desc = s:trim(s:remove_tags(matchstr(l:html, '\_.\{-}\ze<BR>', l:right)))
+
+    let l:category = l:categories_en[index(l:categories_ja, matchstr(l:txt, '（\zs.\{-}\ze）'))]
+    if has_key(g:hidemac_builtin[tolower(l:category) . 's'].data, l:word)
+      continue
+    endif
+    if l:category == 'Statement'
+      let l:candidate = {
+            \ 'word': l:word,
+            \ 'desc': '(' . l:category .') ' . l:desc
+            \}
+      let l:data = []
+    elseif l:category == 'Function'
+      if l:word =~ '^dllfunc'
+        " 本当ゎ、複数のDLLを扱ぅとき引数パターンがちがぅんだけど、
+        " そーゅー関数がほかにもぁったらまたかんがぇる
+        let l:type = '?'
+        let l:arg_string = 'funcname, ...'
+        let l:arg_types = ['$']
+      elseif l:word == 'loaddll'
+        let l:desc = '複数のDLLを扱うためのloaddll文の代わり'
+        let l:type = '#'
+        let l:arg_string = 'filename'
+        let l:arg_types = ['$']
+      elseif l:word == 'getloaddllfile'
+        let l:type = '$'
+        let l:arg_string = 'dll_id'
+        let l:arg_types = ['#']
+      endif
+      
+      let l:candidate = {
+          \ 'word' : l:word . '(',
+          \ 'info' : l:word . '(' . l:arg_string . ')',
+          \ 'kind' : l:type,
+          \ 'menu' : l:desc
+          \}
+      let l:data = {
+            \ 'type': l:type,
+            \ 'args': {'str': l:arg_string, 'types': l:arg_types}
+            \}
+    elseif l:category == 'Keyword'
+      let l:type = '?'
+      if l:word == 'loaddllfile'
+        let l:desc = 'ロードされているDLLのファイル名'
+        let l:type = '$'
+      endif
+      let l:candidate = {
+            \ 'word': l:word,
+            \ 'kind': l:type,
+            \ 'menu': '(' . l:category .') ' . l:desc
+            \}
+      let l:data = {type: l:type}
+    endif
+    call add(g:hidemac_builtin[tolower(l:category) . 's'].candidates, l:candidate)
+    let g:hidemac_builtin[tolower(l:category) . 's'].data[l:word] = l:data
+    unlet l:data
+  endwhile
 endfunction
 
 function! s:load_functions() abort
@@ -621,12 +711,8 @@ function! s:get_last_type(ctx) abort
         return '$'
       elseif l:k =~ '^#'
         return '#'
-      else
-        for data in s:keywords()
-          if data.word == l:k
-            return data.kind
-          endif
-        endfor
+      elseif has_key(g:hidemac_builtin.keywords.data, l:k)
+        return g:hidemac_builtin.keywords.data[l:k].type
       endif
       break
     else
@@ -704,7 +790,6 @@ function! s:stringify_candidates(cur_arg_text, candidates) abort
     return a:candidates
   endif
   let l:candidates = a:candidates
-  echomsg string(l:candidates)
   for i in range(0, len(l:candidates) - 1)
     let l:candidates[i].word = '"' . l:candidates[i].word . '"'
   endfor
@@ -828,6 +913,7 @@ call s:chm2html()
 call s:load_statements()
 call s:load_functions()
 call s:load_keywords()
+call s:load_dlls()
 
 let g:hidemac_macro_dir = 'C:\Users\color_000\AppData\Roaming\Hidemaruo\Hidemaru\Macro'
 
