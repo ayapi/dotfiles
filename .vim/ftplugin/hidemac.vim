@@ -166,6 +166,29 @@ function! s:load_configs() abort
         \}
 endfunction
 
+function! s:load_filters() abort
+  if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'filters')
+    return
+  endif
+  let l:dict = {}
+  
+  let l:lines = s:get_html_lines('080_CmdStatement_Edit_filter.html')
+  let l:start = match(l:lines, '<TABLE') + 1
+  let l:end = match(l:lines, '</TABLE>') - 1
+  for l:lnum in range(l:start, l:end)
+    let l:line = l:lines[l:lnum]
+    let l:line = substitute(l:line, '^\s*<tr><td>', '', '')
+    let l:line = substitute(l:line, '</td></tr>$', '', '')
+    let [l:word, l:desc] = split(l:line, '</td><td>')
+    let l:desc = substitute(l:desc, ' (※注)', '', '')
+    
+    let l:dict[l:word] = {'type': '$', 'desc': l:desc}
+  endfor
+  let g:hidemac_builtin.filters = {
+        \ 'data': l:dict
+        \}
+endfunction
+
 function! s:some_match(str, patterns) abort
   for pat in a:patterns
     if a:str =~ pat
@@ -662,14 +685,30 @@ function! s:split_arguments(line) abort
   
   let l:args = []
   let l:commas_count = len(l:commas)
-  call add(l:args, l:line[: l:commas[0]])
+  call add(l:args, l:line[: l:commas[0] - 1])
   for l:cnum in range(0, l:commas_count - 2)
     call add(l:args, l:line[l:commas[l:cnum] + 1 : l:commas[l:cnum + 1] - 1])
   endfor
   call add(l:args, l:line[l:commas[l:commas_count - 1] + 1 :])
   
-  call map(l:args, 'substitute(v:val, "^\s*", "", "")')
+  call map(l:args, 'substitute(v:val, "^\\s*", "", "")')
   return l:args
+endfunction
+
+function! s:get_candidates_from_data(data) abort
+  return values(map(deepcopy(a:data),
+        \ '{"word": v:key, "menu": v:val.desc, "kind": v:val.type}'))
+endfunction
+function! s:stringify_candidates(cur_arg_text, candidates) abort
+  if a:cur_arg_text =~ '^"'
+    return a:candidates
+  endif
+  let l:candidates = a:candidates
+  echomsg string(l:candidates)
+  for i in range(0, len(l:candidates) - 1)
+    let l:candidates[i].word = '"' . l:candidates[i].word . '"'
+  endfor
+  return l:candidates
 endfunction
 
 let s:special_functions = {}
@@ -678,13 +717,27 @@ function! s:special_functions.getconfig(i, args) abort
     return []
   endif
   call s:load_configs()
-  let l:map_word = 'v:key'
-  if a:args[0] !~ '^"'
-    let l:map_word = '"\"" . v:key . "\""'
+  let l:candidates = s:get_candidates_from_data(g:hidemac_builtin.configs.data)
+  return s:stringify_candidates(a:args[0],l:candidates)
+endfunction
+function! s:special_functions.filter(i, args) abort
+  if a:i == 0
+    return s:stringify_candidates(a:args[a:i],
+          \	[{'word': 'HmFilter', 'menu': '標準の変換モジュール'}])
+  elseif a:i == 1
+    if a:args[0] =~ '^""' || a:args[0] =~ '^"HmFilter"'
+      call s:load_filters()
+      echomsg string(g:hidemac_builtin.filters.data)
+      let l:candidates = s:get_candidates_from_data(g:hidemac_builtin.filters.data)
+      return s:stringify_candidates(a:args[1], l:candidates)
+    endif
+  elseif a:i == 2
+    if a:args[1] =~ '^"To\(Space\|Tab\)"'
+      return s:stringify_candidates(a:args[a:i],
+            \ [{'word': '1', 'menu': '範囲指定を無視して計算する'}])
+    endif
   endif
-  let l:candidates = values(map(deepcopy(g:hidemac_builtin.configs.data),
-        \ '{"word": ' . l:map_word . ', "menu": v:val.desc, "kind": v:val.type}'))
-  return l:candidates
+  return []
 endfunction
 
 function! s:gather_candidates(cur_line, cur_text) abort
