@@ -751,6 +751,9 @@ function! s:gather_candidates(cur_line, cur_text) abort
   elseif l:ctx =~ '^}\s*'
     " ブロックが閉じてる後
     return s:get_after_block(l:ctx)
+  elseif l:ctx =~ '[#$]\k\+\[\s*'
+    " 配列のキーをかきはじめるとこ
+    return s:expressions('#')
   elseif l:ctx =~ '#\k\+\s*=\s*$'
     " 数値型変数に代入するとこ
     return s:expressions('#')
