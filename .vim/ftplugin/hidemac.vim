@@ -531,14 +531,17 @@ function! s:variables(...) abort
         continue
       endif
       call add(l:candidates, {
-            \ 'word': matchstr(l:var, '^' . l:type_pattern . '.\{-}[ \=]'),
-            \ 'menu': matchstr(l:var, '=.\{-};$')
+            \ 'word': matchstr(l:var, '^' . l:type_pattern . '.\{-}\ze[ \=]'),
+            \ 'menu': matchstr(l:var, '\s*\zs=.\{-};$')
             \})
     endwhile
   endfor
   if l:call_found
     let l:returns = [{'word': '$$return'}, {'word': '##return'}]
-    call filter(l:returns, 'v:val.word !~ "^" . l:type_pattern')
+    if l:type_pattern == '$'
+      let l:type_pattern = '\$'
+    endif
+    call filter(l:returns, 'v:val.word =~ "^" . l:type_pattern')
     let l:candidates = l:candidates + l:returns
   endif
   return l:candidates
@@ -548,7 +551,6 @@ function! s:labels() abort
   let l:candidates = []
   for l:lnum in range(1, line('$'))
     let l:line = getline(l:lnum)
-    echomsg l:line
     let l:label = matchstr(l:line, '^\s*\zs[a-zA-Z0-9_"]\+\ze:\s*$')
     if l:label != ''
       call add(l:candidates, {'word': l:label})
@@ -875,6 +877,54 @@ function! s:special_statements.goto(i, args) abort
     return []
   endif
   return s:labels()
+endfunction
+function! s:special_statements.call(i, args) abort
+  " 文ゎふっぅ名前の後に引数カンマ区切りだけど、
+  " callゎ例外だと思ぅたぶん
+  " call Label $arg1, #arg2
+  " てかんじだからラベル名の後にゎカンマがこなぃ
+  let l:label_arg = matchstr(a:args[0], '^.\{-}\ze ')
+  if l:label_arg == ''
+    let l:args = a:args
+  else
+    let l:args = [
+          \ matchstr(a:args[0], '^.\{-}\ze '),
+          \ matchstr(a:args[0], ' \zs.*$')
+          \]
+    if len(a:args) > 1
+      let l:args = l:args + a:args[1:]
+    endif
+  endif
+  
+  let l:i = len(l:args) - 1
+  if l:i == 0
+    return s:labels()
+  endif
+  if l:i > 9
+    return []
+  endif
+  " 呼ぼーとしてるサブルーチンをさがす
+  let l:in_target_sub = 0
+  let l:type = '?'
+  for l:lnum in range(1, line('$'))
+    let l:line = getline(l:lnum)
+    if l:line =~ '^\s*' . l:args[0] . ':'
+      let l:in_target_sub = 1
+      continue
+    endif
+    if l:in_target_sub
+      " 呼ぼーとしてるサブルーチンの中で引数っぽぃものをさがす
+      let l:arg = matchstr(l:line, '[$#]\{2}' . string(l:i))
+      if l:arg != ''
+        let l:type = l:arg[0]
+        break
+      endif
+    endif
+    if l:line =~ '^\s*return;' && l:in_target_sub
+      break
+    endif
+  endfor
+  return s:expressions(l:type)
 endfunction
 
 function! s:gather_candidates(cur_line, cur_text) abort
