@@ -544,6 +544,19 @@ function! s:variables(...) abort
   return l:candidates
 endfunction
 
+function! s:labels() abort
+  let l:candidates = []
+  for l:lnum in range(1, line('$'))
+    let l:line = getline(l:lnum)
+    echomsg l:line
+    let l:label = matchstr(l:line, '^\s*\zs[a-zA-Z0-9_"]\+\ze:\s*$')
+    if l:label != ''
+      call add(l:candidates, {'word': l:label})
+    endif
+  endfor
+  return l:candidates
+endfunction
+
 function! s:get_after_block(ctx) abort
   if strridx(a:ctx, '(') > strridx(a:ctx, ')')
     " else ifの条件のかくカッコの中にぃる
@@ -856,6 +869,12 @@ function! s:special_statements.execmacro(i, args) abort
     return s:expressions('$')
   endif
   return []
+endfunction
+function! s:special_statements.goto(i, args) abort
+  if a:i > 0
+    return []
+  endif
+  return s:labels()
 endfunction
 
 function! s:gather_candidates(cur_line, cur_text) abort
