@@ -485,17 +485,21 @@ function! s:expressions(...) abort
     return s:variables() + s:keywords() + s:functions()
   endif
   if a:1 == '#'
-    return filter(copy(s:variables()), 'v:val.word =~ "^#"')
+    return s:variables('#')
             \ + filter(copy(s:keywords()), 'v:val.kind != "$"')
             \ + filter(copy(s:functions()), 'v:val.kind != "$"')
   elseif a:1 == '$'
-    return filter(copy(s:variables()), 'v:val.word =~ "^\\$"')
+    return s:variables('$')
             \ + filter(copy(s:keywords()), 'v:val.kind != "#"')
             \ + filter(copy(s:functions()), 'v:val.kind != "#"')
   endif
 endfunction
 
-function! s:variables() abort
+function! s:variables(...) abort
+  let l:type_pattern = '[$#]'
+  if a:0 == 1 && a:1 =~ '[$#]'
+    let l:type_pattern = a:1
+  endif
   let l:candidates = []
   let l:in_other_sub = 0
   let l:call_found = 0
@@ -516,15 +520,26 @@ function! s:variables() abort
       let l:call_found = 1
     endif
     
-    if l:line =~ '^\s*[$#]'
-      if l:in_other_sub && l:line =~ '^\s*[$#]\{2\}' " local var in other sub
+    let l:i = 1
+    while 1
+      let l:var = matchstr(l:line, l:type_pattern . '[a-zA-Z0-9_]\+\s*=[^;]\{-};', 0, l:i)
+      let l:i = l:i + 1
+      if l:var == ''
+        break
+      endif
+      if l:in_other_sub && l:var =~ '^' . l:type_pattern .'\{2\}' " local var in other sub
         continue
       endif
-      call add(l:candidates, {'word': matchstr(l:line, '^\s*\zs[$#][^ \=]*\ze')})
-    endif
+      call add(l:candidates, {
+            \ 'word': matchstr(l:var, '^' . l:type_pattern . '.\{-}[ \=]'),
+            \ 'menu': matchstr(l:var, '=.\{-};$')
+            \})
+    endwhile
   endfor
   if l:call_found
-    let l:candidates = l:candidates + [{'word': '$$return'}, {'word': '##return'}]
+    let l:returns = [{'word': '$$return'}, {'word': '##return'}]
+    call filter(l:returns, 'v:val.word !~ "^" . l:type_pattern')
+    let l:candidates = l:candidates + l:returns
   endif
   return l:candidates
 endfunction
