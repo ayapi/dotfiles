@@ -43,7 +43,7 @@ function! s:chm2html() abort
 endfunction
 
 function! s:trim(str) abort
-  return substitute(a:str, '^[ \t　]\+', '', 'g')
+  return substitute(a:str, '^[ \t\r\n　]\+', '', 'g')
 endfunction
 
 function! s:remove_tags(str) abort
@@ -104,6 +104,66 @@ function! s:load_keywords() abort
   let g:hidemac_builtin.keywords = {
         \ 'candidates': l:candidates,
         \ 'data': l:list
+        \}
+endfunction
+
+function! s:full2half(str) abort
+  let l:list = [['（', '('], ['）', ')']]
+  let l:str = a:str
+  for [full, half] in l:list
+    let l:str = substitute(l:str, full, half, 'g')
+  endfor
+  return l:str
+endfunction
+
+function! s:load_configs() abort
+  if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'configs')
+    return
+  endif
+  let l:candidates = []
+  let l:dict = {}
+  
+  let l:lines = s:get_html_lines('150_ConfigStatement_config_x.html')
+  let l:start = match(l:lines, '<TD VALIGN=TOP><NOBR><B>xFont')
+  let l:end = match(l:lines, '</TABLE>')
+  let l:html = join(l:lines[l:start : l:end], "\r")
+  
+  let l:pos = 0
+  let l:len = len(l:html)
+  
+  " 改行を含む最短一致で内包要素のみマッチ
+  let l:td_pattern = '<TD\( VALIGN=TOP\)*>\zs\_.\{-}\ze</TD>'
+  
+  while 1
+    let l:left = match(l:html, l:td_pattern, l:pos)
+    if l:left == -1
+      break
+    endif
+    let l:right = matchend(l:html, l:td_pattern, l:pos)
+    let l:pos = l:right + 1
+    
+    let l:txt = l:html[l:left : l:right - 1]
+    if l:txt =~ '<NOBR><B>x'
+      let l:word = substitute(s:remove_tags(l:txt), '^x', '', '')
+      continue
+    elseif l:txt =~ '<NOBR>'
+      let l:type = s:remove_tags(l:txt) == '文字列' ? '$' : '#'
+      continue
+    else
+      let l:desc = s:trim(s:full2half(substitute(l:txt, '<BR>\_.*', '', '')))
+      call add(l:candidates, {
+            \ 'word': l:word,
+            \ 'kind': l:type,
+            \ 'menu': l:desc
+            \})
+      let l:dict[l:word] = {
+          \ 'type': l:type
+          \}
+    endif
+  endwhile
+  let g:hidemac_builtin.configs = {
+        \ 'candidates': l:candidates,
+        \ 'data': l:dict
         \}
 endfunction
 
