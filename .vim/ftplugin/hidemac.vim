@@ -120,7 +120,6 @@ function! s:load_configs() abort
   if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'configs')
     return
   endif
-  let l:candidates = []
   let l:dict = {}
   
   let l:lines = s:get_html_lines('150_ConfigStatement_config_x.html')
@@ -151,18 +150,18 @@ function! s:load_configs() abort
       continue
     else
       let l:desc = s:trim(s:full2half(substitute(l:txt, '<BR>\_.*', '', '')))
-      call add(l:candidates, {
-            \ 'word': l:word,
-            \ 'kind': l:type,
-            \ 'menu': l:desc
-            \})
+      if l:word == 'AutoAdjustOrikaeshi'
+        let l:desc = '折り返し桁数の動作'
+      elseif l:word == 'OrikaeshiLine'
+        let l:desc = substitute(l:desc, '　.*', '', '')
+      endif
       let l:dict[l:word] = {
-          \ 'type': l:type
+          \ 'type': l:type,
+          \ 'desc': l:desc
           \}
     endif
   endwhile
   let g:hidemac_builtin.configs = {
-        \ 'candidates': l:candidates,
         \ 'data': l:dict
         \}
 endfunction
@@ -228,8 +227,7 @@ function! s:load_functions() abort
     let l:arg_types = map(split(l:func[2], ', '), 'v:val =~ "^s" ? "$" : "#"')
     let l:dict[l:func[1]] = {
           \ 'type': l:type,
-          \ 'arg_labels': l:func[2],
-          \ 'arg_types': l:arg_types
+          \ 'args': {'str': l:func[2], 'types': l:arg_types}
           \}
   endfor
   let g:hidemac_builtin.functions = {
@@ -530,7 +528,13 @@ function! s:stash_strings(line) abort
     endif
     " 開ぃてたから、閉じるとこまでを置き換ぇる
     let l:q = l:line[l:q_open_pos]
-    let l:line = substitute(l:line, s:str_patterns[l:q], '$$str')
+    let l:replaced_line = substitute(l:line, s:str_patterns[l:q], '$$str', '')
+    if l:replaced_line == l:line
+      " そも②閉じられてなかった
+      let l:line = l:line[: l:q_open_pos - 1] . '$$str'
+      break
+    endif
+    let l:line = l:replaced_line
   endwhile
   return l:line
 endfunction
@@ -620,6 +624,21 @@ function! s:get_last_type(ctx) abort
   return l:type
 endfunction
 
+let s:special_functions = {}
+function! s:special_functions.getconfig(i, ctx_args) abort
+  if a:i > 0
+    return []
+  endif
+  call s:load_configs()
+  let l:map_word = 'v:key'
+  if a:ctx_args !~ '^"'
+    let l:map_word = '"\"" . v:key . "\""'
+  endif
+  let l:candidates = values(map(deepcopy(g:hidemac_builtin.configs.data),
+        \ '{"word": ' . l:map_word . ', "menu": v:val.desc, "kind": v:val.type}'))
+  return l:candidates
+endfunction
+
 function! s:gather_candidates(cur_line, cur_text) abort
   let l:ctx = s:get_context(a:cur_line)
   echomsg 'ctx: ' . l:ctx
@@ -650,13 +669,17 @@ function! s:gather_candidates(cur_line, cur_text) abort
     let [l:function_name, l:comma_count] = s:analyze_function(l:line)
     if l:function_name != '' && has_key(g:hidemac_builtin.functions.data, l:function_name)
       " 関数の引数
-      let l:arg_types = g:hidemac_builtin.functions.data[l:function_name].arg_types
+      if has_key(s:special_functions, l:function_name)
+        " 特別な補完候補の用意がぁる
+        return s:special_functions[l:function_name](l:comma_count,
+              \ substitute(l:ctx, '^.\{-}' . l:function_name . '(', '', ''))
+      endif
+      " 特別じゃなくただ型で候補をだす
+      let l:arg_types = g:hidemac_builtin.functions.data[l:function_name].args.types
       if l:comma_count >= len(l:arg_types)
         return []
       endif
-      return s:expressions(
-          \ g:hidemac_builtin.functions.data[l:function_name].arg_types[l:comma_count]
-          \)
+      return s:expressions(l:arg_types[l:comma_count])
     elseif has_key(g:hidemac_builtin.statements.data, l:ks[0])
       " 文の引数かく場面なんだけどまだ演算子とか関数とかゎかぃてなぃ系
       return s:expressions()
