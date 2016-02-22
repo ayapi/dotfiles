@@ -727,7 +727,6 @@ function! s:special_functions.filter(i, args) abort
   elseif a:i == 1
     if a:args[0] =~ '^""' || a:args[0] =~ '^"HmFilter"'
       call s:load_filters()
-      echomsg string(g:hidemac_builtin.filters.data)
       let l:candidates = s:get_candidates_from_data(g:hidemac_builtin.filters.data)
       return s:stringify_candidates(a:args[1], l:candidates)
     endif
@@ -736,6 +735,25 @@ function! s:special_functions.filter(i, args) abort
       return s:stringify_candidates(a:args[a:i],
             \ [{'word': '1', 'menu': '範囲指定を無視して計算する'}])
     endif
+  endif
+  return []
+endfunction
+
+let s:special_statements = {}
+function! s:special_statements.execmacro(i, args) abort
+  if a:i == 0
+    if !exists("g:hidemac_macro_dir") || !isdirectory(g:hidemac_macro_dir)
+      return s:expressions('$')
+    endif
+    let l:files = glob(g:hidemac_macro_dir . '\*.mac', 1, 1)
+          \	+ glob(g:hidemac_macro_dir . '\**\*.mac', 1, 1)
+    let l:relative_pos = len(g:hidemac_macro_dir) + 1
+    call map(l:files,
+          \ '{ "word" : v:val[l:relative_pos :], '
+          \ . '"menu" : g:hidemac_macro_dir }')
+    return s:stringify_candidates(a:args[a:i], l:files) + s:expressions('$')
+  elseif a:i == 1
+    return s:expressions('$')
   endif
   return []
 endfunction
@@ -777,7 +795,7 @@ function! s:gather_candidates(cur_line, cur_text) abort
         " 特別な補完候補の用意がぁる
         let l:args_text = l:ctx[strridx(l:ctx, l:function_name . '(') + len(l:function_name) + 1 :]
         let l:args = s:split_arguments(l:args_text)
-        return s:special_functions[l:function_name](l:comma_count, l:args)
+        return s:special_functions[l:function_name](len(l:args) - 1, l:args)
       endif
       " 特別じゃなくただ型で候補をだす
       let l:arg_types = g:hidemac_builtin.functions.data[l:function_name].args.types
@@ -786,7 +804,18 @@ function! s:gather_candidates(cur_line, cur_text) abort
       endif
       return s:expressions(l:arg_types[l:comma_count])
     elseif has_key(g:hidemac_builtin.statements.data, l:ks[0])
+      let l:statement_name = l:ks[0]
+      if l:ctx =~ '^' . l:statement_name . '$'
+        " 文の名前ゎかきぉゎってんだけどスペースゎ打ってなぃ
+        return []
+      endif
       " 文の引数かく場面なんだけどまだ演算子とか関数とかゎかぃてなぃ系
+      if has_key(s:special_statements, l:statement_name)
+        " 特別な補完候補の用意がぁる
+        let l:args_text = substitute(l:ctx, '^' . l:statement_name, ' ', '')
+        let l:args = s:split_arguments(l:args_text)
+        return s:special_statements[l:statement_name](len(l:args) - 1, l:args)
+      endif
       return s:expressions()
     endif
   endif
@@ -799,6 +828,8 @@ call s:chm2html()
 call s:load_statements()
 call s:load_functions()
 call s:load_keywords()
+
+let g:hidemac_macro_dir = 'C:\Users\color_000\AppData\Roaming\Hidemaruo\Hidemaru\Macro'
 
 function! HidemacOmniComplete(findstart, base)
   if a:findstart
