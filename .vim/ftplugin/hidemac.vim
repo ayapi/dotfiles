@@ -624,14 +624,62 @@ function! s:get_last_type(ctx) abort
   return l:type
 endfunction
 
+function! s:split_arguments(line) abort
+  let l:line = a:line
+  let l:pos = 0
+  let l:level = 0
+  let l:commas = []
+
+  while 1
+    let l:pos = match(l:line, '[(),"'']', l:pos)
+    if l:pos == -1
+      break
+    endif
+    let l:char = l:line[l:pos]
+    
+    if l:char =~ '["'']'
+      " 文字列リテラルがはじまったからスキップする
+      let l:q_close_pos = matchend(l:line, s:str_patterns[l:char], l:pos)
+      if l:q_close_pos == -1
+        " 閉じてなぃっぽぃ
+        break
+      endif
+      let l:pos = l:q_close_pos
+      continue
+    elseif l:char == '('
+      let l:level = l:level + 1
+    elseif l:char == ')'
+      let l:level = l:level - 1
+    elseif l:char == ',' && l:level == 0
+      call add(l:commas, l:pos)
+    endif
+    let l:pos = l:pos + 1
+  endwhile
+  
+  if len(l:commas) == 0
+    return [substitute(l:line, '^\s*', '', '')]
+  endif
+  
+  let l:args = []
+  let l:commas_count = len(l:commas)
+  call add(l:args, l:line[: l:commas[0]])
+  for l:cnum in range(0, l:commas_count - 2)
+    call add(l:args, l:line[l:commas[l:cnum] + 1 : l:commas[l:cnum + 1] - 1])
+  endfor
+  call add(l:args, l:line[l:commas[l:commas_count - 1] + 1 :])
+  
+  call map(l:args, 'substitute(v:val, "^\s*", "", "")')
+  return l:args
+endfunction
+
 let s:special_functions = {}
-function! s:special_functions.getconfig(i, ctx_args) abort
+function! s:special_functions.getconfig(i, args) abort
   if a:i > 0
     return []
   endif
   call s:load_configs()
   let l:map_word = 'v:key'
-  if a:ctx_args !~ '^"'
+  if a:args[0] !~ '^"'
     let l:map_word = '"\"" . v:key . "\""'
   endif
   let l:candidates = values(map(deepcopy(g:hidemac_builtin.configs.data),
@@ -671,8 +719,9 @@ function! s:gather_candidates(cur_line, cur_text) abort
       " 関数の引数
       if has_key(s:special_functions, l:function_name)
         " 特別な補完候補の用意がぁる
-        return s:special_functions[l:function_name](l:comma_count,
-              \ substitute(l:ctx, '^.\{-}' . l:function_name . '(', '', ''))
+        let l:args_text = l:ctx[strridx(l:ctx, l:function_name . '(') + len(l:function_name) + 1 :]
+        let l:args = s:split_arguments(l:args_text)
+        return s:special_functions[l:function_name](l:comma_count, l:args)
       endif
       " 特別じゃなくただ型で候補をだす
       let l:arg_types = g:hidemac_builtin.functions.data[l:function_name].args.types
