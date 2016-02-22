@@ -1,7 +1,7 @@
 highlight Normal ctermfg=none ctermbg=none guifg=NONE guibg=NONE
 highlight VisualNOS cterm=none term=none gui=none
 highlight NonText cterm=none ctermfg=none gui=none
-highlight MatchParen cterm=none ctermbg=236 ctermfg=255 guibg=gray guifg=white
+highlight MatchParen cterm=none ctermbg=236 ctermfg=255 guibg=#303030 guifg=white
 highlight LineNr ctermbg=none guibg=NONE
 highlight cursorline cterm=none ctermbg=none ctermfg=none gui=none guibg=NONE guifg=NONE
 highlight cursorlinenr ctermfg=white ctermbg=none guifg=white guibg=NONE
