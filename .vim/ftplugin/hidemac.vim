@@ -1,7 +1,7 @@
 let g:hidemac_builtin = get(g:, 'hidemac_builtin', {})
 
 let s:chm_filenames = ['hidemac_html.chm', 'hmjre.chm']
-function! s:set_hidemac_chm_dir() abort
+function! s:set_hidemac_chm_dir() abort"{{{
   if exists("g:hidemac_chm_dir") && filereadable(g:hidemac_chm_dir . '\' . s:chm_filenames[0])
     let s:hidemac_chm_dir = g:hidemac_chm_dir
     return
@@ -17,17 +17,15 @@ function! s:set_hidemac_chm_dir() abort
     endif
   endfor
   echoerr 'couldnt find Hidemaru directory'
-endfunction
-
-function! s:set_hidemac_doc_dir() abort
+endfunction"}}}
+function! s:set_hidemac_doc_dir() abort"{{{
   if exists("g:hidemac_extract_dir")
     let s:hidemac_extract_dir = g:hidemac_extract_dir
   else
     let s:hidemac_extract_dir = $HOME . '\hidemac_doc'
   endif
-endfunction
-
-function! s:chm2html() abort
+endfunction"}}}
+function! s:chm2html() abort"{{{
   for l:chm_filename in s:chm_filenames
     let l:extract_dir = shellescape(
           \ s:hidemac_extract_dir	. '\' .fnamemodify(l:chm_filename, ':t:r')
@@ -44,17 +42,14 @@ function! s:chm2html() abort
             \)
     call system(l:extract_cmd)
   endfor
-endfunction
-
-function! s:trim(str) abort
+endfunction"}}}
+function! s:trim(str) abort"{{{
   return substitute(a:str, '^[ \t\r\n　]\+', '', 'g')
-endfunction
-
-function! s:remove_tags(str) abort
+endfunction"}}}
+function! s:remove_tags(str) abort"{{{
   return substitute(a:str, '<[^>]\+>', '', 'g')
-endfunction
-
-function! s:get_html_lines(fullpath_or_filename, ...) abort
+endfunction"}}}
+function! s:get_html_lines(fullpath_or_filename, ...) abort"{{{
   let l:doc = 'hidemac_html'
   if a:0 == 1
     let l:doc = a:1
@@ -67,9 +62,8 @@ function! s:get_html_lines(fullpath_or_filename, ...) abort
   let l:sjis_html = join(readfile(l:path, 'b'))
   let l:utf8_html = iconv(l:sjis_html, 'cp932', 'utf-8')
   return split(l:utf8_html, "\r", 1)
-endfunction
-
-function! s:load_keywords() abort
+endfunction"}}}
+function! s:load_keywords() abort"{{{
   if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'keywords')
     return
   endif
@@ -113,18 +107,16 @@ function! s:load_keywords() abort
         \ 'candidates': l:candidates,
         \ 'data': l:dict
         \}
-endfunction
-
-function! s:full2half(str) abort
+endfunction"}}}
+function! s:full2half(str) abort"{{{
   let l:list = [['（', '('], ['）', ')']]
   let l:str = a:str
   for [full, half] in l:list
     let l:str = substitute(l:str, full, half, 'g')
   endfor
   return l:str
-endfunction
-
-function! s:load_configs() abort
+endfunction"}}}
+function! s:load_configs() abort"{{{
   if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'configs')
     return
   endif
@@ -172,9 +164,8 @@ function! s:load_configs() abort
   let g:hidemac_builtin.configs = {
         \ 'data': l:dict
         \}
-endfunction
-
-function! s:load_filters() abort
+endfunction"}}}
+function! s:load_filters() abort"{{{
   if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'filters')
     return
   endif
@@ -195,18 +186,16 @@ function! s:load_filters() abort
   let g:hidemac_builtin.filters = {
         \ 'data': l:dict
         \}
-endfunction
-
-function! s:some_match(str, patterns) abort
+endfunction"}}}
+function! s:some_match(str, patterns) abort"{{{
   for pat in a:patterns
     if a:str =~ pat
       return 1
     endif
   endfor
   return 0
-endfunction
-
-function! s:load_dlls() abort
+endfunction"}}}
+function! s:load_dlls() abort"{{{
   if !exists('g:hidemac_builtin')
         \	|| !has_key(g:hidemac_builtin, 'functions')
         \ || !has_key(g:hidemac_builtin, 'statements')
@@ -295,10 +284,10 @@ function! s:load_dlls() abort
     let g:hidemac_builtin[l:category . 's'].data[l:word] = l:data
     unlet l:data
   endwhile
-endfunction
+endfunction"}}}
 
 let s:load_dllfuncs = {}
-function! s:load_dllfuncs.hmjre() abort
+function! s:load_dllfuncs.hmjre() abort"{{{
   if exists('g:hidemac_dlls')	&& has_key(g:hidemac_builtin, 'hmjre')
     return
   endif
@@ -376,9 +365,8 @@ function! s:load_dllfuncs.hmjre() abort
     endfor
   endwhile
   let g:hidemac_dlls.hmjre = l:dict
-endfunction
-
-function! s:load_functions() abort
+endfunction"}}}
+function! s:load_functions() abort"{{{
   if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'functions')
     return
   endif
@@ -437,9 +425,8 @@ function! s:load_functions() abort
         \ 'candidates': l:candidates,
         \ 'data': l:dict
         \}
-endfunction
-
-function! s:get_cmd_statements() abort
+endfunction"}}}
+function! s:get_cmd_statements() abort"{{{
   let l:candidates = []
   let l:dict = {}
   for l:file in glob(s:hidemac_extract_dir . '\hidemac_html\html\080_CmdStatement_*.html', 1, 1)
@@ -468,7 +455,7 @@ function! s:get_cmd_statements() abort
     endfor
   endfor
   return [l:candidates, l:dict]
-endfunction
+endfunction"}}}
 
 let s:other_statements = {
       \ 'openreg': 'レジストリをオープンする',
@@ -484,8 +471,7 @@ let s:other_statements = {
       \ 'begingroupundo': 'やり直しのグループ化を開始する',
       \ 'endgroupundo': 'やり直しのグループ化を終了する',
       \}
-
-function! s:get_other_statements() abort
+function! s:get_other_statements() abort"{{{
   let l:candidates = []
   let l:dict = {}
   for l:num in range(9, 15)
@@ -545,9 +531,8 @@ function! s:get_other_statements() abort
   let l:dict['call'] = []
   let l:dict['return'] = []
   return [l:candidates, l:dict]
-endfunction
-
-function! s:load_statements() abort
+endfunction"}}}
+function! s:load_statements() abort"{{{
   if exists('g:hidemac_builtin') && has_key(g:hidemac_builtin, 'statements')
     return
   endif
@@ -556,13 +541,11 @@ function! s:load_statements() abort
   let [l:other_candidates, l:other_data] = s:get_other_statements()
   let g:hidemac_builtin.statements.candidates = l:cmd_candidates + l:other_candidates
   let g:hidemac_builtin.statements.data = extend(l:cmd_data, l:other_data)
-endfunction
-
-function! s:statements() abort
+endfunction"}}}
+function! s:statements() abort"{{{
   return g:hidemac_builtin.statements.candidates
-endfunction
-
-function! s:functions(...) abort
+endfunction"}}}
+function! s:functions(...) abort"{{{
   if a:0 == 0 || a:1 == '' || a:1 == '?'
     return copy(g:hidemac_builtin.functions.candidates)
   endif
@@ -570,9 +553,8 @@ function! s:functions(...) abort
   if a:1 =~ '[$#]'
     return filter(copy(g:hidemac_builtin.functions.candidates), 'v:val.kind != l:type')
   endif
-endfunction
-
-function! s:keywords(...) abort
+endfunction"}}}
+function! s:keywords(...) abort"{{{
   if a:0 == 0 || a:1 == '' || a:1 == '?'
     return copy(g:hidemac_builtin.keywords.candidates)
   endif
@@ -580,18 +562,16 @@ function! s:keywords(...) abort
   if a:1 =~ '[$#]'
     return filter(copy(g:hidemac_builtin.keywords.candidates), 'v:val.kind != l:type')
   endif
-endfunction
-
-function! s:expressions(...) abort
+endfunction"}}}
+function! s:expressions(...) abort"{{{
   if a:0 == 0 || a:1 == '' || a:1 == '?'
     return s:variables() + s:keywords() + s:functions()
   endif
   if a:1 =~ '[$#]'
     return s:variables(a:1) + s:keywords(a:1) + s:functions(a:1)
   endif
-endfunction
-
-function! s:variables(...) abort
+endfunction"}}}
+function! s:variables(...) abort"{{{
   let l:type_pattern = '[$#]'
   if a:0 == 1 && a:1 =~ '[$#]'
     let l:type_pattern = a:1
@@ -641,9 +621,8 @@ function! s:variables(...) abort
     let l:candidates = l:candidates + l:returns
   endif
   return l:candidates
-endfunction
-
-function! s:labels() abort
+endfunction"}}}
+function! s:labels() abort"{{{
   let l:candidates = []
   for l:lnum in range(1, line('$'))
     let l:line = getline(l:lnum)
@@ -653,9 +632,8 @@ function! s:labels() abort
     endif
   endfor
   return l:candidates
-endfunction
-
-function! s:get_after_block(ctx) abort
+endfunction"}}}
+function! s:get_after_block(ctx) abort"{{{
   if strridx(a:ctx, '(') > strridx(a:ctx, ')')
     " else ifの条件のかくカッコの中にぃる
     return s:expressions()
@@ -685,10 +663,10 @@ function! s:get_after_block(ctx) abort
     return []
   endif
   return []
-endfunction
+endfunction"}}}
 
 let s:str_patterns = {'''': '''.\{-}\(\\\)\@<!''', '"': '".\{-}\(\\\)\@<!"'}
-function! s:get_context(line) abort
+function! s:get_context(line) abort"{{{
   let l:line = a:line
   let l:str_ranges = []
   let l:i = 0
@@ -755,9 +733,8 @@ function! s:get_context(line) abort
 
   " echomsg l:head_position . '/' . len(l:line)
   return s:trim(l:line[l:head_position: ])
-endfunction
-
-function! s:stash_strings(line) abort
+endfunction"}}}
+function! s:stash_strings(line) abort"{{{
   let l:line = a:line
   while 1
     " ダブルクオートかクオートがひらくとこをさがす
@@ -776,9 +753,8 @@ function! s:stash_strings(line) abort
     let l:line = l:replaced_line
   endwhile
   return l:line
-endfunction
-
-function! s:analyze_brace(line, target_level) abort
+endfunction"}}}
+function! s:analyze_brace(line, target_level) abort"{{{
   let l:level = 0
   let l:last_pos = len(a:line) - 1
   let l:comma_count = 0
@@ -804,9 +780,8 @@ function! s:analyze_brace(line, target_level) abort
     let l:level = l:cur_level
   endfor
   return [i, l:comma_count]
-endfunction
-
-function! s:analyze_function(line, ...) abort
+endfunction"}}}
+function! s:analyze_function(line, ...) abort"{{{
   " デフォでゎ、ぃま引数をかぃてる関数の名前を取る
   let l:target_level = -1
   if a:0 == 1 && a:1 == 'last'
@@ -815,9 +790,8 @@ function! s:analyze_function(line, ...) abort
   endif
   let [l:pos, l:comma_count] = s:analyze_brace(a:line, l:target_level)
   return [matchstr(a:line[: l:pos - 1], '[a-zA-Z0-9_$#]\+$'), l:comma_count]
-endfunction
-
-function! s:get_last_type(ctx) abort
+endfunction"}}}
+function! s:get_last_type(ctx) abort"{{{
   let l:line = s:stash_strings(a:ctx)
   let l:type = '?'
   while len(l:line) >= 0
@@ -857,9 +831,8 @@ function! s:get_last_type(ctx) abort
     endif
   endwhile
   return l:type
-endfunction
-
-function! s:split_arguments(line) abort
+endfunction"}}}
+function! s:split_arguments(line) abort"{{{
   let l:line = a:line
   let l:pos = 0
   let l:level = 0
@@ -905,13 +878,12 @@ function! s:split_arguments(line) abort
   
   call map(l:args, 'substitute(v:val, "^\\s*", "", "")')
   return l:args
-endfunction
-
-function! s:get_candidates_from_data(data) abort
+endfunction"}}}
+function! s:get_candidates_from_data(data) abort"{{{
   return values(map(deepcopy(a:data),
         \ '{"word": v:key, "menu": v:val.desc, "kind": v:val.type}'))
-endfunction
-function! s:stringify_candidates(cur_arg_text, candidates) abort
+endfunction"}}}
+function! s:stringify_candidates(cur_arg_text, candidates) abort"{{{
   if a:cur_arg_text =~ '^"'
     return a:candidates
   endif
@@ -920,18 +892,18 @@ function! s:stringify_candidates(cur_arg_text, candidates) abort
     let l:candidates[i].word = '"' . l:candidates[i].word . '"'
   endfor
   return l:candidates
-endfunction
+endfunction"}}}
 
 let s:special_functions = {}
-function! s:special_functions.getconfig(i, args) abort
+function! s:special_functions.getconfig(i, args) abort"{{{
   if a:i > 0
     return []
   endif
   call s:load_configs()
   let l:candidates = s:get_candidates_from_data(g:hidemac_builtin.configs.data)
   return s:stringify_candidates(a:args[0],l:candidates)
-endfunction
-function! s:special_functions.filter(i, args) abort
+endfunction"}}}
+function! s:special_functions.filter(i, args) abort"{{{
   if a:i == 0
     return s:stringify_candidates(a:args[a:i],
           \	[{'word': 'HmFilter', 'menu': '標準の変換モジュール'}])
@@ -948,8 +920,8 @@ function! s:special_functions.filter(i, args) abort
     endif
   endif
   return []
-endfunction
-function! s:special_functions.loaddll(i, args) abort
+endfunction"}}}
+function! s:special_functions.loaddll(i, args) abort"{{{
   if a:i > 0
     return []
   endif
@@ -961,8 +933,8 @@ function! s:special_functions.loaddll(i, args) abort
         \ + s:stringify_candidates(a:args[a:i],	[{'word': 'hmjre.dll'}])
         \ + s:keywords('$')
         \ + s:functions('$')
-endfunction
-function! s:special_functions.dllfunc(i, args) abort
+endfunction"}}}
+function! s:special_functions.dllfunc(i, args) abort"{{{
   let l:loaded_dll = ''
   let l:id_specified = 0
   let l:i = a:i
@@ -1053,22 +1025,22 @@ function! s:special_functions.dllfunc(i, args) abort
     endif
   endif
   return []
-endfunction
-function! s:special_functions.dllfuncstr(i, args) abort
+endfunction"}}}
+function! s:special_functions.dllfuncstr(i, args) abort"{{{
   return s:special_functions.dllfunc(a:i, a:args)
-endfunction
-function! s:special_functions.dllfuncw(i, args) abort
+endfunction"}}}
+function! s:special_functions.dllfuncw(i, args) abort"{{{
   return s:special_functions.dllfunc(a:i, a:args)
-endfunction
-function! s:special_functions.dllfuncstrw(i, args) abort
+endfunction"}}}
+function! s:special_functions.dllfuncstrw(i, args) abort"{{{
   return s:special_functions.dllfunc(a:i, a:args)
-endfunction
+endfunction"}}}
 
 let s:special_statements = {}
-function! s:special_statements.loaddll(i, args) abort
+function! s:special_statements.loaddll(i, args) abort"{{{
   return s:special_functions.loaddll(a:i, a:args)
-endfunction
-function! s:special_statements.execmacro(i, args) abort
+endfunction"}}}
+function! s:special_statements.execmacro(i, args) abort"{{{
   if a:i == 0
     if !exists("g:hidemac_macro_dir") || !isdirectory(g:hidemac_macro_dir)
       return s:expressions('$')
@@ -1084,14 +1056,14 @@ function! s:special_statements.execmacro(i, args) abort
     return s:expressions('$')
   endif
   return []
-endfunction
-function! s:special_statements.goto(i, args) abort
+endfunction"}}}
+function! s:special_statements.goto(i, args) abort"{{{
   if a:i > 0
     return []
   endif
   return s:labels()
-endfunction
-function! s:special_statements.call(i, args) abort
+endfunction"}}}
+function! s:special_statements.call(i, args) abort"{{{
   " 文ゎふっぅ名前の後に引数カンマ区切りだけど、
   " callゎ例外だと思ぅたぶん
   " call Label $arg1, #arg2
@@ -1138,9 +1110,8 @@ function! s:special_statements.call(i, args) abort
     endif
   endfor
   return s:expressions(l:type)
-endfunction
-
-function! s:gather_candidates(cur_line, cur_text) abort
+endfunction"}}}
+function! s:gather_candidates(cur_line, cur_text) abort"{{{
   let l:ctx = s:get_context(a:cur_line)
   echomsg 'ctx: ' . l:ctx
   
@@ -1205,7 +1176,7 @@ function! s:gather_candidates(cur_line, cur_text) abort
     endif
   endif
   return s:expressions()
-endfunction
+endfunction"}}}
 
 call s:set_hidemac_chm_dir()
 call s:set_hidemac_doc_dir()
@@ -1217,12 +1188,12 @@ call s:load_dlls()
 
 let g:hidemac_macro_dir = 'C:\Users\color_000\AppData\Roaming\Hidemaruo\Hidemaru\Macro'
 
-function! s:sort_candidates(l, r) abort
+function! s:sort_candidates(l, r) abort"{{{
   let l = a:l.pos
   let r = a:r.pos
   return l == r ? 0 : l > r ? 1 : -1
-endfunction
-function! CompleteHidemac(findstart, base)
+endfunction"}}}
+function! CompleteHidemac(findstart, base)"{{{
   if a:findstart
     let l:line = getline('.')
     let l:start = col('.') - 1
@@ -1261,7 +1232,7 @@ function! CompleteHidemac(findstart, base)
   " マッチした位置でソートする関数に渡す
   " 左でマッチした候補ほど上に出る
   return sort(l:matches, function("s:sort_candidates"))
-endfunction
+endfunction"}}}
 
 setlocal omnifunc=CompleteHidemac
 
