@@ -103,7 +103,7 @@ function! s:load_keywords() abort
       call add(l:candidates, {
             \ 'word' : l:word,
             \ 'kind' : l:type,
-            \ 'menu' : '(Keyword) ' . l:menu
+            \ 'menu' : '(値) ' . l:menu
             \})
       let l:dict[l:word] = {'type': l:type}
       let desc = ''
@@ -225,7 +225,7 @@ function! s:load_dlls() abort
   
   let l:dt_pattern = '<DT CLASS="SUBTITLE2">\zs.\{-}\ze\r'
   let l:categories_ja = ['文', '関数', '値']
-  let l:categories_en = ['Statement', 'Function', 'Keyword']
+  let l:categories_en = ['statement', 'function', 'keyword']
   
   while 1
     let l:left = match(l:html, l:dt_pattern, l:pos)
@@ -239,17 +239,18 @@ function! s:load_dlls() abort
     let l:word = matchstr(l:txt, '[a-z]\+')
     let l:desc = s:trim(s:remove_tags(matchstr(l:html, '\_.\{-}\ze<BR>', l:right)))
 
-    let l:category = l:categories_en[index(l:categories_ja, matchstr(l:txt, '（\zs.\{-}\ze）'))]
-    if has_key(g:hidemac_builtin[tolower(l:category) . 's'].data, l:word)
+    let l:category_ja = matchstr(l:txt, '（\zs.\{-}\ze）')
+    let l:category = l:categories_en[index(l:categories_ja, l:category_ja)]
+    if has_key(g:hidemac_builtin[l:category . 's'].data, l:word)
       continue
     endif
-    if l:category == 'Statement'
+    if l:category == 'statement'
       let l:candidate = {
             \ 'word': l:word,
-            \ 'menu': '(' . l:category .') ' . l:desc
+            \ 'menu': '(' . l:category_ja .') ' . l:desc
             \}
       let l:data = []
-    elseif l:category == 'Function'
+    elseif l:category == 'function'
       if l:word =~ '^dllfunc'
         " 本当ゎ、複数のDLLを扱ぅとき引数パターンがちがぅんだけど、
         " そーゅー関数がほかにもぁったらまたかんがぇる
@@ -277,7 +278,7 @@ function! s:load_dlls() abort
             \ 'type': l:type,
             \ 'args': {'str': l:arg_string, 'types': l:arg_types}
             \}
-    elseif l:category == 'Keyword'
+    elseif l:category == 'keyword'
       let l:type = '?'
       if l:word == 'loaddllfile'
         let l:desc = 'ロードされているDLLのファイル名'
@@ -286,12 +287,12 @@ function! s:load_dlls() abort
       let l:candidate = {
             \ 'word': l:word,
             \ 'kind': l:type,
-            \ 'menu': '(' . l:category .') ' . l:desc
+            \ 'menu': '(' . l:category_ja .') ' . l:desc
             \}
       let l:data = {'type': l:type}
     endif
-    call add(g:hidemac_builtin[tolower(l:category) . 's'].candidates, l:candidate)
-    let g:hidemac_builtin[tolower(l:category) . 's'].data[l:word] = l:data
+    call add(g:hidemac_builtin[l:category . 's'].candidates, l:candidate)
+    let g:hidemac_builtin[l:category . 's'].data[l:word] = l:data
     unlet l:data
   endwhile
 endfunction
@@ -460,7 +461,7 @@ function! s:get_cmd_statements() abort
       let l:desc = s:remove_tags(l:desc)
       call add(l:candidates, {
             \ 'word' : l:word,
-            \ 'menu' : '(Statement) ' . s:trim(l:desc)
+            \ 'menu' : '(文) ' . s:trim(l:desc)
             \})
       let l:dict[l:word] = []
       let desc = ''
@@ -522,7 +523,7 @@ function! s:get_other_statements() abort
         
         call add(l:candidates, {
             \ 'word' : l:word,
-            \ 'menu' : '(Statement) ' . l:desc
+            \ 'menu' : '(文) ' . l:desc
             \})
         let l:dict[l:word] = []
       endfor
@@ -531,13 +532,13 @@ function! s:get_other_statements() abort
   
   let l:candidates = l:candidates + [
         \{'word': 'refreshdatetime',
-        \ 'menu': '(Statement) 日付と時刻を表すキーワードの値を更新する'},
+        \ 'menu': '(文) 日付と時刻を表すキーワードの値を更新する'},
         \{'word': 'goto',
-        \	'menu': '(Statement) マクロの処理を任意の場所に移動させる'},
+        \	'menu': '(文) マクロの処理を任意の場所に移動させる'},
         \{'word': 'call',
-        \	'menu': '(Statement) サブルーチンを呼ぶ'},
+        \	'menu': '(文) サブルーチンを呼ぶ'},
         \{'word': 'return',
-        \	'menu': '(Statement) サブルーチンから復帰する'}
+        \	'menu': '(文) サブルーチンから復帰する'}
         \]
   let l:dict['refreshdatetime'] = []
   let l:dict['goto'] = []
@@ -662,7 +663,7 @@ function! s:get_after_block(ctx) abort
     " } else ってかぃたとこ
     return [{
           \ 'word': 'if',
-          \ 'menu': '(Statement) その直後にある条件式が０以外の場合に次のコマンドを実行します。'
+          \ 'menu': '(文) その直後にある条件式が０以外の場合に次のコマンドを実行します。'
           \}]
   elseif a:ctx =~ '^}\s*$'
     " } ってだけかぃたとこ
@@ -679,7 +680,7 @@ function! s:get_after_block(ctx) abort
     endfor
     if l:line =~ 'if\s*([^)]\+)\s*{\s*'
       " ifブロックを閉じた直後だった
-      return [{'word': 'else', 'menu': '(Statement)'}]
+      return [{'word': 'else', 'menu': '(文)'}]
     endif
     return []
   endif
@@ -1150,7 +1151,7 @@ function! s:gather_candidates(cur_line, cur_text) abort
   elseif l:ctx =~ '^}\s*'
     " ブロックが閉じてる後
     return s:get_after_block(l:ctx)
-  elseif l:ctx =~ '[#$]\k\+\[\s*'
+  elseif l:ctx =~ '[#$]\k\+\[\s*$'
     " 配列のキーをかきはじめるとこ
     return s:expressions('#')
   elseif l:ctx =~ '#\k\+\s*=\s*$'
@@ -1166,6 +1167,9 @@ function! s:gather_candidates(cur_line, cur_text) abort
   elseif l:ctx =~ '\(+\|!=\|==\)\s*$'
     " 文字列型かもしれなぃ演算子の直後
     return s:expressions(s:get_last_type(substitute(l:ctx, '\(+\|!=\|==\)\s*$', '', '')))
+  elseif l:ctx =~ '[#$]\k\+\s*$'
+    " 変数名を入力しぉゎってるけどその次のイコールとか打ってなぃ
+    return []
   else
     " 関数か文の引数
     let l:line = s:stash_strings(l:ctx)
@@ -1213,7 +1217,12 @@ call s:load_dlls()
 
 let g:hidemac_macro_dir = 'C:\Users\color_000\AppData\Roaming\Hidemaruo\Hidemaru\Macro'
 
-function! HidemacOmniComplete(findstart, base)
+function! s:sort_candidates(l, r) abort
+  let l = a:l.pos
+  let r = a:r.pos
+  return l == r ? 0 : l > r ? 1 : -1
+endfunction
+function! CompleteHidemac(findstart, base)
   if a:findstart
     let l:line = getline('.')
     let l:start = col('.') - 1
@@ -1233,12 +1242,27 @@ function! HidemacOmniComplete(findstart, base)
 
   let l:matches = []
   for k in l:candidates
-    if strpart(k.word, 0, strlen(a:base)) == a:base
-      call add(l:matches, k)
+    " 行頭からの完全一致だと、変数名の最初の#$とか、
+    " 文字列リテラルのダブルクオートが候補に入ってると、
+    " それをぃち②打っのめんどぃから、ここで調整
+    " ちな、ファジーでゎなぃ ぁくまでマッチの開始位置にこだゎらなぃだけ
+    let k.pos = stridx(k.word, b:cur_text)
+    if k.pos == -1
+      continue
     endif
+    " どっかにマッチゎした
+    if k.word =~ '^[$#"]' && b:cur_text !~ '^[$#"]'
+      " 候補が記号ではじまってんだけど入力にゎ記号がなかった場合、
+      " マッチした位置を1文字分有利(上のほーにくる)にする
+      let k.pos = k.pos - 1
+    endif
+    call add(l:matches, k)
   endfor
-  
-  return l:matches
+  " マッチした位置でソートする関数に渡す
+  " 左でマッチした候補ほど上に出る
+  return sort(l:matches, function("s:sort_candidates"))
 endfunction
 
-setlocal omnifunc=HidemacOmniComplete
+setlocal omnifunc=CompleteHidemac
+
+setlocal cindent
