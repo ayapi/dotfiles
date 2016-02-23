@@ -1,8 +1,8 @@
 let g:hidemac_builtin = get(g:, 'hidemac_builtin', {})
 
-let s:chm_filename = "hidemac_html.chm"
+let s:chm_filenames = ['hidemac_html.chm', 'hmjre.chm']
 function! s:set_hidemac_chm_dir() abort
-  if exists("g:hidemac_chm_dir") && filereadable(g:hidemac_chm_dir . '\' . s:chm_filename)
+  if exists("g:hidemac_chm_dir") && filereadable(g:hidemac_chm_dir . '\' . s:chm_filenames[0])
     let s:hidemac_chm_dir = g:hidemac_chm_dir
     return
   endif
@@ -11,7 +11,7 @@ function! s:set_hidemac_chm_dir() abort
         \ 'C:\Program Files (x86)\Hidemaru',
         \ 'C:\Hidemaru']
   for dirname in l:path_candidates
-    if filereadable(dirname . '\\' . s:chm_filename)
+    if filereadable(dirname . '\\' . s:chm_filenames[0])
       let s:hidemac_chm_dir = dirname
       return
     endif
@@ -28,18 +28,22 @@ function! s:set_hidemac_doc_dir() abort
 endfunction
 
 function! s:chm2html() abort
-  let l:escaped_extract_dir = shellescape(s:hidemac_extract_dir)
-  if !isdirectory(s:hidemac_extract_dir)
-    call system('mkdir ' . l:escaped_extract_dir)
-  endif
-  let l:escaped_chm_path = shellescape(s:hidemac_chm_dir . '\' . s:chm_filename)
-  call system(printf('cp %s %s', l:escaped_chm_path, l:escaped_extract_dir . '\' . s:chm_filename))
-  let l:extract_cmd = printf(
-          \ 'cd %s && hh.exe -decompile .\ %s',
-          \	l:escaped_extract_dir,
-          \ s:chm_filename
-          \)
-  call system(l:extract_cmd)
+  for l:chm_filename in s:chm_filenames
+    let l:extract_dir = shellescape(
+          \ s:hidemac_extract_dir	. '\' .fnamemodify(l:chm_filename, ':t:r')
+          \)                          "拡張子なしbasenameをdirnameにっかぅ
+    if !isdirectory(l:extract_dir)
+      call system('mkdir ' . l:extract_dir)
+    endif
+    let l:escaped_chm_path = shellescape(s:hidemac_chm_dir . '\' . l:chm_filename)
+    call system(printf('cp %s %s', l:escaped_chm_path, l:extract_dir . '\' . l:chm_filename))
+    let l:extract_cmd = printf(
+            \ 'cd %s && hh.exe -decompile .\ %s',
+            \	l:extract_dir,
+            \ l:chm_filename
+            \)
+    call system(l:extract_cmd)
+  endfor
 endfunction
 
 function! s:trim(str) abort
@@ -50,11 +54,15 @@ function! s:remove_tags(str) abort
   return substitute(a:str, '<[^>]\+>', '', 'g')
 endfunction
 
-function! s:get_html_lines(fullpath_or_filename) abort
+function! s:get_html_lines(fullpath_or_filename, ...) abort
+  let l:doc = 'hidemac_html'
+  if a:0 == 1
+    let l:doc = a:1
+  endif
   if a:fullpath_or_filename =~ '\'
     let l:path = a:fullpath_or_filename
   else
-    let l:path = s:hidemac_extract_dir . '\html\' . a:fullpath_or_filename
+    let l:path = s:hidemac_extract_dir . '\' . l:doc . '\html\' . a:fullpath_or_filename
   endif
   let l:sjis_html = join(readfile(l:path, 'b'))
   let l:utf8_html = iconv(l:sjis_html, 'cp932', 'utf-8')
@@ -67,7 +75,7 @@ function! s:load_keywords() abort
   endif
   let l:candidates = []
   let l:dict = {}
-  for l:file in glob(s:hidemac_extract_dir . '\html\060_Keyword_*.html', 1, 1)
+  for l:file in glob(s:hidemac_extract_dir . '\hidemac_html\html\060_Keyword_*.html', 1, 1)
     let l:lines = s:get_html_lines(l:file)
     let l:desc = ''
     let l:start = match(l:lines, '<TABLE')
@@ -209,7 +217,7 @@ function! s:load_dlls() abort
   
   let l:lines = s:get_html_lines('200_Dll.html')
   let l:start = match(l:lines, '<DL>')
-  let l:end = match(l:lines, '</DL>')
+  let l:end = match(l:lines, '</DL>', 0, 2)
   let l:html = join(l:lines[l:start : l:end], "\r")
   
   let l:pos = 0
@@ -238,14 +246,14 @@ function! s:load_dlls() abort
     if l:category == 'Statement'
       let l:candidate = {
             \ 'word': l:word,
-            \ 'desc': '(' . l:category .') ' . l:desc
+            \ 'menu': '(' . l:category .') ' . l:desc
             \}
       let l:data = []
     elseif l:category == 'Function'
       if l:word =~ '^dllfunc'
         " 本当ゎ、複数のDLLを扱ぅとき引数パターンがちがぅんだけど、
         " そーゅー関数がほかにもぁったらまたかんがぇる
-        let l:type = '?'
+        let l:type = l:word =~ '^dllfuncstr' ? '$' : '?'
         let l:arg_string = 'funcname, ...'
         let l:arg_types = ['$']
       elseif l:word == 'loaddll'
@@ -280,12 +288,93 @@ function! s:load_dlls() abort
             \ 'kind': l:type,
             \ 'menu': '(' . l:category .') ' . l:desc
             \}
-      let l:data = {type: l:type}
+      let l:data = {'type': l:type}
     endif
     call add(g:hidemac_builtin[tolower(l:category) . 's'].candidates, l:candidate)
     let g:hidemac_builtin[tolower(l:category) . 's'].data[l:word] = l:data
     unlet l:data
   endwhile
+endfunction
+
+let s:load_dllfuncs = {}
+function! s:load_dllfuncs.hmjre() abort
+  if exists('g:hidemac_dlls')	&& has_key(g:hidemac_builtin, 'hmjre')
+    return
+  endif
+  let g:hidemac_dlls = get(g:, 'hidemac_dlls', {})
+  
+  let l:dict = {}
+  let l:lines = s:get_html_lines('0008_API_MACRO.html', 'hmjre')
+  let l:start = match(l:lines, '^\s<DL>')
+  let l:end = match(l:lines, '^\s</DL>')
+  let l:html = join(l:lines[l:start : l:end], "\r")
+  
+  let l:pos = 0
+  let l:len = len(l:html)
+  
+  let l:dt_pattern = '[^\t]<DT CLASS="SUBTITLE2">\zs.\{-}\ze\r'
+  
+  while 1
+    let l:dt_start = match(l:html, l:dt_pattern, l:pos)
+    if l:dt_start == -1
+      break
+    endif
+    let l:dt_end = matchend(l:html, l:dt_pattern, l:pos)
+    let l:words = split(s:remove_tags(l:html[l:dt_start : l:dt_end - 1]), ',')
+    
+    let l:dd_end = matchend(l:html, '[^\t]<DD>\zs\_.\{-}</DD>', l:dt_end)
+    if l:dd_end == -1
+      break
+    endif
+    let l:dd = l:html[l:dt_end : l:dd_end - 1]
+    let l:pos = l:dd_end + 1
+
+    for l:word in l:words
+      let l:word = matchstr(l:word, '[a-zA-Z_]\+')
+      if l:word == ''
+        continue
+      endif
+      if l:word == 'SetUnicodeIndexAutoConvert'
+        let l:desc = 'HmJre.dll側での文字コードインデックス自動変換をONにする'
+      elseif len(l:words) == 1
+        let l:desc = matchstr(l:dd, '関数は、\?\zs.\{-}\ze。')
+        if l:desc == ''
+          let l:desc = matchstr(l:dd, '^\zs.\{-}\ze。')
+        endif
+      else
+        let l:desc = matchstr(l:dd, l:word . '関数は、\?\zs.\{-}\ze。')
+      endif
+      let l:desc = s:trim(s:remove_tags(l:desc))
+      
+      let l:type = l:word =~ '^ReplaceRegular' ? '$' : '#'
+      
+      let l:params = []
+      if l:word =~ '^GetLastMatchTag' || l:word == 'SetUnicodeIndexAutoConvert'
+        call add(l:params, '#')
+      elseif l:dd !~ 'パラメータはありません'
+        let l:param_i = 1
+        if l:dd =~ 'パラメータ１'
+          let l:param_pattern = 'パラメータ[１-８][(（]\zs\(数値\|文字列\)\ze型[)）]'
+        else
+          let l:param_pattern = '第[１-８]パラメータ[(（]\zs\(数値\|文字列\)\ze型[)）]'
+        endif
+        while 1
+          let l:param = matchstr(l:dd, l:param_pattern, 0, l:param_i)
+          if l:param == ''
+            break
+          endif
+          call add(l:params, ['#', '$'][index(['数値', '文字列'], l:param)])
+          let l:param_i = l:param_i + 1
+        endwhile
+      endif
+      let l:dict[l:word] = {
+            \ 'type': l:type,
+            \ 'arg_types': l:params,
+            \ 'desc': '(HmJre) ' . l:desc
+            \}
+    endfor
+  endwhile
+  let g:hidemac_dlls.hmjre = l:dict
 endfunction
 
 function! s:load_functions() abort
@@ -352,7 +441,7 @@ endfunction
 function! s:get_cmd_statements() abort
   let l:candidates = []
   let l:dict = {}
-  for l:file in glob(s:hidemac_extract_dir . '\html\080_CmdStatement_*.html', 1, 1)
+  for l:file in glob(s:hidemac_extract_dir . '\hidemac_html\html\080_CmdStatement_*.html', 1, 1)
     if l:file !~ '080_CmdStatement_[^_]\+\.html'
       continue
     endif
@@ -407,7 +496,7 @@ function! s:get_other_statements() abort
       let l:doc_num = l:num . '0'
     endif
     
-    for l:file in glob(s:hidemac_extract_dir . '\html\'	. l:doc_num . '_*.html', 1, 1)
+    for l:file in glob(s:hidemac_extract_dir . '\hidemac_html\html\'	. l:doc_num . '_*.html', 1, 1)
       let l:lines = s:get_html_lines(l:file)
       let l:title_line = s:remove_tags(matchstr(l:lines, '<TITLE>'))
       if l:title_line !~ '文$'
@@ -472,26 +561,32 @@ function! s:statements() abort
   return g:hidemac_builtin.statements.candidates
 endfunction
 
-function! s:functions() abort
-  return g:hidemac_builtin.functions.candidates
+function! s:functions(...) abort
+  if a:0 == 0 || a:1 == '' || a:1 == '?'
+    return copy(g:hidemac_builtin.functions.candidates)
+  endif
+  let l:type = substitute('#$', a:1, '', '')
+  if a:1 =~ '[$#]'
+    return filter(copy(g:hidemac_builtin.functions.candidates), 'v:val.kind != l:type')
+  endif
 endfunction
 
-function! s:keywords() abort
-  return g:hidemac_builtin.keywords.candidates
+function! s:keywords(...) abort
+  if a:0 == 0 || a:1 == '' || a:1 == '?'
+    return copy(g:hidemac_builtin.keywords.candidates)
+  endif
+  let l:type = substitute('#$', a:1, '', '')
+  if a:1 =~ '[$#]'
+    return filter(copy(g:hidemac_builtin.keywords.candidates), 'v:val.kind != l:type')
+  endif
 endfunction
 
 function! s:expressions(...) abort
   if a:0 == 0 || a:1 == '' || a:1 == '?'
     return s:variables() + s:keywords() + s:functions()
   endif
-  if a:1 == '#'
-    return s:variables('#')
-            \ + filter(copy(s:keywords()), 'v:val.kind != "$"')
-            \ + filter(copy(s:functions()), 'v:val.kind != "$"')
-  elseif a:1 == '$'
-    return s:variables('$')
-            \ + filter(copy(s:keywords()), 'v:val.kind != "#"')
-            \ + filter(copy(s:functions()), 'v:val.kind != "#"')
+  if a:1 =~ '[$#]'
+    return s:variables(a:1) + s:keywords(a:1) + s:functions(a:1)
   endif
 endfunction
 
@@ -853,8 +948,125 @@ function! s:special_functions.filter(i, args) abort
   endif
   return []
 endfunction
+function! s:special_functions.loaddll(i, args) abort
+  if a:i > 0
+    return []
+  endif
+  if a:args[a:i] =~ '^"' " 文字列リテラルをかぃてる
+    return [{'word': 'hmjre.dll'}]
+  endif
+  " ぃまのところ文字列リテラルじゃなぃ
+  return filter(s:variables('$'), 'v:val.menu =~ "\\.dll"')
+        \ + s:stringify_candidates(a:args[a:i],	[{'word': 'hmjre.dll'}])
+        \ + s:keywords('$')
+        \ + s:functions('$')
+endfunction
+function! s:special_functions.dllfunc(i, args) abort
+  let l:loaded_dll = ''
+  let l:id_specified = 0
+  let l:i = a:i
+  if l:i >= 1
+    if a:args[0] =~ '^#' || a:args[0] =~ 'loaddll('
+    " 最初の引数に数値型がぁる場合特別
+      if a:args[0] =~ '^#'
+        " 数値型変数名だったらloaddll()関数の返り値(dllの識別子)が代入されてるはず
+        for l:var in s:variables('#')
+          if a:args[0] == l:var.word
+            let l:loaded_dll = matchstr(l:var.menu, 'loaddll("\zs.\{-}\ze\.dll')
+            if l:loaded_dll != ''
+              break
+            endif
+          endif
+        endfor
+      elseif a:args[0] =~ 'loaddll('
+        let l:loaded_dll = matchstr(a:args[0], 'loaddll("\zs.\{-}\ze\.dll')
+      endif
+      let l:i = l:i - 1
+      let l:id_specified = 1
+    endif
+  endif
+  if !l:id_specified
+    " loaddll文のdllをみっける
+    for l:lnum in range(line('.'), 1, -1) + range(line('$'), line('.') + 1, -1)
+      let l:line = getline(l:lnum)
+      let l:loaddll_arg = matchstr(l:line, 'loaddll\s\zs[^;]\{-}\ze;', 0, l:i)
+      if l:loaddll_arg != ''
+        let l:dll_pattern = '"\zs[^\.]\{-}\ze\.dll"'
+        if l:loaddll_arg =~ '^\$'
+          for l:var in s:variables('$')
+            if l:var.word == l:loaddll_arg
+              let l:loaded_dll = matchstr(l:var.menu, l:dll_pattern)
+              break
+            endif
+          endfor
+        else
+          let l:loaded_dll = matchstr(l:loaddll_arg, l:dll_pattern)
+        endif
+        break
+      endif
+    endfor
+  endif
+  if l:i == 0
+    let l:candidates = []
+    if !l:id_specified
+      " loaddll()関数の返り値が代入されてるっぽぃ変数をぜんぶ拾って候補に出す
+      let l:vars = s:variables('#')
+      call filter(l:vars, 'v:val.menu =~ "\\s*=\\s*loaddll("')
+      let l:candidates = l:candidates + l:vars
+    endif
+
+    let l:dllfunc_names = []
+    if l:loaded_dll != '' && has_key(s:load_dllfuncs, l:loaded_dll)
+      " dllの関数名を候補に出す
+      call s:load_dllfuncs[l:loaded_dll]()
+      let l:candidates = l:candidates + s:stringify_candidates(
+            \ a:args[a:i],
+            \ s:get_candidates_from_data(g:hidemac_dlls[l:loaded_dll])
+            \)
+    endif
+    return l:candidates + s:expressions('$')
+  else
+    if l:loaded_dll != '' && has_key(s:load_dllfuncs, l:loaded_dll)
+      " 指定されてるdllがゎかった
+      let l:candidates = []
+      call s:load_dllfuncs[l:loaded_dll]()
+      let l:dllfunc_name = substitute(a:args[l:id_specified], '"', '', 'g')
+      if has_key(g:hidemac_dlls[l:loaded_dll], l:dllfunc_name)
+        " dllの関数名もゎかった
+        let l:arg_types = g:hidemac_dlls[l:loaded_dll][l:dllfunc_name].arg_types
+        if (l:i - 1) < len(l:arg_types)
+          let l:type = l:arg_types[l:i - 1]
+          " 引数の型がゎかった
+          let l:candidates = s:expressions(l:type)
+        else
+          " 仕様ょり引数多く入力しょーとしてる
+          return []
+        endif
+      endif
+      if empty(l:candidates)
+        " しらなぃdllとかで引数の情報がなぃ
+        let l:candidates = s:expressions()
+      endif
+      " 数値型変数名の候補からdll識別子が代入されてるのゎ除外する
+      return filter(l:candidates, 'v:val.menu !~ "\\s*=\\s*loaddll("')
+    endif
+  endif
+  return []
+endfunction
+function! s:special_functions.dllfuncstr(i, args) abort
+  return s:special_functions.dllfunc(a:i, a:args)
+endfunction
+function! s:special_functions.dllfuncw(i, args) abort
+  return s:special_functions.dllfunc(a:i, a:args)
+endfunction
+function! s:special_functions.dllfuncstrw(i, args) abort
+  return s:special_functions.dllfunc(a:i, a:args)
+endfunction
 
 let s:special_statements = {}
+function! s:special_statements.loaddll(i, args) abort
+  return s:special_functions.loaddll(a:i, a:args)
+endfunction
 function! s:special_statements.execmacro(i, args) abort
   if a:i == 0
     if !exists("g:hidemac_macro_dir") || !isdirectory(g:hidemac_macro_dir)
