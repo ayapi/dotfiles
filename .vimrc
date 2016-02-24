@@ -24,7 +24,7 @@ Plug 'junegunn/vim-plug', {'dir': '~/.vim/plugged/vim-plug/autoload'}
 Plug 'vim-jp/vimdoc-ja'
 Plug 'xolox/vim-misc' | Plug 'xolox/vim-session'
 if has('nvim')
-  Plug 'neovim/node-host'
+  Plug 'neovim/node-host', {'do': 'npm install'}
 endif
 Plug 'tyru/caw.vim'
 Plug 'airblade/vim-gitgutter'
