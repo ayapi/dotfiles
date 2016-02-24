@@ -43,7 +43,7 @@ Plug 'davidhalter/jedi-vim',
       \ {'do': 'git submodule update --init', 'for': 'python'}
 Plug 'othree/yajs.vim', {'for': 'javascript'}
 Plug 'othree/es.next.syntax.vim', {'for': 'javascript'}
-Plug 'digitaltoad/vim-jade', {'for': 'jade'}
+Plug 'digitaltoad/vim-pug', {'for': 'pug'}
 Plug 'wavded/vim-stylus', {'for': 'stylus'}
 Plug 'alunny/pegjs-vim', {'for': 'pegjs'}
 Plug 'vim-pandoc/vim-pandoc'
@@ -303,9 +303,10 @@ let g:neosnippet#scope_aliases['vim'] = 'vim,vim-functions'
 let g:neosnippet#disable_runtime_snippets = {'_' : 1}
 let g:funcsnips = {}
 
-augroup stylusomni
+augroup setomniafterfiletype
   autocmd!
   autocmd FileType stylus setlocal omnifunc=StylusOmniComplete
+  autocmd FileType pug setlocal omnifunc=JadeOmniComplete
 augroup END
 
 " ------------------------------------
@@ -315,7 +316,7 @@ augroup END
 set noautoindent
 augroup indentexpr
   autocmd!
-  autocmd FileType stylus,jade setlocal indentexpr=
+  autocmd FileType stylus,pug setlocal indentexpr=
   autocmd FileType stylus setlocal autoindent
 augroup END
 
