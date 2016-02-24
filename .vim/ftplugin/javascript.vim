@@ -1,5 +1,6 @@
 "let tern#is_show_argument_hints_enabled=1
 
+setlocal iskeyword-=.
 setlocal dictionary=~/.vim/dicts/javascript.dict
 
 " <S-F6> for rename(refactor)
