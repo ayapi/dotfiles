@@ -41,6 +41,8 @@ Plug 'ternjs/tern_for_vim',
       \ {'do': 'npm install', 'for': 'javascript'}
 Plug 'davidhalter/jedi-vim',
       \ {'do': 'git submodule update --init', 'for': 'python'}
+Plug 'othree/yajs.vim', {'for': 'javascript'}
+Plug 'othree/es.next.syntax.vim', {'for': 'javascript'}
 Plug 'digitaltoad/vim-jade', {'for': 'jade'}
 Plug 'wavded/vim-stylus', {'for': 'stylus'}
 Plug 'alunny/pegjs-vim', {'for': 'pegjs'}
