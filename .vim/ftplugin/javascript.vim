@@ -8,3 +8,8 @@ inoremap <buffer> <expr> <F18> pumvisible() ? "\<C-e>\<C-o>:TernRename\<CR>" : "
 
 " <F2> for show doc
 inoremap <buffer> <F2> <C-o>:TernDocBrowse<CR>
+
+" snips for unit-test only
+if expand('%:p') =~ '\(test\|spec\)'
+  NeoSnippetSource ~/.vim/snippets/javascript-unittest.snip
+endif

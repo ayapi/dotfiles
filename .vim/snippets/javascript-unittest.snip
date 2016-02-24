@@ -1,0 +1,29 @@
+snippet describe
+options head
+	describe("${1:test_name}", () => {
+		${0:TARGET}
+	});
+
+snippet beforeEach
+options head
+	beforeEach(${1:#:async} (${2:#:done}) => {
+		${0:TARGET}
+	});
+
+snippet afterEach
+options head
+	afterEach(${1:#:async} (${2:#:done}) => {
+		${0:TARGET}
+	});
+
+snippet before
+options head
+	before(${1:#:async} (${2:#:done}) => {
+		${0:TARGET}
+	});
+
+snippet after
+options head
+	after(${1:#:async} (${2:#:done}) => {
+		${0:TARGET}
+	});
