@@ -649,3 +649,6 @@ compinit
 
 compdef -d rm
 
+__git_remote_repositories() {
+}
+
