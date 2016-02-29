@@ -51,7 +51,7 @@ function! JadeOmniComplete(findstart, base)
           let l:categories = ['attrValue']
         elseif l:line =~ '=$'
           " input(type=_
-          let l:categories = ['attrValue', 'code']
+          let l:categories = ['attrValueQuote', 'code']
         elseif l:line =~ '[(, ]$' || l:line =~ '^\s*$'
           " input(_
           " input(type='text',_
@@ -76,37 +76,36 @@ function! JadeOmniComplete(findstart, base)
   echomsg string(l:candidates)
   echomsg a:base
 
-  return l:candidates
+  " return l:candidates
 
-  " if a:base == ""
-  " 	return l:candidates
-  " endif
-  " 
-  " let l:matches = []
-  " for k in l:candidates
-  " 	if strpart(k, 0, strlen(a:base)) ==# a:base
-  " 		call add(l:matches, k)
-  " 	endif
-  " endfor
-  " return l:matches
+  if a:base == ""
+    return l:candidates
+  endif
+  return MatchCandidates(l:candidates, a:base)
 endfunction
 
 function! s:gather_candidates(info) abort
   let l:candidates = []
   for l:category in a:info.categories
     if l:category == 'elementName'
-      return g:html_candidates.getElementNames()
+      let l:candidates += g:html_candidates.getElementNames()
     elseif l:category == 'attrName'
-      return g:html_candidates.getAttributeNames(s:get_element(a:info.lnum))
-    elseif l:category == 'attrValue'
-      return g:html_candidates.getAttributeValues(
+      let l:candidates += g:html_candidates.getAttributeNames(
+            \ s:get_element(a:info.lnum)
+            \ )
+    elseif l:category =~ '^attrValue'
+      let l:values = g:html_candidates.getAttributeValues(
             \ s:get_attribute_name(a:info.lnum),
             \ s:get_element(a:info.lnum)
             \ )
-    else
-      return []
+      if l:category =~ 'Quote$'
+        call map(l:values, '"\"" . v:val . "\""')
+      endif
+      let l:candidates += l:values
+      unlet l:values
     endif
   endfor
+  return l:candidates
 endfunction
 
 function! s:get_syntax_stack(lnum, cnum) abort
@@ -142,7 +141,7 @@ function! s:get_attribute_name(lnum) abort
   let l:attr_name = ''
   while l:cnum > 0
     let l:stack = s:get_syntax_stack(a:lnum, l:cnum)
-    if l:stack[1] =~ '[hH]tmlArg$'
+    if len(l:stack) >= 2 && l:stack[1] =~ '[hH]tmlArg$'
       let l:attr_name = l:line[l:cnum - 1] . l:attr_name
     elseif l:attr_name != ''
       break
