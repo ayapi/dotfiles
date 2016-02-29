@@ -46,6 +46,7 @@ Plug 'othree/es.next.syntax.vim', {'for': 'javascript'}
 Plug 'digitaltoad/vim-pug', {'for': 'pug'}
 Plug 'wavded/vim-stylus', {'for': 'stylus'}
 Plug 'alunny/pegjs-vim', {'for': 'pegjs'}
+Plug 'elzr/vim-json', {'for': 'json'}
 Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
 Plug 'othree/html5.vim'
@@ -133,6 +134,7 @@ let g:rainbow_conf = {
     \       },
     \       'html': 0,
     \       'css': 0,
+    \       'json': 0
     \   }
     \}
 
@@ -186,6 +188,9 @@ let g:pandoc#syntax#conceal#use=0
 "let g:pandoc#syntax#emphases=0
 "let g:pandoc#syntax#underline_special=0
 let g:pandoc#syntax#codeblocks#embeds#langs = ["javascript", "python", "bash=sh", "zsh=sh", "vim"]
+
+" json
+let g:vim_json_syntax_conceal = 0
 
 " diff (merge tool)
 if &diff 
