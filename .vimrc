@@ -44,7 +44,7 @@ Plug 'davidhalter/jedi-vim',
 Plug 'othree/yajs.vim', {'for': 'javascript'}
 Plug 'othree/es.next.syntax.vim', {'for': 'javascript'}
 Plug 'digitaltoad/vim-pug', {'for': 'pug'}
-Plug 'wavded/vim-stylus', {'for': 'stylus'}
+Plug 'wavded/vim-stylus', {'for': ['stylus', 'pug']}
 Plug 'alunny/pegjs-vim', {'for': 'pegjs'}
 Plug 'elzr/vim-json', {'for': 'json'}
 Plug 'vim-pandoc/vim-pandoc'
@@ -521,7 +521,7 @@ endfunction
 " ---------------------------------
 inoremap <silent><expr> <CR>
       \ pumvisible()
-      \ ? "\<C-g>u\<C-y>\<C-o>:let b:completed_item={}\<CR>"
+      \ ? "\<C-y>\<C-o>:let b:completed_item={}\<CR>"
       \ : "\<C-g>u\<CR>x\<BS>"
 
 
