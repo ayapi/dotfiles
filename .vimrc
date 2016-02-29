@@ -255,9 +255,39 @@ augroup END
 " mix up omnifunc & neosnippet & custom dictionaries
 " ref. http://vi.stackexchange.com/questions/2618/one-pop-up-menu-with-keyword-and-user-defined-completion
 
+function! SortCandidates(l, r) abort
+  let l = a:l.pos
+  let r = a:r.pos
+  return l == r ? 0 : l > r ? 1 : -1
+endfunction
+function! MatchCandidates(candidates, cur_text) abort
+  let l:candidates = a:candidates
+  let l:matches = []
+  for k in l:candidates
+    if type(k) == type("")
+      let l:candidate = {"word": k}
+    elseif type(k) == type({})
+      let l:candidate = k
+    else
+      continue
+    endif
+    
+    " ignore special symbols & ignore case
+    let l:candidate.pos = stridx(
+          \ tolower(substitute(l:candidate.word, '[^a-zA-Z0-9]', '', 'g')),
+          \ tolower(substitute(a:cur_text, '[^a-zA-Z0-9]', '', 'g'))
+          \)
+    if l:candidate.pos == -1
+      continue
+    endif
+    call add(l:matches, l:candidate)
+    unlet l:candidate
+  endfor
+  return sort(l:matches, "SortCandidates")
+endfunction
 function! MixComplete(findstart, base)
   if a:findstart
-    return call(&omnifunc, [a:findstart, a:base])
+  return call(&omnifunc, [a:findstart, a:base])
   endif
 
   let l:matches = []
@@ -271,24 +301,22 @@ function! MixComplete(findstart, base)
   endif
 
   if &dictionary != ""
-    let l:keyword_matches = []
     let l:dict = readfile(expand(&dictionary))
-    for k in l:dict
-      if strpart(k, 0, strlen(a:base)) ==# a:base
-        call add(l:matches, {'word': k,
-                            \'menu': '(keyword)'})
-      endif
-    endfor
+    let l:keyword_matches = MatchCandidates(l:dict, a:base)
+    call map(l:keyword_matches,
+          \ '{"word": v:val.word, "menu": "(keyword)"}'
+          \)
+    let l:matches += l:keyword_matches
   endif
     
   let l:snippets = neosnippet#helpers#get_snippets()
-  for k in keys(l:snippets)
-    if strpart(k, 0, strlen(a:base)) ==# a:base
-      call add(l:matches, {'word': k,
-                          \'menu': '(snip)',
-                          \'info': l:snippets[k]['description']})
-    endif
-  endfor
+  let l:snippet_matches = MatchCandidates(keys(l:snippets), a:base)
+  call map(l:snippet_matches,
+        \ '{"word": v:val.word, '
+        \ . '"menu": "(snip)", '
+        \ . '"info": l:snippets[v:val.word]["description"]}'
+        \)
+  let l:matches += l:snippet_matches
   
   return l:matches
 endfunction

@@ -1,6 +1,6 @@
 snippet import
 options head
-	import ${0:#:name} from '${1:#:module-name}';
+	import ${0:#:name} from '${1:#:module_name}';
 
 snippet class
 options head
@@ -12,13 +12,13 @@ options head
 
 snippet extends
 options word
-	extends ${0:#:parent-class-name}
+	extends ${0:#:parent_class_name}
 
 snippet super
 options word
 	super(${0:#:arguments});
 
-snippet arrow-function
+snippet arrow_function
 options word
 	(${1}) => {
 		${0:TARGET}
@@ -38,7 +38,7 @@ options head
 
 snippet elseif
 options word
-	elseif (${1:#:condition}) {
+	else if (${1:#:condition}) {
 		${0:TARGET}
 	}
 
@@ -54,13 +54,13 @@ options head
 		${0:TARGET}
 	}
 
-snippet for-in
+snippet for_in
 options head
 	for (let ${1:i} in ${2:#:Array}) {
 		${0:TARGET}
 	}
 
-snippet for-of
+snippet for_of
 options head
 	for (let ${1:i} of ${2:#:Array}) {
 		${0:TARGET}
@@ -72,7 +72,7 @@ options head
 		${0:TARGET}
 	}
 
-snippet do-while
+snippet do_while
 options head
 	do {
 		${0:TARGET}
@@ -92,7 +92,7 @@ options head indent
 		${0:TARGET}
 		break;
 
-snippet try-catch
+snippet try_catch
 options head
 	try {
 		${1:TARGET}
@@ -100,7 +100,7 @@ options head
 		${2:// handle error}
 	}
 
-snippet try-catch-finally
+snippet try_catch_finally
 options head
 	try {
 		${1:TARGET}
@@ -116,10 +116,10 @@ options word
 		${0:TARGET}
 	}
 
-snippet throw-new-error
+snippet throw_new_error
 options word
 	throw new Error('${0:TARGET}')
 
-snippet use-strict
+snippet use_strict
 options head
 	'use strict';
