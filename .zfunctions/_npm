@@ -1,0 +1,12 @@
+_npm_completion() {
+  local si=$IFS
+  local -x COMP_POINT COMP_CWORD
+  (( COMP_POINT = 1 + ${#${(j. .)words[1,CURRENT]}} + $#QIPREFIX + $#IPREFIX + $#PREFIX ))
+  compadd -- $(COMP_CWORD=$((CURRENT-1)) \
+               COMP_LINE=$BUFFER \
+               COMP_POINT="$COMP_POINT" \
+               npm completion -- "${words[@]}" \
+               2>/dev/null)
+  IFS=$si
+}
+compdef _npm_completion npm
