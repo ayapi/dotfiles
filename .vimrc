@@ -180,7 +180,8 @@ set shortmess+=c "supress 'Pattern not found' message
 " augroup END
 
 " markdown
-let g:pandoc#modules#disabled=["spell","chdir","menu","formatting","command","bibliographies", "folding"]
+let g:pandoc#modules#disabled=["spell","chdir","menu","formatting","command","bibliographies", "folding", "completion"]
+let g:pandoc#modules#enabled=["metadata","keyboard","toc","hypertext"]
 let g:pandoc#syntax#conceal#use=0
 "let g:pandoc#syntax#emphases=0
 "let g:pandoc#syntax#underline_special=0
