@@ -487,8 +487,14 @@ function! IMapWithClosePopup(before, after, ...)
   exec "inoremap ".silent."<expr> ".a:before." pumvisible() ? \"\\<C-e>".a:after."\" : \"".a:after."\""
 endfunction
 
-" [accept item in completion popup menu, without expand snippet]
-inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>\<C-o>:let b:completed_item={}\<CR>" : "\<CR>"
+" <CR> ----------------------------
+" completion mode : accept item w/o expanding snippet
+" other modes     : add new line w/o removing indent
+" ---------------------------------
+inoremap <silent><expr> <CR>
+      \ pumvisible()
+      \ ? "\<C-g>u\<C-y>\<C-o>:let b:completed_item={}\<CR>"
+      \ : "\<C-g>u\<CR>x\<BS>"
 
 
 " <Tab> ---------------------------
