@@ -502,10 +502,14 @@ function nv() {
     return 1
   fi
   
+  local filename="$@[-1]"
+  local -a args
+  args=($@[1,-2] ${filename:a})
+  
   if [[ -n "$NVIM_LISTEN_ADDRESS" ]]; then
-    nvr "$@"
+    nvr $args
   else
-    nvim "$@"
+    nvim $args
   fi
 }
 alias nv=nv
