@@ -51,7 +51,7 @@ Plug 'vim-pandoc/vim-pandoc-syntax'
 Plug 'othree/html5.vim'
 Plug 'hail2u/vim-css3-syntax'
 Plug 'othree/csscomplete.vim'
-Plug 'gorodinskiy/vim-coloresque'
+Plug 'ap/vim-css-color'
 
 Plug 'luochen1990/rainbow'
 Plug 'dpy-/molokai'
