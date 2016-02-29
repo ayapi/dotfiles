@@ -98,6 +98,11 @@ function! s:gather_candidates(info) abort
       return g:html_candidates.getElementNames()
     elseif l:category == 'attrName'
       return g:html_candidates.getAttributeNames(s:get_element(a:info.lnum))
+    elseif l:category == 'attrValue'
+      return g:html_candidates.getAttributeValues(
+            \ s:get_attribute_name(a:info.lnum),
+            \ s:get_element(a:info.lnum)
+            \ )
     else
       return []
     endif
@@ -130,6 +135,21 @@ function! s:get_element(lnum) abort
     return 'div'
   endif
   return matchstr(getline(l:lnum)[l:cnum :], '^[a-zA-Z-]\+')
+endfunction
+function! s:get_attribute_name(lnum) abort
+  let l:line = getline(a:lnum)
+  let l:cnum = len(l:line) - 1
+  let l:attr_name = ''
+  while l:cnum > 0
+    let l:stack = s:get_syntax_stack(a:lnum, l:cnum)
+    if l:stack[1] =~ '[hH]tmlArg$'
+      let l:attr_name = l:line[l:cnum - 1] . l:attr_name
+    elseif l:attr_name != ''
+      break
+    endif
+    let l:cnum -= 1
+  endwhile
+  return l:attr_name
 endfunction
 function! s:is_code(lnum) abort
   let l:line = getline(a:lnum)
