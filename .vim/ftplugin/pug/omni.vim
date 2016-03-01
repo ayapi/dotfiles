@@ -29,12 +29,12 @@ function! JadeOmniComplete(findstart, base)
   
     if empty(l:synstack)
       if l:line == '' || l:line =~ '^\s*$'
-        " element name or jade keyword
-        let l:categories = ['elementName']
+        " beginning of line
+        let l:categories = ['statementName', 'elementName']
       endif
     elseif l:synstack[0] == 'pugTag'
       " inpu_
-      let l:categories = ['elementName']
+      let l:categories = ['statementName', 'elementName']
     else
       let l:synstack_attr_i = index(l:synstack, 'pugAttributes')
       if l:synstack_attr_i != -1
@@ -87,7 +87,9 @@ endfunction
 function! s:gather_candidates(info) abort
   let l:candidates = []
   for l:category in a:info.categories
-    if l:category == 'elementName'
+    if l:category == 'statementName'
+      let l:candidates += s:gather_statement_name_candidates(a:info)
+    elseif l:category == 'elementName'
       let l:candidates += g:html_candidates.getElementNames()
     elseif l:category == 'attrName'
       let l:candidates += g:html_candidates.getAttributeNames(
@@ -107,7 +109,12 @@ function! s:gather_candidates(info) abort
   endfor
   return l:candidates
 endfunction
-
+let s:jade_anywhere_statements = ['if', 'case', 'each', 'while', 'extends', 'include', 'mixin', 'block', 'append']
+function! s:gather_statement_name_candidates(info) abort
+  " TODO: lookup buffer content for additional statements
+  let l:additional_statements = ['else', 'when', 'default', 'doctype']
+  return copy(s:jade_anywhere_statements + l:additional_statements)
+endfunction
 function! s:get_syntax_stack(lnum, cnum) abort
   return map(synstack(a:lnum, a:cnum), 'synIDattr(v:val, "name")')
 endfunction
