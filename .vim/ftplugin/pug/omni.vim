@@ -1,9 +1,19 @@
-if !exists('g:html_candidates')
-  runtime! scripts/html_candidates.vim
-endif
+runtime! scripts/html_candidates.vim
+runtime! scripts/omniutil.vim
 
-function! JadeOmniComplete(findstart, base)
+function! CompleteJade(findstart, base)
   let l:lnum = line('.')
+  let l:cnum = col('.')
+  let l:synstack = g:omniutil.get_syntax_stack(l:lnum, l:cnum)
+  if !empty(l:synstack)
+    if l:synstack[0] == 'pugStylusBlock'
+      if !exists('CompleteStylus')
+        runtime! ftplugin/stylus/omni.vim
+      endif
+      return CompleteStylus(a:findstart, a:base)
+    endif
+  endif
+  
   if a:findstart
     let l:line = getline('.')
     let l:start = col('.') - 1
@@ -13,10 +23,11 @@ function! JadeOmniComplete(findstart, base)
 
     let l:categories = []
     
-    if s:is_comment(l:lnum)
+    if g:omniutil.is_comment(l:lnum)
       let l:categories = ['comment']
     endif
     if s:is_code(l:lnum)
+      echomsg 'code detect'
       let l:categories = ['code']
     endif
 
@@ -24,17 +35,15 @@ function! JadeOmniComplete(findstart, base)
     if l:start > 0
       let l:line = getline('.')[0: l:start - 1]
     endif
-    let l:cnum = col('.')
-    let l:synstack = s:get_syntax_stack(l:lnum, l:cnum)
   
     if empty(l:synstack)
       if l:line == '' || l:line =~ '^\s*$'
         " beginning of line
         let l:categories = ['statementName', 'elementName']
       else
-        let l:bol_synstack = s:get_syntax_stack(
+        let l:bol_synstack = g:omniutil.get_syntax_stack(
               \ l:lnum,
-              \ s:get_first_non_white_col(l:lnum) + 1
+              \ g:omniutil.get_first_non_white_col(l:lnum) + 1
               \ )
         if !empty(l:bol_synstack)
           if l:bol_synstack[0] == 'pugDoctype'
@@ -46,10 +55,10 @@ function! JadeOmniComplete(findstart, base)
       " inpu_
       let l:categories = ['statementName', 'elementName']
     else
-      let l:synstack_attr_i = index(l:synstack, 'pugAttributes')
+      let l:synstack_attr_i = match(l:synstack, '^pugAttributes')
       if l:synstack_attr_i != -1
-        if len(l:synstack) > l:synstack_attr_i + 1
-          if l:synstack[l:synstack_attr_i] =~ '^javascriptString'
+        if len(l:synstack) > l:synstack_attr_i + 2
+          if l:synstack[l:synstack_attr_i + 1] =~ '^javascriptString'
             " input(type='a_
             let l:categories = ['attrValue']
           else
@@ -69,6 +78,7 @@ function! JadeOmniComplete(findstart, base)
         endif
       endif
     endif
+    echomsg string(l:categories)
 
     let b:jade_completion_categories = l:categories
     let b:jade_completion_cur_text = l:line[l:start :]
@@ -82,11 +92,12 @@ function! JadeOmniComplete(findstart, base)
         \ 'text': b:jade_completion_cur_text,
         \ 'categories': b:jade_completion_categories
         \ })
+  unlet b:jade_completion_categories
+  unlet	b:jade_completion_cur_text
+  unlet b:jade_completion_cur_line
   
-  echomsg string(l:candidates)
-  echomsg a:base
-
-  " return l:candidates
+  " echomsg string(l:candidates)
+  " echomsg a:base
 
   if a:base == ""
     return l:candidates
@@ -132,18 +143,11 @@ function! s:gather_doctype_candidates() abort
   return copy(s:jade_doctypes)
 endfunction
 
-function! s:get_syntax_stack(lnum, cnum) abort
-  return map(synstack(a:lnum, a:cnum), 'synIDattr(v:val, "name")')
-endfunction
-function! s:get_first_non_white_col(lnum) abort
-  let l:line = getline(a:lnum)
-  return match(l:line, '[^ \t]')
-endfunction
 function! s:get_element(lnum) abort
   let l:lnum = a:lnum
   while l:lnum >= 1
-    let l:cnum = s:get_first_non_white_col(lnum)
-    let l:stack = s:get_syntax_stack(l:lnum, l:cnum + 1)
+    let l:cnum = g:omniutil.get_first_non_white_col(lnum)
+    let l:stack = g:omniutil.get_syntax_stack(l:lnum, l:cnum + 1)
     let l:element_start_syntaxes = ['pugTag', 'pugIdChar', 'pugClassChar']
     if index(l:element_start_syntaxes, l:stack[0]) >= 0
       break
@@ -152,7 +156,7 @@ function! s:get_element(lnum) abort
     if l:lnum == 1
       break
     endif
-    let l:lnum = s:prevnonblanknoncomment(l:lnum - 1)
+    let l:lnum = g:omniutil.prev_line(l:lnum - 1)
   endwhile
   if l:stack[0] =~ 'Char$'
     return 'div'
@@ -164,7 +168,7 @@ function! s:get_attribute_name(lnum) abort
   let l:cnum = len(l:line) - 1
   let l:attr_name = ''
   while l:cnum > 0
-    let l:stack = s:get_syntax_stack(a:lnum, l:cnum)
+    let l:stack = g:omniutil.get_syntax_stack(a:lnum, l:cnum)
     if len(l:stack) >= 2 && l:stack[1] =~ '[hH]tmlArg$'
       let l:attr_name = l:line[l:cnum - 1] . l:attr_name
     elseif l:attr_name != ''
@@ -188,26 +192,12 @@ function! s:is_code(lnum) abort
   return 0
 endfunction
 
-function! s:is_comment(lnum) abort
-  let l:line = getline(a:lnum)
-  if l:line =~ '^\s*//'
-    return 1
-  endif
-  let l:ascentors = s:get_ancestors(a:lnum)
-  for l:ascentor in l:ascentors
-    if l:ascentor =~ '^//'
-      return 1
-    endif
-  endfor
-  return 0
-endfunction
-
 function! s:get_ancestors(lnum) abort
   let l:lnum = a:lnum
   let l:current_indent = indent(l:lnum)
   let l:ascentors = []
   while 1
-    let l:lnum = prevnonblank(l:lnum)
+    let l:lnum = g:omniutil.prev_line(l:lnum)
     if indent(l:lnum) < l:current_indent
       break
     endif
@@ -225,17 +215,4 @@ function! s:get_ancestors(lnum) abort
   return l:ascentors
 endfunction
 
-function! s:prevnonblanknoncomment(lnum) "{{{
-  let lnum = a:lnum
-  while lnum > 1
-    let lnum = prevnonblank(lnum)
-    let line = getline(lnum)
-    if !s:is_comment(lnum)
-      break
-    endif
-  endwhile
-  return lnum
-endfunction "}}}
-
 " vim: foldmethod=marker
-

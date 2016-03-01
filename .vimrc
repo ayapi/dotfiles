@@ -263,12 +263,14 @@ endfunction
 function! MatchCandidates(candidates, cur_text) abort
   let l:candidates = a:candidates
   let l:matches = []
-  for k in l:candidates
-    if type(k) == type("")
-      let l:candidate = {"word": k}
+  for l:k in l:candidates
+    if type(l:k) == type("")
+      let l:candidate = {"word": l:k}
     elseif type(k) == type({})
-      let l:candidate = k
-    else
+      let l:candidate = l:k
+    endif
+    unlet l:k
+    if !exists('l:candidate')
       continue
     endif
     
@@ -339,8 +341,8 @@ let g:funcsnips = {}
 
 augroup setomniafterfiletype
   autocmd!
-  autocmd FileType stylus setlocal omnifunc=StylusOmniComplete
-  autocmd FileType pug setlocal omnifunc=JadeOmniComplete
+  autocmd FileType stylus setlocal omnifunc=CompleteStylus
+  autocmd FileType pug setlocal omnifunc=CompleteJade
 augroup END
 
 " ------------------------------------

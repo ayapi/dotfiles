@@ -1,4 +1,10 @@
-function! StylusOmniComplete(findstart, base)
+if !exists('g:xmldata_html5')
+  runtime! autoload/xml/html5.vim
+endif
+runtime! scripts/html_candidates.vim
+runtime! scripts/omniutil.vim
+
+function! CompleteStylus(findstart, base)
   if a:findstart
     " We need whole line to proper checking
     let line = getline('.')
@@ -17,20 +23,7 @@ function! StylusOmniComplete(findstart, base)
   if a:base == ""
     return l:candidates
   endif
-  
-  let l:matches = []
-  for k in l:candidates
-    if strpart(k, 0, strlen(a:base)) ==# a:base
-      call add(l:matches, k)
-    endif
-  endfor
-  
-  if len(l:matches) == 0
-    return l:candidates
-  endif
-  
-  " echomsg string(l:matches)
-  return l:matches
+  return MatchCandidates(l:candidates, a:base)
 endfunction
 
 function! s:gather_candidates() abort
@@ -45,9 +38,12 @@ function! s:gather_candidates() abort
         \ && stridx(l:line, '(') == -1
     " concat continuation lines
     " TODO: nested parens
-    let l:lnum = line('.')-1
+    let l:lnum = line('.')
     while (l:lnum >= 1 && stridx(l:line, '(') < 0)
-      let l:lnum = s:prevnonblanknoncomment(l:lnum)
+      let l:lnum = s:prev_line(l:lnum)
+      if l:lnum < 1
+        return []
+      endif
       let l:line = getline(l:lnum) . l:line
       let l:lnum -= 1
     endwhile
@@ -61,8 +57,11 @@ function! s:gather_candidates() abort
       " look up parent selector
       let l:lnum = line('.')
       let l:current_indent = indent('.')
-      while indent(s:prevnonblanknoncomment(l:lnum)) >= l:current_indent
-        let l:lnum-=1
+      while indent(l:lnum) >= l:current_indent
+        let l:lnum = s:prev_line(l:lnum)
+        if l:lnum < 1
+          return []
+        endif
       endwhile
       let l:maybe_element = s:get_element_name_from_selector_line(
                             \ getline(l:lnum)
@@ -106,11 +105,11 @@ function! s:gather_candidates() abort
         \ '^\%(openbrace\|semicolon\|opencomm\|closecomm\|plus\|lt\)$'
     if col('.') == 1
       return s:get_ids_and_classes_from_visible_buffers()
-            \ +g:html_candidates.getElementNames()
+            \ + g:html_candidates.getElementNames()
     elseif l:line =~ '^\s*$'
       return s:get_ids_and_classes_from_visible_buffers()
-            \ +g:html_candidates.getElementNames()
-            \ +s:prop_names
+            \ + g:html_candidates.getElementNames()
+            \ + copy(s:prop_names)
     elseif l:line =~ '[+>]\S*$'
       return g:html_candidates.getElementNames()
     else
@@ -139,11 +138,11 @@ function! s:gather_candidates() abort
     endif
 
     if l:line =~ '[^:]:[a-zA-Z-]*$'
-      return s:pseudo_element_names + s:pseudo_class_names
+      return copy(s:pseudo_element_names + s:pseudo_class_names)
     endif
 
     if l:line =~ '::[a-zA-Z-]*$'
-      return s:pseudo_element_names
+      return copy(s:pseudo_element_names)
     endif
     
     return []
@@ -163,13 +162,6 @@ function! s:gather_candidates() abort
   endif
   return []
 endfunction
-
-if !exists('g:xmldata_html5')
-  runtime! autoload/xml/html5.vim
-endif
-if !exists('g:html_candidates')
-  runtime! scripts/html_candidates.vim
-endif
 
 let s:dict_path = substitute(fnamemodify(expand('<sfile>'), ':h'), '\\', '/', 'g')
 function! s:get_stylus_builtin_funcs() abort
@@ -194,17 +186,23 @@ function! s:get_stylus_builtin_funcs() abort
   return s:stylus_builtin_funcs
 endfunction
 function! s:get_property_lookup(lnum) abort
-  let l:lnum = a:lnum - 1
+  let l:lnum = a:lnum
   let l:props = []
-  while indent(s:prevnonblanknoncomment(l:lnum)) > 0
-    let l:pieces = split(getline(l:lnum))
+  while 1
+    let l:lnum = s:prev_line(l:lnum)
+    if l:lnum < 1
+      break
+    endif
+    let l:pieces = split(getline(l:lnum), '\(:\|\s\+\)')
     if len(l:pieces) >= 2
           \	&& l:pieces[0] =~ '^\s*[a-zA-Z-]\+$'
           \ && index(s:prop_names, l:pieces[0]) >= 0
       let l:prop_name = l:pieces[0]
       call add(l:props, l:prop_name)
     endif
-    let l:lnum-=1
+    if indent(l:lnum) == 0
+      break
+    endif
   endwhile
   return l:props
 endfunction
@@ -233,7 +231,7 @@ function! s:get_element_name_from_selector_line(line) abort
   let l:selector_pieces = split(a:line, '[+> ]\+')
   return matchstr(
         \ l:selector_pieces[len(l:selector_pieces)-1],
-        \ '^\zs[^:#\.\[]\+\ze'
+        \ '^\s*\zs[^:#\.\[]\+\ze'
         \)
 endfunction
 function! s:get_property_values(prop, vals) abort "{{{
@@ -780,25 +778,14 @@ endfunction "}}}
 function! s:get_atrule_names() abort "{{{
   return ["charset", "page", "media", "import", "font-face", "namespace", "supports", "keyframes", "viewport", "document"]
 endfunction "}}}
-function! s:prevnonblanknoncomment(lnum) "{{{
-  let lnum = a:lnum
-  while lnum > 1
-    let lnum = prevnonblank(lnum)
-    let line = getline(lnum)
-    if line =~ '\*/'
-      while lnum > 1 && line !~ '/\*'
-        let lnum -= 1
-      endwhile
-      if line =~ '^\s*/\*'
-        let lnum -= 1
-      else
-        break
-      endif
-    else
-      break
-    endif
-  endwhile
-  return lnum
+function! s:prev_line(lnum) abort "{{{
+  if exists('b:current_syntax') && b:current_syntax == 'pug'
+    return g:omniutil.prev_line(a:lnum, [
+          \ ['pugStylusBlock', 1],
+          \ ['pugStyleTag', 0]
+          \ ])
+  endif
+  return g:omniutil.prev_line(a:lnum)
 endfunction "}}}
 let s:prop_names = split("all additive-symbols align-content align-items align-self animation animation-delay animation-direction animation-duration animation-fill-mode animation-iteration-count animation-name animation-play-state animation-timing-function backface-visibility background background-attachment background-blend-mode background-clip background-color background-image background-origin background-position background-repeat background-size block-size border border-block-end border-block-end-color border-block-end-style border-block-end-width border-block-start border-block-start-color border-block-start-style border-block-start-width border-bottom border-bottom-color border-bottom-left-radius border-bottom-right-radius border-bottom-style border-bottom-width border-collapse border-color border-image border-image-outset border-image-repeat border-image-slice border-image-source border-image-width border-inline-end border-inline-end-color border-inline-end-style border-inline-end-width border-inline-start border-inline-start-color border-inline-start-style border-inline-start-width border-left border-left-color border-left-style border-left-width border-radius border-right border-right-color border-right-style border-right-width border-spacing border-style border-top border-top-color border-top-left-radius border-top-right-radius border-top-style border-top-width border-width bottom box-decoration-break box-shadow box-sizing break-after break-before break-inside caption-side clear clip clip-path color columns column-count column-fill column-gap column-rule column-rule-color column-rule-style column-rule-width column-span column-width content counter-increment counter-reset cue cue-before cue-after cursor direction display empty-cells fallback filter flex flex-basis flex-direction flex-flow flex-grow flex-shrink flex-wrap float font font-family font-feature-settings font-kerning font-language-override font-size font-size-adjust font-stretch font-style font-synthesis font-variant font-variant-alternates font-variant-caps font-variant-east-asian font-variant-ligatures font-variant-numeric font-variant-position font-weight grid grid-area grid-auto-columns grid-auto-flow grid-auto-position grid-auto-rows grid-column grid-column-start grid-column-end grid-row grid-row-start grid-row-end grid-template grid-template-areas grid-template-rows grid-template-columns height hyphens image-rendering image-resolution image-orientation ime-mode inline-size isolation justify-content left letter-spacing line-break line-height list-style list-style-image list-style-position list-style-type margin margin-block-end margin-block-start margin-bottom margin-inline-end margin-inline-start margin-left margin-right margin-top marks mask mask-type max-block-size max-height max-inline-size max-width max-zoom min-block-size min-height min-inline-size min-width min-zoom mix-blend-mode negative object-fit object-position offset-block-end offset-block-start offset-inline-end offset-inline-start opacity order orientation orphans outline outline-color outline-offset outline-style outline-width overflow overflow-wrap overflow-x overflow-y pad padding padding-block-end padding-block-start padding-bottom padding-inline-end padding-inline-start padding-left padding-right padding-top page-break-after page-break-before page-break-inside pause-before pause-after pause perspective perspective-origin pointer-events position prefix quotes range resize rest rest-before rest-after right ruby-align ruby-merge ruby-position scroll-behavior scroll-snap-coordinate scroll-snap-destination scroll-snap-points-x scroll-snap-points-y scroll-snap-type scroll-snap-type-x scroll-snap-type-y shape-image-threshold shape-margin shape-outside speak speak-as suffix symbols system table-layout tab-size text-align text-align-last text-combine-upright text-decoration text-decoration-color text-decoration-line text-emphasis text-emphasis-color text-emphasis-position text-emphasis-style text-indent text-orientation text-overflow text-rendering text-shadow text-transform text-underline-position top touch-action transform transform-box transform-origin transform-style transition transition-delay transition-duration transition-property transition-timing-function unicode-bidi unicode-range user-zoom vertical-align visibility voice-balance voice-duration voice-family voice-pitch voice-rate voice-range voice-stress voice-volume white-space widows width will-change word-break word-spacing word-wrap writing-mode z-index zoom")
 let s:pseudo_element_names = ["first-line", "first-letter", "before", "after", "selection", "backdrop"]
