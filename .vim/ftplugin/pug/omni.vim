@@ -31,6 +31,16 @@ function! JadeOmniComplete(findstart, base)
       if l:line == '' || l:line =~ '^\s*$'
         " beginning of line
         let l:categories = ['statementName', 'elementName']
+      else
+        let l:bol_synstack = s:get_syntax_stack(
+              \ l:lnum,
+              \ s:get_first_non_white_col(l:lnum) + 1
+              \ )
+        if !empty(l:bol_synstack)
+          if l:bol_synstack[0] == 'pugDoctype'
+            let l:categories = ['doctype']
+          endif
+        endif
       endif
     elseif l:synstack[0] == 'pugTag'
       " inpu_
@@ -105,6 +115,8 @@ function! s:gather_candidates(info) abort
       endif
       let l:candidates += l:values
       unlet l:values
+    elseif l:category =~ 'doctype'
+      let l:candidates += s:gather_doctype_candidates()
     endif
   endfor
   return l:candidates
@@ -115,6 +127,11 @@ function! s:gather_statement_name_candidates(info) abort
   let l:additional_statements = ['else', 'when', 'default', 'doctype']
   return copy(s:jade_anywhere_statements + l:additional_statements)
 endfunction
+let s:jade_doctypes = ['html', 'xml', 'transitional', 'strict', 'frameset', '1.1', 'basic', 'mobile']
+function! s:gather_doctype_candidates() abort
+  return copy(s:jade_doctypes)
+endfunction
+
 function! s:get_syntax_stack(lnum, cnum) abort
   return map(synstack(a:lnum, a:cnum), 'synIDattr(v:val, "name")')
 endfunction
