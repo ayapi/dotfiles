@@ -4,17 +4,19 @@ runtime! scripts/omniutil.vim
 function! CompleteJade(findstart, base)
   let l:lnum = line('.')
   let l:cnum = col('.')
-  let l:synstack = g:omniutil.getSyntaxStack(l:lnum, l:cnum - 1)
-  if !empty(l:synstack)
-    if l:synstack[0] == 'pugStylusBlock'
-      if !exists('CompleteStylus')
-        runtime! ftplugin/stylus/omni.vim
-      endif
-      return CompleteStylus(a:findstart, a:base)
-    endif
-  endif
   
   if a:findstart
+    let l:synstack = g:omniutil.getSyntaxStack(l:lnum, l:cnum - 1)
+    if !empty(l:synstack)
+      if l:synstack[0] =~ 'pugStylus\(Block\|Filter\)'
+        if !exists('CompleteStylus')
+          runtime! ftplugin/stylus/omni.vim
+        endif
+        let b:jade_completion_external = 'Stylus'
+        return CompleteStylus(a:findstart, a:base)
+      endif
+    endif
+    
     let l:line = getline('.')
     let l:start = col('.') - 1
     while l:start >= 0 && l:line[l:start - 1] =~ '\%(\k\|-\)'
@@ -83,15 +85,23 @@ function! CompleteJade(findstart, base)
     return l:start
   endif
 
+  if exists("b:jade_completion_external")
+    let l:external_name = b:jade_completion_external
+    unlet b:jade_completion_external
+    if l:external_name == 'Stylus'
+      return CompleteStylus(a:findstart, a:base)
+    endif
+  endif
+
   let l:candidates = s:gather_candidates({
         \ 'lnum': l:lnum,
         \ 'line': b:jade_completion_cur_line,
         \ 'text': b:jade_completion_cur_text,
         \ 'categories': b:jade_completion_categories
         \ })
-  unlet b:jade_completion_categories
-  unlet	b:jade_completion_cur_text
-  unlet b:jade_completion_cur_line
+  unlet! b:jade_completion_categories
+  unlet! b:jade_completion_cur_text
+  unlet! b:jade_completion_cur_line
   
   " echomsg string(l:candidates)
   " echomsg a:base

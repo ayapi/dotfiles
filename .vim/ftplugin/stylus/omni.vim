@@ -780,10 +780,17 @@ function! s:get_atrule_names() abort "{{{
 endfunction "}}}
 function! s:get_prev_lnum(lnum) abort "{{{
   if exists('b:current_syntax') && b:current_syntax == 'pug'
-    return g:omniutil.getPrevLnum(a:lnum, [
+    if g:omniutil.is('pugStylusBlock', a:lnum)
+      return g:omniutil.getPrevLnum(a:lnum, [
           \ ['pugStylusBlock', 1],
           \ ['pugStyleTag', 0]
           \ ])
+    elseif g:omniutil.is('pugStylusFilter', a:lnum)
+      return g:omniutil.getPrevLnum(a:lnum, [
+          \ ['pugStylusFilter', 1],
+          \ ['pugFilter', 0]
+          \ ])
+    endif
   endif
   return g:omniutil.getPrevLnum(a:lnum)
 endfunction "}}}
