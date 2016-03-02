@@ -4,7 +4,7 @@ runtime! scripts/omniutil.vim
 function! CompleteJade(findstart, base)
   let l:lnum = line('.')
   let l:cnum = col('.')
-  let l:synstack = g:omniutil.get_syntax_stack(l:lnum, l:cnum)
+  let l:synstack = g:omniutil.getSyntaxStack(l:lnum, l:cnum - 1)
   if !empty(l:synstack)
     if l:synstack[0] == 'pugStylusBlock'
       if !exists('CompleteStylus')
@@ -23,7 +23,7 @@ function! CompleteJade(findstart, base)
 
     let l:categories = []
     
-    if g:omniutil.is_comment(l:lnum)
+    if g:omniutil.isComment(l:lnum)
       let l:categories = ['comment']
     endif
     if s:is_code(l:lnum)
@@ -41,10 +41,7 @@ function! CompleteJade(findstart, base)
         " beginning of line
         let l:categories = ['statementName', 'elementName']
       else
-        let l:bol_synstack = g:omniutil.get_syntax_stack(
-              \ l:lnum,
-              \ g:omniutil.get_first_non_white_col(l:lnum) + 1
-              \ )
+        let l:bol_synstack = g:omniutil.getSyntaxStack(l:lnum)
         if !empty(l:bol_synstack)
           if l:bol_synstack[0] == 'pugDoctype'
             let l:categories = ['doctype']
@@ -145,9 +142,9 @@ endfunction
 
 function! s:get_element(lnum) abort
   let l:lnum = a:lnum
+  let l:cnum = g:omniutil.getFirstNonWhiteCnum(l:lnum)
   while l:lnum >= 1
-    let l:cnum = g:omniutil.get_first_non_white_col(lnum)
-    let l:stack = g:omniutil.get_syntax_stack(l:lnum, l:cnum + 1)
+    let l:stack = g:omniutil.getSyntaxStack(l:lnum)
     let l:element_start_syntaxes = ['pugTag', 'pugIdChar', 'pugClassChar']
     if index(l:element_start_syntaxes, l:stack[0]) >= 0
       break
@@ -156,7 +153,7 @@ function! s:get_element(lnum) abort
     if l:lnum == 1
       break
     endif
-    let l:lnum = g:omniutil.prev_line(l:lnum - 1)
+    let l:lnum = g:omniutil.getPrevLnum(l:lnum - 1)
   endwhile
   if l:stack[0] =~ 'Char$'
     return 'div'
@@ -168,7 +165,7 @@ function! s:get_attribute_name(lnum) abort
   let l:cnum = len(l:line) - 1
   let l:attr_name = ''
   while l:cnum > 0
-    let l:stack = g:omniutil.get_syntax_stack(a:lnum, l:cnum)
+    let l:stack = g:omniutil.getSyntaxStack(a:lnum, l:cnum - 1)
     if len(l:stack) >= 2 && l:stack[1] =~ '[hH]tmlArg$'
       let l:attr_name = l:line[l:cnum - 1] . l:attr_name
     elseif l:attr_name != ''
@@ -197,7 +194,7 @@ function! s:get_ancestors(lnum) abort
   let l:current_indent = indent(l:lnum)
   let l:ascentors = []
   while 1
-    let l:lnum = g:omniutil.prev_line(l:lnum)
+    let l:lnum = g:omniutil.getPrevLnum(l:lnum)
     if indent(l:lnum) < l:current_indent
       break
     endif

@@ -2,26 +2,22 @@ if exists('g:omniutil')
   finish
 endif
 let g:omniutil = {}
-function! g:omniutil.get_syntax_stack(lnum, cnum) abort "{{{
-  return map(synstack(a:lnum, a:cnum), 'synIDattr(v:val, "name")')
+function! g:omniutil.getSyntaxStack(lnum, ...) abort "{{{
+  let l:cnum = (a:0 == 1) ? a:1 : self.getFirstNonWhiteCnum(a:lnum)
+  return map(synstack(a:lnum, l:cnum + 1), 'synIDattr(v:val, "name")')
 endfunction "}}}
-function! g:omniutil.get_first_non_white_col(lnum) abort "{{{
+function! g:omniutil.getFirstNonWhiteCnum(lnum) abort "{{{
   let l:line = getline(a:lnum)
   return match(l:line, '[^ \t]')
 endfunction "}}}
-function! g:omniutil.is_comment(lnum, ...) abort "{{{
+function! g:omniutil.isComment(lnum, ...) abort "{{{
   return call(self.is, ['Comment', a:lnum] + a:000, self)
 endfunction "}}}
 function! g:omniutil.is(synname_pattern, lnum, ...) abort "{{{
-  let l:lnum = a:lnum
-  let l:cnum = 1
-  if a:0 == 1
-    let l:cnum = a:1 + 1
-  endif
-  let l:synstack = self.get_syntax_stack(l:lnum, l:cnum)
+  let l:synstack = call(self.getSyntaxStack, [a:lnum] + a:000, self)
   return match(l:synstack, a:synname_pattern) >= 0
 endfunction "}}}
-function! g:omniutil.prev_line(lnum, ...) abort "{{{
+function! g:omniutil.getPrevLnum(lnum, ...) abort "{{{
   if a:0 == 1
     let l:synname_filters = a:1
   endif
@@ -31,7 +27,7 @@ function! g:omniutil.prev_line(lnum, ...) abort "{{{
     if l:cur_lnum == 0
       return 0
     endif
-    let l:cnum = self.get_first_non_white_col(l:cur_lnum)
+    let l:cnum = self.getFirstNonWhiteCnum(l:cur_lnum)
     if exists('l:synname_filters')
       let l:out_of_syntax = 0
       for l:synname_filter in l:synname_filters
@@ -47,7 +43,7 @@ function! g:omniutil.prev_line(lnum, ...) abort "{{{
       endif
     endif
     let l:lnum = l:cur_lnum
-    let l:is_comment = self.is_comment(l:cur_lnum, l:cnum)
+    let l:is_comment = self.isComment(l:cur_lnum, l:cnum)
     if !l:is_comment
       break
     endif
