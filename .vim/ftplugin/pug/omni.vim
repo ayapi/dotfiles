@@ -27,52 +27,51 @@ function! CompleteJade(findstart, base)
     
     if g:omniutil.isComment(l:lnum)
       let l:categories = ['comment']
-    endif
-    if s:isCode(l:lnum)
+    elseif s:isCode(l:lnum, l:cnum)
       let l:categories = ['code']
-    endif
-
-    let l:line = ''
-    if l:start > 0
-      let l:line = getline('.')[0: l:start - 1]
-    endif
-  
-    if empty(l:synstack)
-      if l:line == '' || l:line =~ '^\s*$'
-        " beginning of line
-        let l:categories = ['statementName', 'elementName']
-      else
-        let l:bol_synstack = g:omniutil.getSyntaxStack(l:lnum)
-        if !empty(l:bol_synstack)
-          if l:bol_synstack[0] == 'pugDoctype'
-            let l:categories = ['doctype']
+    else
+      let l:line = ''
+      if l:start > 0
+        let l:line = getline('.')[0: l:start - 1]
+      endif
+    
+      if empty(l:synstack)
+        if l:line == '' || l:line =~ '^\s*$'
+          " beginning of line
+          let l:categories = ['statementName', 'elementName']
+        else
+          let l:bol_synstack = g:omniutil.getSyntaxStack(l:lnum)
+          if !empty(l:bol_synstack)
+            if l:bol_synstack[0] == 'pugDoctype'
+              let l:categories = ['doctype']
+            endif
           endif
         endif
-      endif
-    elseif l:synstack[0] == 'pugTag'
-      " inpu_
-      let l:categories = ['statementName', 'elementName']
-    else
-      let l:synstack_attr_i = match(l:synstack, '^pugAttributes')
-      if l:synstack_attr_i != -1
-        if len(l:synstack) > l:synstack_attr_i + 2
-          if l:synstack[l:synstack_attr_i + 1] =~ '^javascriptString'
-            " input(type='a_
+      elseif l:synstack[0] == 'pugTag'
+        " inpu_
+        let l:categories = ['statementName', 'elementName']
+      else
+        let l:synstack_attr_i = match(l:synstack, '^pugAttributes')
+        if l:synstack_attr_i != -1
+          if len(l:synstack) > l:synstack_attr_i + 2
+            if l:synstack[l:synstack_attr_i + 1] =~ '^javascriptString'
+              " input(type='a_
+              let l:categories = ['attrValue']
+            else
+              " javascript expression?
+              let l:categories = ['code']
+            endif
+          elseif l:line =~ "=[\"']$"
+            " input(type='_
             let l:categories = ['attrValue']
-          else
-            " javascript expression?
-            let l:categories = ['code']
+          elseif l:line =~ '=$'
+            " input(type=_
+            let l:categories = ['attrValueQuote', 'code']
+          elseif l:line =~ '[(, ]$' || l:line =~ '^\s*$'
+            " input(_
+            " input(type='text',_
+            let l:categories = ['attrName']
           endif
-        elseif l:line =~ "=[\"']$"
-          " input(type='_
-          let l:categories = ['attrValue']
-        elseif l:line =~ '=$'
-          " input(type=_
-          let l:categories = ['attrValueQuote', 'code']
-        elseif l:line =~ '[(, ]$' || l:line =~ '^\s*$'
-          " input(_
-          " input(type='text',_
-          let l:categories = ['attrName']
         endif
       endif
     endif
@@ -183,18 +182,8 @@ function! s:getAttributeName(lnum) abort"{{{
   endwhile
   return l:attr_name
 endfunction"}}}
-function! s:isCode(lnum) abort"{{{
-  let l:line = getline(a:lnum)
-  if matchstr(l:line, '^\s*\zs[^( ]*\ze') =~ '!\?[-=]$'
-    return 1
-  endif
-  let l:ascentors = s:getAncestors(a:lnum)
-  for l:ascentor in l:ascentors
-    if l:ascentor =~ '^-' || l:ascentor =~ '^script'
-      return 1
-    endif
-  endfor
-  return 0
+function! s:isCode(lnum, cnum) abort"{{{
+  return g:omniutil.is('pugJavascript', a:lnum, a:cnum)
 endfunction"}}}
 function! s:getAncestors(lnum) abort"{{{
   let l:lnum = a:lnum
