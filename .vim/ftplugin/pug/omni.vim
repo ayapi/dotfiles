@@ -28,8 +28,7 @@ function! CompleteJade(findstart, base)
     if g:omniutil.isComment(l:lnum)
       let l:categories = ['comment']
     endif
-    if s:is_code(l:lnum)
-      echomsg 'code detect'
+    if s:isCode(l:lnum)
       let l:categories = ['code']
     endif
 
@@ -93,7 +92,7 @@ function! CompleteJade(findstart, base)
     endif
   endif
 
-  let l:candidates = s:gather_candidates({
+  let l:candidates = s:gatherCandidates({
         \ 'lnum': l:lnum,
         \ 'line': b:jade_completion_cur_line,
         \ 'text': b:jade_completion_cur_text,
@@ -112,21 +111,21 @@ function! CompleteJade(findstart, base)
   return MatchCandidates(l:candidates, a:base)
 endfunction
 
-function! s:gather_candidates(info) abort
+function! s:gatherCandidates(info) abort"{{{
   let l:candidates = []
   for l:category in a:info.categories
     if l:category == 'statementName'
-      let l:candidates += s:gather_statement_name_candidates(a:info)
+      let l:candidates += s:gatherStatementNames(a:info)
     elseif l:category == 'elementName'
       let l:candidates += g:html_candidates.getElementNames()
     elseif l:category == 'attrName'
       let l:candidates += g:html_candidates.getAttributeNames(
-            \ s:get_element(a:info.lnum)
+            \ s:getElementName(a:info.lnum)
             \ )
     elseif l:category =~ '^attrValue'
       let l:values = g:html_candidates.getAttributeValues(
-            \ s:get_attribute_name(a:info.lnum),
-            \ s:get_element(a:info.lnum)
+            \ s:getAttributeName(a:info.lnum),
+            \ s:getElementName(a:info.lnum)
             \ )
       if l:category =~ 'Quote$'
         call map(l:values, '"\"" . v:val . "\""')
@@ -134,28 +133,27 @@ function! s:gather_candidates(info) abort
       let l:candidates += l:values
       unlet l:values
     elseif l:category =~ 'doctype'
-      let l:candidates += s:gather_doctype_candidates()
+      let l:candidates += s:gatherDoctypeValues()
     endif
   endfor
   return l:candidates
-endfunction
+endfunction"}}}
 let s:jade_anywhere_statements = ['if', 'case', 'each', 'while', 'extends', 'include', 'mixin', 'block', 'append']
-function! s:gather_statement_name_candidates(info) abort
+function! s:gatherStatementNames(info) abort"{{{
   " TODO: lookup buffer content for additional statements
   let l:additional_statements = ['else', 'when', 'default', 'doctype']
   return copy(s:jade_anywhere_statements + l:additional_statements)
-endfunction
+endfunction"}}}
 let s:jade_doctypes = ['html', 'xml', 'transitional', 'strict', 'frameset', '1.1', 'basic', 'mobile']
-function! s:gather_doctype_candidates() abort
+function! s:gatherDoctypeValues() abort"{{{
   return copy(s:jade_doctypes)
-endfunction
-
-function! s:get_element(lnum) abort
+endfunction"}}}
+function! s:getElementName(lnum) abort"{{{
   let l:lnum = a:lnum
   let l:cnum = g:omniutil.getFirstNonWhiteCnum(l:lnum)
+  let l:element_start_syntaxes = ['pugTag', 'pugIdChar', 'pugClassChar']
   while l:lnum >= 1
     let l:stack = g:omniutil.getSyntaxStack(l:lnum)
-    let l:element_start_syntaxes = ['pugTag', 'pugIdChar', 'pugClassChar']
     if index(l:element_start_syntaxes, l:stack[0]) >= 0
       break
     endif
@@ -169,8 +167,8 @@ function! s:get_element(lnum) abort
     return 'div'
   endif
   return matchstr(getline(l:lnum)[l:cnum :], '^[a-zA-Z-]\+')
-endfunction
-function! s:get_attribute_name(lnum) abort
+endfunction"}}}
+function! s:getAttributeName(lnum) abort"{{{
   let l:line = getline(a:lnum)
   let l:cnum = len(l:line) - 1
   let l:attr_name = ''
@@ -184,22 +182,21 @@ function! s:get_attribute_name(lnum) abort
     let l:cnum -= 1
   endwhile
   return l:attr_name
-endfunction
-function! s:is_code(lnum) abort
+endfunction"}}}
+function! s:isCode(lnum) abort"{{{
   let l:line = getline(a:lnum)
   if matchstr(l:line, '^\s*\zs[^( ]*\ze') =~ '!\?[-=]$'
     return 1
   endif
-  let l:ascentors = s:get_ancestors(a:lnum)
+  let l:ascentors = s:getAncestors(a:lnum)
   for l:ascentor in l:ascentors
     if l:ascentor =~ '^-' || l:ascentor =~ '^script'
       return 1
     endif
   endfor
   return 0
-endfunction
-
-function! s:get_ancestors(lnum) abort
+endfunction"}}}
+function! s:getAncestors(lnum) abort"{{{
   let l:lnum = a:lnum
   let l:current_indent = indent(l:lnum)
   let l:ascentors = []
@@ -220,6 +217,6 @@ function! s:get_ancestors(lnum) abort
     let l:lnum-=1
   endwhile
   return l:ascentors
-endfunction
+endfunction"}}}
 
 " vim: foldmethod=marker
