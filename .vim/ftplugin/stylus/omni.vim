@@ -45,7 +45,6 @@ function! s:gather_candidates() abort
         return []
       endif
       let l:line = getline(l:lnum) . l:line
-      let l:lnum -= 1
     endwhile
   endif
   

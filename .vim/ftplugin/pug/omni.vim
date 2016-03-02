@@ -160,7 +160,7 @@ function! s:getElementName(lnum) abort"{{{
     if l:lnum == 1
       break
     endif
-    let l:lnum = g:omniutil.getPrevLnum(l:lnum - 1)
+    let l:lnum = g:omniutil.getPrevLnum(l:lnum)
   endwhile
   if l:stack[0] =~ 'Char$'
     return 'div'
