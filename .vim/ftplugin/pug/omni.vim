@@ -77,9 +77,13 @@ function! CompleteJade(findstart, base)
     endif
     echomsg string(l:categories)
 
-    let b:jade_completion_categories = l:categories
-    let b:jade_completion_cur_text = l:line[l:start :]
-    let b:jade_completion_cur_line = l:line[0: l:start - 1]
+    let b:jade_completion_info = {
+          \ 'categories': l:categories,
+          \ 'lnum': l:lnum,
+          \ 'cnum': l:start,
+          \ 'text': l:line[l:start :],
+          \ 'line': l:line[0: l:start - 1]
+          \ }
     return l:start
   endif
 
@@ -91,15 +95,8 @@ function! CompleteJade(findstart, base)
     endif
   endif
 
-  let l:candidates = s:gatherCandidates({
-        \ 'lnum': l:lnum,
-        \ 'line': b:jade_completion_cur_line,
-        \ 'text': b:jade_completion_cur_text,
-        \ 'categories': b:jade_completion_categories
-        \ })
-  unlet! b:jade_completion_categories
-  unlet! b:jade_completion_cur_text
-  unlet! b:jade_completion_cur_line
+  let l:candidates = s:gatherCandidates(b:jade_completion_info)
+  unlet! b:jade_completion_info
   
   " echomsg string(l:candidates)
   " echomsg a:base
@@ -116,16 +113,11 @@ function! s:gatherCandidates(info) abort"{{{
     if l:category == 'statementName'
       let l:candidates += s:gatherStatementNames(a:info)
     elseif l:category == 'elementName'
-      let l:candidates += g:html_candidates.getElementNames()
+      let l:candidates += s:gatherElementNames(a:info)
     elseif l:category == 'attrName'
-      let l:candidates += g:html_candidates.getAttributeNames(
-            \ s:getElementName(a:info.lnum)
-            \ )
+      let l:candidates += s:gatherAttributeNames(a:info)
     elseif l:category =~ '^attrValue'
-      let l:values = g:html_candidates.getAttributeValues(
-            \ s:getAttributeName(a:info.lnum),
-            \ s:getElementName(a:info.lnum)
-            \ )
+      let l:values = s:gatherAttributeValues(a:info)
       if l:category =~ 'Quote$'
         call map(l:values, '"\"" . v:val . "\""')
       endif
@@ -137,6 +129,30 @@ function! s:gatherCandidates(info) abort"{{{
   endfor
   return l:candidates
 endfunction"}}}
+function! s:getProvider(lnum, cnum) abort"{{{
+  if s:isSVG(a:lnum, a:cnum)
+    if !exists('g:svg_candidates')
+      runtime! scripts/svg_candidates.vim
+    endif
+    return g:svg_candidates
+  endif
+  return g:html_candidates
+endfunction"}}}
+function! s:gatherElementNames(info) abort"{{{
+  return s:getProvider(a:info.lnum, a:info.cnum).getElementNames()
+endfunction"}}}
+function! s:gatherAttributeNames(info) abort"{{{
+  let l:provider = s:getProvider(a:info.lnum, a:info.cnum)
+  let l:tag_name = s:getElementName(a:info.lnum, a:info.cnum)
+  return l:provider.getAttributeNames(l:tag_name)
+endfunction"}}}
+function! s:gatherAttributeValues(info) abort"{{{
+  let l:provider = s:getProvider(a:info.lnum, a:info.cnum)
+  return l:provider.getAttributeValues(
+            \ s:getAttributeName(a:info.lnum, a:info.cnum),
+            \ s:getElementName(a:info.lnum, a:info.cnum)
+            \ )
+endfunction"}}}
 let s:jade_anywhere_statements = ['if', 'case', 'each', 'while', 'extends', 'include', 'mixin', 'block', 'append']
 function! s:gatherStatementNames(info) abort"{{{
   " TODO: lookup buffer content for additional statements
@@ -147,29 +163,36 @@ let s:jade_doctypes = ['html', 'xml', 'transitional', 'strict', 'frameset', '1.1
 function! s:gatherDoctypeValues() abort"{{{
   return copy(s:jade_doctypes)
 endfunction"}}}
-function! s:getElementName(lnum) abort"{{{
+function! s:getElementName(lnum, cnum) abort"{{{
   let l:lnum = a:lnum
-  let l:element_start_syntaxes = ['pugTag', 'pugIdChar', 'pugClassChar']
-  while l:lnum >= 1
-    let l:stack = g:omniutil.getSyntaxStack(l:lnum)
-    if index(l:element_start_syntaxes, l:stack[0]) >= 0
-      break
-    endif
-    unlet l:stack
-    if l:lnum == 1
+  let l:cnum = a:cnum
+  let l:tag_name = ''
+  while l:lnum > 0
+    let l:line = getline(l:lnum)
+    let l:first_non_white_cnum = g:omniutil.getFirstNonWhiteCnum(l:lnum)
+    while l:cnum >= l:first_non_white_cnum
+      if g:omniutil.is('pug\(Tag\|Id\|Class\)', l:lnum, l:cnum - 1)
+        let l:tag_name = l:line[l:cnum - 1] . l:tag_name
+      elseif l:tag_name != ''
+        break
+      endif
+      let l:cnum -= 1
+    endwhile
+    if l:tag_name != ''
       break
     endif
     let l:lnum = g:omniutil.getPrevLnum(l:lnum)
+    let l:cnum = len(getline(l:lnum))
   endwhile
-  return substitute(s:getTagOrStatementNames(l:lnum)[-1], '[#\.].\+$', '', '')
+  return substitute(l:tag_name, '[#\.].\+$', '', '')
 endfunction"}}}
-function! s:getAttributeName(lnum) abort"{{{
+function! s:getAttributeName(lnum, cnum) abort"{{{
   let l:line = getline(a:lnum)
-  let l:cnum = len(l:line) - 1
+  let l:lnum = a:lnum
+  let l:cnum = a:cnum
   let l:attr_name = ''
   while l:cnum > 0
-    let l:stack = g:omniutil.getSyntaxStack(a:lnum, l:cnum - 1)
-    if len(l:stack) >= 2 && l:stack[1] =~ '[hH]tmlArg$'
+    if g:omniutil.is('[hH]tmlArg$', l:lnum, l:cnum - 1)
       let l:attr_name = l:line[l:cnum - 1] . l:attr_name
     elseif l:attr_name != ''
       break
@@ -178,50 +201,46 @@ function! s:getAttributeName(lnum) abort"{{{
   endwhile
   return l:attr_name
 endfunction"}}}
-function! s:isCode(lnum, cnum) abort"{{{
-  return g:omniutil.is('pugJavascript', a:lnum, a:cnum)
-endfunction"}}}
-function! s:getAncestors(lnum) abort"{{{
+function! s:getAncestors(lnum, cnum) abort"{{{
   let l:lnum = a:lnum
-  let l:indent = indent(l:lnum)
+  let l:cnum = a:cnum
+  let l:indent = indent(l:lnum) + 1
   let l:ascentors = []
   
-  " current line, gather block expansion(nested) tags
-  " div: a: span
-  let l:current_names = s:getTagOrStatementNames(l:lnum)
-  if len(l:current_names) > 1
-    let l:ascentors += reverse(l:current_names[:-2])
-  endif
-  
-  " previous lines
-  while 1
-    let l:lnum = g:omniutil.getPrevLnum(l:lnum)
-    if l:lnum == 0
-      break
-    endif
-    
+  while l:lnum > 0
     let l:current_indent = indent(l:lnum)
-    if l:current_indent >= l:indent
-          \ || g:omniutil.is('pugAttributes', l:lnum)
-      continue
+    if l:current_indent < l:indent
+      let l:name = ''
+      let l:line = getline(l:lnum)
+      let l:cnum = len(l:line)
+      let l:first_non_white_cnum = g:omniutil.getFirstNonWhiteCnum(l:lnum)
+      while l:cnum >= l:first_non_white_cnum
+        let l:char = l:line[l:cnum - 1]
+        if l:char !~ '\s' && g:omniutil.is(
+              \ 'pug\%(Tag$\|Id\|Class\|Script'
+              \ . '\%(Conditional\|Statement\|LoopKeywords\)\)',
+              \ l:lnum, l:cnum - 1
+              \ )
+          let l:name = l:char . l:name
+        elseif l:name != ''
+          call add(l:ascentors, l:name)
+          let l:name = ''
+        endif
+        let l:cnum -= 1
+      endwhile
+      let l:indent = l:current_indent
     endif
-    
-    let l:names = s:getTagOrStatementNames(l:lnum)
-    let l:ascentors += reverse(l:names)
-    let l:indent = l:current_indent
+    let l:lnum = g:omniutil.getPrevLnum(l:lnum)
   endwhile
+  " echomsg string(l:ascentors)
   return l:ascentors
 endfunction"}}}
-function! s:getTagOrStatementNames(lnum) abort"{{{
-  let l:lnum = a:lnum
-  let l:line = substitute(getline(l:lnum), '^\s*', '', '')
-    
-  " split with colon for block expansion (nested syntax)
-  " ref. http://jade-lang.com/reference/tags/
-  let l:names = split(
-        \ matchstr(l:line, '^\zs.\{-}\ze\((\|\(:\)\@<! \|$\)'),
-        \ ': ', 1)
-  return map(l:names, '(v:val =~ "^[#\.]" ? "div" : "") . v:val')
+function! s:isSVG(lnum, cnum) abort"{{{
+  let l:ancestors = s:getAncestors(a:lnum, a:cnum)
+  return index(l:ancestors, 'svg', 0, 1) >= 0
+endfunction"}}}
+function! s:isCode(lnum, cnum) abort"{{{
+  return g:omniutil.is('pugJavascript', a:lnum, a:cnum)
 endfunction"}}}
 
 " vim: foldmethod=marker

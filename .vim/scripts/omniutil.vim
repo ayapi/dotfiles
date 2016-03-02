@@ -4,7 +4,11 @@ endif
 let g:omniutil = {}
 function! g:omniutil.getSyntaxStack(lnum, ...) abort "{{{
   let l:cnum = (a:0 == 1) ? a:1 : self.getFirstNonWhiteCnum(a:lnum)
-  return map(synstack(a:lnum, l:cnum + 1), 'synIDattr(v:val, "name")')
+  let l:stack = synstack(a:lnum, l:cnum + 1)
+  if empty(l:stack)
+    return []
+  endif
+  return map(l:stack, 'synIDattr(v:val, "name")')
 endfunction "}}}
 function! g:omniutil.getFirstNonWhiteCnum(lnum) abort "{{{
   let l:line = getline(a:lnum)
