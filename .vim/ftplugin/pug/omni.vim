@@ -149,7 +149,6 @@ function! s:gatherDoctypeValues() abort"{{{
 endfunction"}}}
 function! s:getElementName(lnum) abort"{{{
   let l:lnum = a:lnum
-  let l:cnum = g:omniutil.getFirstNonWhiteCnum(l:lnum)
   let l:element_start_syntaxes = ['pugTag', 'pugIdChar', 'pugClassChar']
   while l:lnum >= 1
     let l:stack = g:omniutil.getSyntaxStack(l:lnum)
@@ -162,10 +161,7 @@ function! s:getElementName(lnum) abort"{{{
     endif
     let l:lnum = g:omniutil.getPrevLnum(l:lnum)
   endwhile
-  if l:stack[0] =~ 'Char$'
-    return 'div'
-  endif
-  return matchstr(getline(l:lnum)[l:cnum :], '^[a-zA-Z-]\+')
+  return substitute(s:getTagOrStatementNames(l:lnum)[-1], '[#\.].\+$', '', '')
 endfunction"}}}
 function! s:getAttributeName(lnum) abort"{{{
   let l:line = getline(a:lnum)
