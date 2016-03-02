@@ -187,25 +187,45 @@ function! s:isCode(lnum, cnum) abort"{{{
 endfunction"}}}
 function! s:getAncestors(lnum) abort"{{{
   let l:lnum = a:lnum
-  let l:current_indent = indent(l:lnum)
+  let l:indent = indent(l:lnum)
   let l:ascentors = []
+  
+  " current line, gather block expansion(nested) tags
+  " div: a: span
+  let l:current_names = s:getTagOrStatementNames(l:lnum)
+  if len(l:current_names) > 1
+    let l:ascentors += reverse(l:current_names[:-2])
+  endif
+  
+  " previous lines
   while 1
     let l:lnum = g:omniutil.getPrevLnum(l:lnum)
-    if indent(l:lnum) < l:current_indent
+    if l:lnum == 0
       break
     endif
-    let l:line = substitute(getline(l:lnum), '^\s*', '', 'g')
-    " TODO: block expansion (nested colon syntax)
-    " ref. http://jade-lang.com/reference/tags/
     
-    let l:keyword = matchstr(l:line, '^\zs[^( ]*\ze')
-    if l:keyword =~ '^[#\.]'
-      let l:keyword = 'div' . l:line
+    let l:current_indent = indent(l:lnum)
+    if l:current_indent >= l:indent
+          \ || g:omniutil.is('pugAttributes', l:lnum)
+      continue
     endif
-    call add(l:ascentors, l:keyword)
-    let l:lnum-=1
+    
+    let l:names = s:getTagOrStatementNames(l:lnum)
+    let l:ascentors += reverse(l:names)
+    let l:indent = l:current_indent
   endwhile
   return l:ascentors
+endfunction"}}}
+function! s:getTagOrStatementNames(lnum) abort"{{{
+  let l:lnum = a:lnum
+  let l:line = substitute(getline(l:lnum), '^\s*', '', '')
+    
+  " split with colon for block expansion (nested syntax)
+  " ref. http://jade-lang.com/reference/tags/
+  let l:names = split(
+        \ matchstr(l:line, '^\zs.\{-}\ze\((\|\(:\)\@<! \|$\)'),
+        \ ': ', 1)
+  return map(l:names, '(v:val =~ "^[#\.]" ? "div" : "") . v:val')
 endfunction"}}}
 
 " vim: foldmethod=marker
