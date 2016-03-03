@@ -564,14 +564,12 @@ function! JumpSnipOrTab()
   endif
 endfunction
 
-function! EnsureInsertSelect() abort
-  set insertmode
-  startinsert
-endfunction
-
 " [accept item in completion popup menu & expand snippet immediately]
-inoremap <silent><expr><Tab> pumvisible() ? "\<C-y>\<C-r>=ExpandSnip()\<CR>": "\<C-r>=JumpSnipOrTab()\<CR>"
-
+nmap <silent><expr><Tab> neosnippet#jumpable()
+      \ ? "i\<Plug>(neosnippet_jump)" : ""
+inoremap <silent><expr><Tab> pumvisible()
+      \ ? "\<C-y>\<C-r>=ExpandSnip()\<CR>"
+      \ : "\<C-r>=JumpSnipOrTab()\<CR>"
 
 function! IndentOrJump() range abort
   " <C-v> normal-mode -> visual-mode
@@ -884,6 +882,11 @@ inoremap <silent> <C-Down> <C-o>3<C-e>
 noremap  <silent> <C-Up> 3<C-y>
 inoremap <silent> <C-Up> <C-o>3<C-y>
 
+" [delete]
+" to avoid going to normal-mode
+snoremap <BS>  x<BS>
+snoremap <Del> x<BS>
+
 " [cut/copy/paste]
 " Prevent Vim from clearing the clipboard on exit
 " http://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
@@ -901,6 +904,7 @@ function! ConvertIndentPaste() abort
   if l:converted =~ '[\r?\n]'
     execute "normal! `[v`]l\<C-g>"
   endif
+  startinsert
 endfunction
 
 function! MapConvertIndentPaste() abort
