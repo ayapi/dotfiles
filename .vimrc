@@ -564,6 +564,11 @@ function! JumpSnipOrTab()
   endif
 endfunction
 
+function! EnsureInsertSelect() abort
+  set insertmode
+  startinsert
+endfunction
+
 " [accept item in completion popup menu & expand snippet immediately]
 inoremap <silent><expr><Tab> pumvisible() ? "\<C-y>\<C-r>=ExpandSnip()\<CR>": "\<C-r>=JumpSnipOrTab()\<CR>"
 
@@ -1160,12 +1165,12 @@ let g:tcommentMaps = 0
 let g:tcommentModeExtra = '#'
 if has("gui_running")
   noremap <C-\> :TComment<CR>
-  vnoremap <C-\> V:TCommentMaybeInline<CR>
+  vnoremap <C-\> :TCommentMaybeInline<CR>
   inoremap <C-\> <C-o>:TComment<CR>
 else
   " <C-_> means `ctrl+/`
   noremap <C-_> :TComment<CR>
-  vnoremap <C-_> V:TCommentMaybeInline<CR>
+  vnoremap <C-_> :TCommentMaybeInline<CR>
   inoremap <C-_> <C-o>:TComment<CR>
 endif
 
