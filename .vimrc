@@ -26,7 +26,7 @@ Plug 'xolox/vim-misc' | Plug 'xolox/vim-session'
 if has('nvim')
   Plug 'neovim/node-host', {'do': 'npm install'}
 endif
-Plug 'tyru/caw.vim'
+Plug 'tomtom/tcomment_vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'tpope/vim-sleuth'
 if !has('win32')
@@ -1155,30 +1155,20 @@ nnoremap <silent> M :call CirculatePrevHunk()<CR>
 " [reformat]
 noremap <C-l> <C-v>=i<C-g>u
 
-
-function! CommentToggleWrap() abort
-  let l:before_line_length = col('$')
-  if (mode() == 'n' || mode() == 'i') && getline('.') =~ '^\s*$'
-    execute "normal \<Plug>(caw:i:comment)"
-  else
-    execute "normal \<Plug>(caw:i:toggle)"
-  endif
-  call cursor(line('.'), col('.') + (col('$') - l:before_line_length))
-endfunction
-let g:caw_i_sp_blank = ' '
-
 " [comment toggle]
+let g:tcommentMaps = 0
+let g:tcommentModeExtra = '#'
 if has("gui_running")
-  nnoremap <silent> <C-\> :call CommentToggleWrap()<CR>
-  inoremap <silent> <C-\> <C-o>:call CommentToggleWrap()<CR>
-  " TODO: not working on gvim?
-  vmap <C-\> <Plug>(caw:i:toggle)gv
+  noremap <C-\> :TComment<CR>
+  vnoremap <C-\> V:TCommentMaybeInline<CR>
+  inoremap <C-\> <C-o>:TComment<CR>
 else
   " <C-_> means `ctrl+/`
-  nnoremap <silent> <C-_> :call CommentToggleWrap()<CR>
-  inoremap <silent> <C-_> <C-o>:call CommentToggleWrap()<CR>
-  vmap <C-_> <Plug>(caw:i:toggle)gv
+  noremap <C-_> :TComment<CR>
+  vnoremap <C-_> V:TCommentMaybeInline<CR>
+  inoremap <C-_> <C-o>:TComment<CR>
 endif
+
 " [jump to line]
 " ref. http://vim.wikia.com/wiki/Jump_to_a_line_number
 " ref. http://vim.wikia.com/wiki/User_input_from_a_script
