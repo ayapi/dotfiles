@@ -847,8 +847,8 @@ snoremap <silent><expr> <S-Home> "\<C-o>".GetGoHomeCmd()
 snoremap <silent> <S-End> <C-g>:call GoEnd("gvg$")<CR><C-g>
 
 " when leaving select-mode
-snoremap <silent> <Down> <C-G>vgj
-snoremap <silent> <Up> <C-G>vgk
+snoremap <silent> <Down> <Esc>gj
+snoremap <silent> <Up> <Esc>gk
 snoremap <silent><expr> <Home> "\<C-G>v".GetGoHomeCmd()
 snoremap <silent> <End> <C-g>v:call GoEnd("g$")<CR>
 snoremap <silent><expr> <kHome> "\<C-G>v".GetGoHomeCmd()
