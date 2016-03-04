@@ -1236,3 +1236,4 @@ endfunction"}}}
 setlocal omnifunc=CompleteHidemac
 
 setlocal cindent
+setlocal cinkeys=0{,0},0),:,!^F,o,O,e
