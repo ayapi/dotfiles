@@ -31,8 +31,10 @@ syn cluster htmlJavascript add=javascriptParenthesisBlock
 syn region  pugJavascript matchgroup=pugJavascriptOutputChar start="[!&]\==\|\~" skip=",\s*$" end="$" contained contains=@htmlJavascript keepend
 syn region  pugJavascript matchgroup=pugJavascriptChar start="-" skip=",\s*$" end="$" contained contains=@htmlJavascript keepend
 syn cluster pugTop contains=pugBegin,pugComment,pugHtmlComment,pugJavascript
-syn match   pugBegin "^\s*\%([<>]\|&[^=~ ]\)\@!" nextgroup=pugTag,pugClassChar,pugIdChar,pugPlainChar,pugJavascript,pugScriptConditional,pugScriptStatement,pugPipedText
-syn match   pugTag "+\?\w\+\%(:\w\+\)\=" contained contains=htmlTagName,htmlSpecialTagName nextgroup=@pugComponent
+syn match   pugBegin "^\s*\%([<>]\|&[^=~ ]\)\@!" nextgroup=pugMixinTag,pugTag,pugClassChar,pugIdChar,pugPlainChar,pugJavascript,pugScriptConditional,pugScriptStatement,pugPipedText
+syn match   pugMixinTag "+\w\+\%(:\w\+\)\=" contained nextgroup=pugMixinArguments
+syn region  pugMixinArguments matchgroup=pugMixinDelimiter start="(" end=")" contained contains=@htmlJavascript nextgroup=@pugComponent
+syn match   pugTag "\w\+\%(:\w\+\)\=" contained contains=htmlTagName,htmlSpecialTagName nextgroup=@pugComponent
 syn cluster pugComponent contains=pugAttributes,pugIdChar,pugBlockExpansionChar,pugClassChar,pugPlainChar,pugJavascript,pugTagBlockChar,pugTagInlineText
 syn match   pugComment '\s*\/\/.*$'
 syn region  pugCommentBlock start="\z(\s*\)\/\/.*$" end="^\%(\z1\s\|\s*$\)\@!" keepend 

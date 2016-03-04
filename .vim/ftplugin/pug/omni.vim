@@ -34,11 +34,13 @@ function! CompleteJade(findstart, base)
       if l:start > 0
         let l:line = getline('.')[0: l:start - 1]
       endif
-    
+      
       if empty(l:synstack)
         if l:line == '' || l:line =~ '^\s*$'
           " beginning of line
           let l:categories = ['statementName', 'elementName']
+        elseif l:line =~ '^\s*+$'
+          let l:categories = ['mixin']
         else
           let l:bol_synstack = g:omniutil.getSyntaxStack(l:lnum)
           if !empty(l:bol_synstack)
@@ -47,9 +49,6 @@ function! CompleteJade(findstart, base)
             endif
           endif
         endif
-      elseif l:synstack[0] == 'pugTag'
-        " inpu_
-        let l:categories = ['statementName', 'elementName']
       else
         let l:synstack_attr_i = match(l:synstack, '^pugAttributes')
         if l:synstack_attr_i != -1
@@ -123,6 +122,8 @@ function! s:gatherCandidates(info) abort"{{{
       endif
       let l:candidates += l:values
       unlet l:values
+    elseif l:category == 'mixin'
+      let l:candidates += s:gatherMixinNames(a:info)
     elseif l:category =~ 'doctype'
       let l:candidates += s:gatherDoctypeValues()
     endif
@@ -170,6 +171,18 @@ let s:doctypes = ['html', 'xml', 'transitional', 'strict', 'frameset', '1.1', 'b
 function! s:gatherDoctypeValues() abort"{{{
   return copy(s:jade_doctypes)
 endfunction"}}}
+function! s:gatherMixinNames(info) abort
+  let l:candidates = []
+  for l:lnum in range(a:info.lnum - 1, 1, -1)
+    let l:line = getline(l:lnum)
+    let _ = matchlist(l:line, 'mixin \(\w\+\)\((.\+)\)\?')
+    if empty(_)
+      continue
+    endif
+    call add(l:candidates, {'word': _[1], 'menu': _[2]})
+  endfor
+  return l:candidates
+endfunction
 function! s:getElementName(lnum, cnum) abort"{{{
   let l:lnum = a:lnum
   let l:cnum = a:cnum
