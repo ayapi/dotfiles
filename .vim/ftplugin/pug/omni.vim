@@ -139,7 +139,14 @@ function! s:getProvider(lnum, cnum) abort"{{{
   return g:html_candidates
 endfunction"}}}
 function! s:gatherElementNames(info) abort"{{{
-  return s:getProvider(a:info.lnum, a:info.cnum).getElementNames()
+  let l:provider = s:getProvider(a:info.lnum, a:info.cnum)
+  let l:ancestor_elements = s:getAncestorElements(a:info.lnum, a:info.cnum)
+  if empty(l:ancestor_elements)
+    return l:provider.getElementNames()
+  endif
+  return l:provider.getElementNames(
+        \ s:getAncestorElements(a:info.lnum, a:info.cnum)[-1]
+        \ )
 endfunction"}}}
 function! s:gatherAttributeNames(info) abort"{{{
   let l:provider = s:getProvider(a:info.lnum, a:info.cnum)
@@ -153,13 +160,13 @@ function! s:gatherAttributeValues(info) abort"{{{
             \ s:getElementName(a:info.lnum, a:info.cnum)
             \ )
 endfunction"}}}
-let s:jade_anywhere_statements = ['if', 'case', 'each', 'while', 'extends', 'include', 'mixin', 'block', 'append']
+let s:anywhere_statements = ['if', 'case', 'each', 'while', 'extends', 'include', 'mixin', 'block', 'append']
+let s:additional_statements = ['else', 'when', 'default', 'doctype']
 function! s:gatherStatementNames(info) abort"{{{
   " TODO: lookup buffer content for additional statements
-  let l:additional_statements = ['else', 'when', 'default', 'doctype']
-  return copy(s:jade_anywhere_statements + l:additional_statements)
+  return copy(s:anywhere_statements + s:additional_statements)
 endfunction"}}}
-let s:jade_doctypes = ['html', 'xml', 'transitional', 'strict', 'frameset', '1.1', 'basic', 'mobile']
+let s:doctypes = ['html', 'xml', 'transitional', 'strict', 'frameset', '1.1', 'basic', 'mobile']
 function! s:gatherDoctypeValues() abort"{{{
   return copy(s:jade_doctypes)
 endfunction"}}}
@@ -234,6 +241,14 @@ function! s:getAncestors(lnum, cnum) abort"{{{
   endwhile
   return map(l:ascentors, 'substitute(v:val, "[#\\.].\\+$", "", "g")')
 endfunction"}}}
+function! s:getAncestorElements(lnum, cnum) abort
+  let l:ancestors = s:getAncestors(a:lnum, a:cnum)
+  if empty(l:ancestors)
+    return []
+  endif
+  let l:statements = s:anywhere_statements + s:additional_statements
+  return filter(l:ancestors, 'index(l:statements, v:val, 0, 1) == -1')
+endfunction
 function! s:isSVG(lnum, cnum) abort"{{{
   let l:ancestors = s:getAncestors(a:lnum, a:cnum)
   return index(l:ancestors, 'svg', 0, 1) >= 0

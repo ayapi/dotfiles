@@ -7,7 +7,13 @@ endif
 let s:elements = filter(keys(g:xmldata_html5), 'v:val !~ "^vim"')
 
 let g:html_candidates = {}
-function! g:html_candidates.getElementNames() abort "{{{
+function! g:html_candidates.getElementNames(...) abort "{{{
+  if a:0 == 1 && a:1 != ''
+    let l:parent_element = a:1
+    if has_key(g:xmldata_html5, l:parent_element)
+      return g:xmldata_html5[l:parent_element][0]
+    endif
+  endif
   return copy(s:elements)
 endfunction "}}}
 function! g:html_candidates.getAttributeNames(...) abort "{{{

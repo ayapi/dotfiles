@@ -17,7 +17,7 @@ let s:attrs = s:readJson('~/.vim/scripts/SVGAttributes.json')
 let s:tags = s:readJson('~/.vim/scripts/SVGTags.json')
 
 let g:svg_candidates = {}
-function! g:svg_candidates.getElementNames() abort"{{{
+function! g:svg_candidates.getElementNames(...) abort"{{{
   return keys(s:tags.tags)
 endfunction"}}}
 function! g:svg_candidates.getAttributeNames(...) abort "{{{
