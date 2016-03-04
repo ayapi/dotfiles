@@ -232,8 +232,7 @@ function! s:getAncestors(lnum, cnum) abort"{{{
     endif
     let l:lnum = g:omniutil.getPrevLnum(l:lnum)
   endwhile
-  " echomsg string(l:ascentors)
-  return l:ascentors
+  return map(l:ascentors, 'substitute(v:val, "[#\\.].\\+$", "", "g")')
 endfunction"}}}
 function! s:isSVG(lnum, cnum) abort"{{{
   let l:ancestors = s:getAncestors(a:lnum, a:cnum)
