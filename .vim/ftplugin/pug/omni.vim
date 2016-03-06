@@ -173,7 +173,7 @@ let s:doctypes = ['html', 'xml', 'transitional', 'strict', 'frameset', '1.1', 'b
 function! s:gatherDoctypeValues() abort"{{{
   return copy(s:jade_doctypes)
 endfunction"}}}
-function! s:gatherMixinNames(info) abort
+function! s:gatherMixinNames(info) abort"{{{
   let l:candidates = []
   for l:lnum in range(a:info.lnum - 1, 1, -1)
     let l:line = getline(l:lnum)
@@ -184,7 +184,7 @@ function! s:gatherMixinNames(info) abort
     call add(l:candidates, {'word': _[1], 'menu': _[2]})
   endfor
   return l:candidates
-endfunction
+endfunction"}}}
 function! s:getElementName(lnum, cnum) abort"{{{
   let l:lnum = a:lnum
   let l:cnum = a:cnum
@@ -266,28 +266,26 @@ function! s:getAncestors(lnum, cnum) abort"{{{
   endwhile
   return map(l:ascentors, 'substitute(v:val, "[#\\.].\\+$", "", "g")')
 endfunction"}}}
-function! s:getAncestorElements(lnum, cnum) abort
+function! s:getAncestorElements(lnum, cnum) abort"{{{
   let l:ancestors = s:getAncestors(a:lnum, a:cnum)
   if empty(l:ancestors)
     return []
   endif
   let l:statements = s:anywhere_statements + s:additional_statements
   return filter(l:ancestors, 'index(l:statements, v:val, 0, 1) == -1')
-endfunction
+endfunction"}}}
 function! s:findMixin(name, lnum) abort"{{{
   let l:lines = getline(1, a:lnum)
   return match(l:lines, '^\s*mixin\s' . a:name) + 1
 endfunction"}}}
 function! s:findMixinBlock(name, lnum) abort"{{{
   let l:start = s:findMixin(a:name, a:lnum)
-  echomsg 'mixin ' . a:name . 'found at ' .l:start
   let l:end = a:lnum
   let l:indent = indent(l:start)
   let l:cur_lnum = l:start
   while 1
     let l:line = getline(l:cur_lnum)
     if l:line =~ '^\s*block'
-      echomsg 'mixin ' . a:name . 'has block at ' . l:cur_lnum
       return l:cur_lnum
     endif
     let l:cur_lnum += 1
@@ -295,7 +293,6 @@ function! s:findMixinBlock(name, lnum) abort"{{{
       break
     endif
   endwhile
-  echomsg 'mixin ' . a:name . 'has no block'
   return -1
 endfunction"}}}
 function! s:isSVG(lnum, cnum) abort"{{{
