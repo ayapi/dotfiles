@@ -239,12 +239,22 @@ function! s:getAncestors(lnum, cnum) abort"{{{
       while l:cnum >= l:first_non_white_cnum
         let l:char = l:line[l:cnum - 1]
         if l:char !~ '\s' && g:omniutil.is(
-              \ 'pug\%(Tag$\|Id\|Class\|Script'
+              \ 'pug\%(Tag$\|Id\|Class\|MixinTag\|Script'
               \ . '\%(Conditional\|Statement\|LoopKeywords\)\)',
               \ l:lnum, l:cnum - 1
               \ )
           let l:name = l:char . l:name
         elseif l:name != ''
+          if l:name =~ '^+'
+            " mixin
+            let l:mixin_block_lnum = s:findMixinBlock(l:name[1:], l:lnum)
+            if l:mixin_block_lnum >= 0
+              let l:ascentors += s:getAncestors(
+                    \ l:mixin_block_lnum - 1,
+                    \ getline(l:mixin_block_lnum - 1) - 1
+                    \ )
+            endif
+          endif
           call add(l:ascentors, l:name)
           let l:name = ''
         endif
@@ -264,6 +274,30 @@ function! s:getAncestorElements(lnum, cnum) abort
   let l:statements = s:anywhere_statements + s:additional_statements
   return filter(l:ancestors, 'index(l:statements, v:val, 0, 1) == -1')
 endfunction
+function! s:findMixin(name, lnum) abort"{{{
+  let l:lines = getline(1, a:lnum)
+  return match(l:lines, '^\s*mixin\s' . a:name) + 1
+endfunction"}}}
+function! s:findMixinBlock(name, lnum) abort"{{{
+  let l:start = s:findMixin(a:name, a:lnum)
+  echomsg 'mixin ' . a:name . 'found at ' .l:start
+  let l:end = a:lnum
+  let l:indent = indent(l:start)
+  let l:cur_lnum = l:start
+  while 1
+    let l:line = getline(l:cur_lnum)
+    if l:line =~ '^\s*block'
+      echomsg 'mixin ' . a:name . 'has block at ' . l:cur_lnum
+      return l:cur_lnum
+    endif
+    let l:cur_lnum += 1
+    if l:indent > indent(l:cur_lnum)
+      break
+    endif
+  endwhile
+  echomsg 'mixin ' . a:name . 'has no block'
+  return -1
+endfunction"}}}
 function! s:isSVG(lnum, cnum) abort"{{{
   let l:ancestors = s:getAncestors(a:lnum, a:cnum)
   return index(l:ancestors, 'svg', 0, 1) >= 0
