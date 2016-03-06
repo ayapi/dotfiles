@@ -888,12 +888,22 @@ snoremap <BS>  x<BS>
 snoremap <Del> x<BS>
 
 " [cut/copy/paste]
+" to prevent freezing on nvim exit, i use custom clipboard provider
+" i think it caused by the following commit
+" https://github.com/neovim/neovim/commit/49f04179888944943f0266cd77810e467f9d68ef
+if has('nvim')
+  source .vim/clipboard.vim
+endif
+
 " Prevent Vim from clearing the clipboard on exit
 " http://stackoverflow.com/questions/6453595/prevent-vim-from-clearing-the-clipboard-on-exit
-augroup xsel
-  autocmd!
-  autocmd VimLeave * call system("xsel -ib", getreg('+'))
-augroup END
+" cant use this on nvim
+if !has('nvim')
+  augroup xsel
+    autocmd!
+    autocmd VimLeave * call system("xsel -ib", getreg('+'))
+  augroup END
+endif
 
 " convert indent before paste, and select pasted text
 function! ConvertIndentPaste() abort
