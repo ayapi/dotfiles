@@ -173,7 +173,7 @@ function! necovim#helper#command(cur_text, complete_str) "{{{
     " echomsg command
     " echomsg cur_text
     
-    if completion_name != 'autocmd_args'
+    if index(['autocmd_args', 'syntax_args'], completion_name) < 0
           \ && a:cur_text =~ '[[(,{]\|`=[^`]*$'
       " Expression.
       let list = necovim#helper#expression(
@@ -365,6 +365,268 @@ endfunction"}}}
 function! necovim#helper#shellcmd(cur_text, complete_str) "{{{
   return []
 endfunction"}}}
+function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
+  let args = s:split_args(a:cur_text, a:complete_str)
+  echomsg string(args)
+  let i = len(args) - 1
+  
+  if i == 1
+    " return [subcommands] "{{{
+    return [{
+          \ 'word': 'enable',
+          \ 'menu': '現在の色設定を変更せずに構文ハイライトを有効にする'
+          \ },
+          \ {
+          \ 'word': 'on',
+          \ 'menu': '現在の色設定を破棄してデフォルトの色を設定する'
+          \ },
+          \ {
+          \ 'word': 'manual',
+          \ 'menu': '特定のファイルだけ構文強調表示する'
+          \ },
+          \ {
+          \ 'word': 'clear',
+          \ 'menu': 'カレントバッファに対する構文設定を消去する'
+          \ },
+          \ {
+          \ 'word': 'reset',
+          \ 'menu': '構文ハイライトをデフォルトに戻す'
+          \ },
+          \ {
+          \ 'word': 'off',
+          \ 'menu': '構文ファイルを読み込む自動コマンドを削除する'
+          \ },
+          \ {
+          \ 'word': 'keyword',
+          \ 'menu': 'キーワードを定義する'
+          \ },
+          \ {
+          \ 'word': 'match',
+          \ 'menu': 'マッチを定義する'
+          \ },
+          \ {
+          \ 'word': 'region',
+          \ 'menu': 'リージョンを定義する。複数行にわたってもよい'
+          \ },
+          \ {
+          \ 'word': 'case',
+          \ 'menu': 'これ以降の ":syntax" コマンドが大文字・小文字を区別するかどうかを定義する'
+          \ },
+          \ {
+          \ 'word': 'spell',
+          \ 'menu': '構文アイテムに入っていないテキストに対して、どこでスペルチェックを行うかを定義する'
+          \ },
+          \ {
+          \ 'word': 'iskeyword',
+          \ 'menu': 'キーワード文字を定義する'
+          \ },
+          \ {
+          \ 'word': 'cluster',
+          \ 'menu': '複数の構文グループを1つの名前のもとにまとめる'
+          \ },
+          \ {
+          \ 'word': 'include',
+          \ 'menu': 'リージョンにファイルのトップレベルのアイテムを内包させる'
+          \ },
+          \ {
+          \ 'word': 'sync',
+          \ 'menu': '再描画を開始する位置を定義する'
+          \ }
+          \ ] "}}}
+  endif
+  
+  let subcmd = args[1]
+  
+  if index(['enable', 'on', 'manual', 'off', 'reset'], subcmd) >= 0
+    return []
+  endif
+  if i == 2
+    if index(['keyword', 'match', 'region'], subcmd) >= 0 "{{{
+      return s:get_local_syntax_groups() "}}}
+    elseif subcmd == 'cluster' "{{{
+      return s:get_local_syntax_clusters() "}}}
+    elseif subcmd == 'case' "{{{
+      return [{'word': 'match', 'menu': '大文字・小文字を区別する'},
+              \ {'word': 'ignore','menu': '大文字・小文字を区別しない'}] "}}}
+    elseif subcmd == 'spell' "{{{
+      return [
+            \ {'word': 'toplevel', 'menu': 'テキストのスペルチェックを行う'},
+            \ {'word': 'notoplevel', 'menu': 'テキストのスペルチェックを行わない'},
+            \ {'word': 'default', 'menu': 'クラスタ@Spellがあるときスペルチェックを行わない'}
+            \ ] "}}}
+    elseif subcmd == 'iskeyword' "{{{
+      return [{
+            \ 'word': 'clear',
+            \ 'menu': 'シンタックス固有の iskeyword の設定を無効にし、バッファローカルの''iskeyword''設定を有効にする'
+            \ }] "}}}
+    elseif subcmd == 'list' "{{{
+      return s:get_local_syntax_groups() + s:get_local_syntax_clusters('@')
+    endif "}}}
+  endif
+  if subcmd == 'clear'
+    return s:get_local_syntax_groups() + s:get_local_syntax_clusters('@')
+  elseif index(['keyword', 'match', 'region', 'cluster'], subcmd) >= 0
+    let l:grp_ptn = '\(matchgroup\|contains\|containedin\|nextgroup\|add\|remove\)='
+    let l:key_arg = ''
+    if args[i] == '' && args[i - 1] =~ '^' . l:grp_ptn .'\%(\w\+,\)\?$'
+      let l:key_arg = args[i - 1]
+    elseif args[i] =~ '^' . l:grp_ptn
+      let l:key_arg = args[i]
+    endif
+    if l:key_arg != ''
+      let l:candidates = []
+      if l:key_arg =~ '^contains='
+        " let l:candidates += [ "{{{
+        let l:candidates += [
+              \ {
+              \ 'word': 'ALL',
+              \ 'menu': '全てのグループがこのアイテムの内側で許可される'
+              \ },
+              \ {
+              \ 'word': 'ALLBUT,',
+              \ 'menu': '列挙したグループを除く全てのグループがこのアイテムの内側で許可される'
+              \ },
+              \ {
+              \ 'word': 'TOP',
+              \ 'menu': '引数 "contained" を持たないグループ全てが許可される'
+              \ },
+              \ {
+              \ 'word': 'CONTAINED',
+              \ 'menu': '引数	"contained" を持つグループ全てが許可される',
+              \ },
+              \ {
+              \ 'word': 'NONE',
+              \ 'menu': '望まないアイテムが含まれるのを避ける'
+              \ }] "}}}
+      elseif l:key_arg =~ '^matchgroup='
+        " let l:candidates += ["{{{
+        let l:candidates += [
+              \ {
+              \ 'word': 'NONE',
+              \ 'menu': 'matchgroupを使わないように戻す'
+              \ }
+              \ ]"}}}
+      endif
+      return l:candidates
+            \ + s:get_local_syntax_groups()
+            \ + s:get_local_syntax_clusters('@')
+    endif
+    if subcmd == 'cluster'
+      " return [options] "{{{
+      return [{
+            \ 'word': 'contains=',
+            \ 'menu': 'クラスタに含まれるグループを指定する'
+            \ },
+            \ {
+            \ 'word': 'add=',
+            \ 'menu': '指定したグループをクラスタに加える'
+            \ },
+            \ {
+            \ 'word': 'remove=',
+            \ 'menu': '指定したグループをクラスタからとり除く'
+            \ }] "}}}
+    endif
+    " let l:options = [{ "{{{
+    let l:options = [{
+          \ 'word': 'conceal',
+          \ 'menu': 'Conceal 可能にする'
+          \ },
+          \ {
+          \ 'word': 'concealends',
+          \ 'menu': 'リージョンの開始部分と終了部分が Conceal 可能になる (リージョンの中身はならない)'
+          \ },
+          \ {
+          \ 'word': 'cchar=',
+          \ 'menu': 'アイテムが Conceal 表示されたときに実際に画面に表示される文字を定義する'
+          \ },
+          \ {
+          \ 'word': 'contained',
+          \ 'menu': '他のマッチの "contains" フィールドで指定されたときのみ認識させる'
+          \ },
+          \ {
+          \ 'word': 'display',
+          \ 'menu': '検出されたハイライトが表示されない時にスキップさせる'
+          \ },
+          \ {
+          \ 'word': 'transparent',
+          \ 'menu': 'それを含むアイテムのハイライトを引き継ぐ',
+          \ },
+          \ {
+          \ 'word': 'oneline',
+          \ 'menu': 'リージョンに行をまたがせない'
+          \ },
+          \ {
+          \ 'word': 'fold',
+          \ 'menu': '折り畳みレベルを1増加させる'
+          \ },
+          \ {
+          \ 'word': 'contains=',
+          \ 'menu': '指定するグループをアイテムの内側で始まることを許可する'
+          \ },
+          \ {
+          \ 'word': 'containedin=',
+          \ 'menu': '指定するグループの内側でこのアイテムが始まることを許可する'
+          \ },
+          \ {
+          \ 'word': 'nextgroup=',
+          \ 'menu': '終了位置の後ろで、指定された構文グループにマッチする部分が探される'
+          \ },
+          \ {
+          \ 'word': 'skipwhite',
+          \ 'menu': 'スペースとタブ文字をスキップする',
+          \ },
+          \ {
+          \ 'word': 'skipnl',
+          \ 'menu': '行末をスキップする'
+          \ },
+          \ {
+          \ 'word': 'skipempty',
+          \ 'menu': '空行をスキップする(自動的に "skipnl" も含むことになる)'
+          \ }]"}}}
+    if subcmd == 'keyword'
+      let l:cantuse = ['contains','oneline','fold','display','extend','concealends']
+      return filter(l:options, 'index(l:cantuse, v:val.word) == -1')
+    elseif subcmd == 'match'
+      let l:cantuse = ['oneline','concealends']
+      return filter(l:options, 'index(l:cantuse, v:val.word) == -1') + [{
+            \ 'word': 'excludenl',
+            \ 'menu': '行末の "$" を含んでいるパターンに対して、行末以降までマッチやリージョンを拡張しないようにする'
+            \ }]
+    elseif subcmd == 'region'
+      " return l:options "{{{
+      return l:options + 
+            \ [{
+            \ 'word': 'matchgroup=',
+            \ 'menu': '開始パターンと終了パターンのマッチにのみ使われる構文グループ'
+            \ },
+            \ {
+            \ 'word': 'keepend',
+            \ 'menu': '内包されたマッチが終了パターンを越えないようにする'
+            \ },
+            \ {
+            \ 'word': 'extend',
+            \ 'menu': 'このリージョンを含むアイテムの "keepend" を上書きする'
+            \ },
+            \ {
+            \ 'word': 'excludenl',
+            \ 'menu': '行末の "$" を含んでいるパターンに対して、行末以降までマッチやアイテムを拡張しないようにする'
+            \ },
+            \ {
+            \ 'word': 'start=',
+            \ 'menu': 'リージョンの開始を定義する検索パターン'
+            \ },
+            \ {
+            \ 'word': 'skip=',
+            \ 'menu': 'その中ではリージョンの終了を探さないテキストを定義する検索パターン'
+            \ },
+            \ {
+            \ 'word': 'end=',
+            \ 'menu': 'リージョンの終了を定義する検索パターン'
+            \ }]"}}}
+    endif
+  endif
+  return []
+endfunction"}}}
 function! necovim#helper#tag(cur_text, complete_str) "{{{
   return []
 endfunction"}}}
@@ -407,6 +669,41 @@ function! necovim#helper#var(cur_text, complete_str) "{{{
   return list
 endfunction"}}}
 
+function! s:get_local_syntax_groups() abort "{{{
+  let l:grps = []
+  let l:lines = join(getline(1, '$'))
+  let l:count = 1
+  while 1
+    let l:grp = matchstr(l:lines,
+          \ 'sy\%[ntax]\s\+\%(region\|match\|region\)\s\+\zs\w\+\ze',
+          \ 0,
+          \ l:count)
+    if l:grp == ''
+      break
+    endif
+    call add(l:grps, l:grp)
+    let l:count += 1
+  endwhile
+  return map(l:grps, '{"word": v:val, "menu": "(SyntaxGroup)"}' )
+endfunction "}}}
+function! s:get_local_syntax_clusters(...) abort "{{{
+  let l:at = (a:0 == 1 && a:1 == '@') ? '@' : ''
+  let l:clusters = []
+  let l:lines = join(getline(1, '$'), "\n")
+  let l:count = 1
+  while 1
+    let l:cluster = matchstr(l:lines,
+          \ 'sy\%[ntax]\s\+\%(cluster\s\+\|include\s\+@\)\zs\w\+\ze',
+          \ 0,
+          \ l:count)
+    if l:cluster == ''
+      break
+    endif
+    call add(l:clusters, l:cluster)
+    let l:count += 1
+  endwhile
+  return map(l:clusters, '{"word": l:at . v:val, "menu": "(SyntaxCluster)"}' )
+endfunction "}}}
 function! s:get_local_variables() "{{{
   " Get local variable list.
 
