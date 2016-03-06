@@ -440,6 +440,89 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
   if index(['enable', 'on', 'manual', 'off', 'reset'], subcmd) >= 0
     return []
   endif
+  let l:args_for_filter = copy(args)
+  let l:sync_candidates = []
+  if subcmd == 'sync'
+    " let l:first_only_cmds = ["{{{
+    let l:first_only_cmds = [
+          \ {'word': 'fromstart', 'menu': '常にファイルの最初からパースする'},
+          \ {'word': 'clear', 'menu': 'シンクロナイズをクリアする'}
+          \ ]"}}}
+    " let l:line_cmds = "{{{
+    let l:line_cmds = [
+          \ {
+          \ 'word': 'maxlines=',
+          \ 'menu': 'コメントや正規表現を検索するためにさかのぼる行数の最大'
+          \ },
+          \ {
+          \ 'word': 'minlines=',
+          \ 'menu': '常に少なくともその行数さかのぼってパースが開始'
+          \ },
+          \ {
+          \ 'word': 'linebreaks=',
+          \ 'menu': '複数行にマッチする正規表現をさかのぼる行数'
+          \ }] "}}}
+    " let l:exclusive_cmds = "{{{
+    let l:exclusive_cmds = [{
+            \ 'word': 'ccomment',
+            \ 'menu': 'Cスタイルのコメントに基づく'
+            \ },
+            \ {
+            \ 'word': 'match',
+            \ 'menu': 'テキストをさかのぼり、シンクロナイズを始める目印の正規表現を検索する'
+            \ },
+            \ {
+            \ 'word': 'region',
+            \ 'menu': 'テキストをさかのぼり、シンクロナイズを始める目印の正規表現を検索する'
+            \ },
+            \ {
+            \ 'word': 'linecont',
+            \ 'menu': 'マッチが次の行にも継続されるとみなされる'
+            \ }]"}}}
+    if i == 2
+      return l:first_only_cmds + l:line_cmds + l:exclusive_cmds
+    endif
+    if args[2] == 'fromstart'
+      return []
+    elseif args[2] == 'clear'
+      return s:get_local_sync_syntax_groups()
+    endif
+    if index(args, 'ccomment') >= 0
+      let l:comment_groups = filter(
+            \ s:get_local_syntax_groups(),
+            \ 'v:val.word =~ "Comment"'
+            \ )
+      return l:comment_groups + s:filter_already_used_args(l:line_cmds, args[2:])
+    elseif index(args, 'linecont') >= 0
+      return s:filter_already_used_args(l:line_cmds, args[2:])
+    else
+      let l:match_or_region_i = match(args, '^\(match\|region\)$')
+      if l:match_or_region_i >= 0
+        let subcmd = args[l:match_or_region_i]
+        let l:groupthere_or_here_i = match(args, '\(groupthere\|grouphere\)')
+        let l:new_args = ['syntax', subcmd]
+        let l:sync_candidates = l:line_cmds
+        if l:groupthere_or_here_i >= 0
+              \ && len(args) - 1 >= l:groupthere_or_here_i + 1
+          let l:new_args += args[(l:groupthere_or_here_i + 1) :]
+        elseif len(args) - 1 >= l:match_or_region_i + 1
+          let l:new_args += args[(l:match_or_region_i + 1) :]
+          " let l:sync_candidates = [{ "{{{
+          let l:sync_candidates += [{
+                \ 'word': 'grouphere',
+                \ 'menu': 'マッチのすぐ後に続く構文グループを指定しシンクロナイズ用に使うマッチを定義する'
+                \ },
+                \ {
+                \ 'word': 'groupthere',
+                \ 'menu': 'シンクロナイズポイントの検索が始まる行の行頭で使われる構文グループを指定しシンクロナイズ用に使うマッチを定義する'}] "}}}
+        endif
+        let args = l:new_args
+        let i = len(args) - 1
+      else
+        return s:filter_already_used_args(l:line_cmds + l:exclusive_cmds, l:args_for_filter)
+      endif
+    endif
+  endif
   if i == 2
     if index(['keyword', 'match', 'region'], subcmd) >= 0 "{{{
       return s:get_local_syntax_groups() "}}}
@@ -512,8 +595,9 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
             \ + s:get_local_syntax_clusters('@')
     endif
     if subcmd == 'cluster'
-      " return [options] "{{{
-      return [{
+      " return s:filter_already_used_args( "{{{
+      return s:filter_already_used_args(
+            \ [{
             \ 'word': 'contains=',
             \ 'menu': 'クラスタに含まれるグループを指定する'
             \ },
@@ -524,7 +608,8 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
             \ {
             \ 'word': 'remove=',
             \ 'menu': '指定したグループをクラスタからとり除く'
-            \ }] "}}}
+            \ }]
+            \ , l:args_for_filter) "}}}
     endif
     " let l:options = [{ "{{{
     let l:options = [{
@@ -585,16 +670,21 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
           \ }]"}}}
     if subcmd == 'keyword'
       let l:cantuse = ['contains','oneline','fold','display','extend','concealends']
-      return filter(l:options, 'index(l:cantuse, v:val.word) == -1')
+      return s:filter_already_used_args(
+            \ filter(l:options, 'index(l:cantuse, v:val.word) == -1'),
+            \ l:args_for_filter)
     elseif subcmd == 'match'
       let l:cantuse = ['oneline','concealends']
-      return filter(l:options, 'index(l:cantuse, v:val.word) == -1') + [{
-            \ 'word': 'excludenl',
-            \ 'menu': '行末の "$" を含んでいるパターンに対して、行末以降までマッチやリージョンを拡張しないようにする'
-            \ }]
+      let l:candidates = l:sync_candidates
+            \ + filter(l:options, 'index(l:cantuse, v:val.word) == -1')
+            \ + [{
+              \ 'word': 'excludenl',
+              \ 'menu': '行末の "$" を含んでいるパターンに対して、行末以降までマッチやリージョンを拡張しないようにする'
+              \ }]
+      return s:filter_already_used_args(l:candidates, l:args_for_filter)
     elseif subcmd == 'region'
-      " return l:options "{{{
-      return l:options + 
+      " let l:candidates = "{{{
+      let l:candidates = l:sync_candidates + l:options + 
             \ [{
             \ 'word': 'matchgroup=',
             \ 'menu': '開始パターンと終了パターンのマッチにのみ使われる構文グループ'
@@ -623,6 +713,7 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
             \ 'word': 'end=',
             \ 'menu': 'リージョンの終了を定義する検索パターン'
             \ }]"}}}
+    return s:filter_already_used_args(l:candidates, l:args_for_filter)
     endif
   endif
   return []
@@ -669,13 +760,34 @@ function! necovim#helper#var(cur_text, complete_str) "{{{
   return list
 endfunction"}}}
 
+function! s:filter_already_used_args(candidates, prev_args) abort "{{{
+  return filter(a:candidates,
+        \ 'match(a:prev_args, "^" . v:val.word) < 0')
+endfunction "}}}
 function! s:get_local_syntax_groups() abort "{{{
   let l:grps = []
-  let l:lines = join(getline(1, '$'))
+  let l:lines = join(getline(1, '$'), "\n")
   let l:count = 1
   while 1
     let l:grp = matchstr(l:lines,
-          \ 'sy\%[ntax]\s\+\%(region\|match\|region\)\s\+\zs\w\+\ze',
+          \ 'sy\%[ntax]\s\+\%(keyword\|match\|region\)\s\+\zs\w\+\ze',
+          \ 0,
+          \ l:count)
+    if l:grp == ''
+      break
+    endif
+    call add(l:grps, l:grp)
+    let l:count += 1
+  endwhile
+  return map(l:grps, '{"word": v:val, "menu": "(SyntaxGroup)"}' )
+endfunction "}}}
+function! s:get_local_sync_syntax_groups() abort "{{{
+  let l:grps = []
+  let l:lines = join(getline(1, '$'), "\n")
+  let l:count = 1
+  while 1
+    let l:grp = matchstr(l:lines,
+          \ 'sy\%[ntax]\s\+sync\s\+.*\%(region\|match\)\s\+\zs\w\+\ze',
           \ 0,
           \ l:count)
     if l:grp == ''
