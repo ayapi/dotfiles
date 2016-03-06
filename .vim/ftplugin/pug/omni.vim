@@ -117,10 +117,12 @@ function! s:gatherCandidates(info) abort"{{{
       let l:candidates += s:gatherAttributeNames(a:info)
     elseif l:category =~ '^attrValue'
       let l:values = s:gatherAttributeValues(a:info)
-      if l:category =~ 'Quote$'
-        call map(l:values, '"\"" . v:val . "\""')
+      if !empty(l:values)
+        if l:category =~ 'Quote$'
+          call map(l:values, '"\"" . v:val . "\""')
+        endif
+        let l:candidates += l:values
       endif
-      let l:candidates += l:values
       unlet l:values
     elseif l:category == 'mixin'
       let l:candidates += s:gatherMixinNames(a:info)
