@@ -153,8 +153,12 @@ function! s:gatherElementNames(info) abort"{{{
 endfunction"}}}
 function! s:gatherAttributeNames(info) abort"{{{
   let l:provider = s:getProvider(a:info.lnum, a:info.cnum)
-  let l:tag_name = s:getElementName(a:info.lnum, a:info.cnum)
-  return l:provider.getAttributeNames(l:tag_name)
+  let l:element = s:getElementName(a:info.lnum, a:info.cnum)
+  let l:already_defined_attrs = s:getAttributeNames(a:info.lnum, a:info.cnum)
+  return filter(
+        \ l:provider.getAttributeNames(l:element),
+        \ 'index(l:already_defined_attrs, v:val) < 0'
+        \ )
 endfunction"}}}
 function! s:gatherAttributeValues(info) abort"{{{
   let l:provider = s:getProvider(a:info.lnum, a:info.cnum)
@@ -222,6 +226,28 @@ function! s:getAttributeName(lnum, cnum) abort"{{{
     let l:cnum -= 1
   endwhile
   return l:attr_name
+endfunction"}}}
+function! s:getAttributeNames(lnum, cnum) abort"{{{
+  let l:lnum = a:lnum
+  let l:cnum = a:cnum
+  if !g:omniutil.is('pugAttributes', l:lnum, l:cnum - 1)
+    return []
+  endif
+  
+  let l:attrs = []
+  let l:line = getline(l:lnum)
+  
+  let l:attr_name = ''
+  while g:omniutil.is('pugAttributes', l:lnum, l:cnum - 1)
+    if g:omniutil.is('[hH]tmlArg$', l:lnum, l:cnum - 1)
+      let l:attr_name = l:line[l:cnum - 1] . l:attr_name
+    elseif l:attr_name != ''
+      call add(l:attrs, l:attr_name)
+      let l:attr_name = ''
+    endif
+    let l:cnum -= 1
+  endwhile
+  return l:attrs
 endfunction"}}}
 function! s:getAncestors(lnum, cnum) abort"{{{
   let l:lnum = a:lnum
