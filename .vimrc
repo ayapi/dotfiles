@@ -47,6 +47,7 @@ Plug 'digitaltoad/vim-pug', {'for': 'pug'}
 Plug 'wavded/vim-stylus', {'for': ['stylus', 'pug']}
 Plug 'alunny/pegjs-vim', {'for': 'pegjs'}
 Plug 'elzr/vim-json', {'for': 'json'}
+Plug 'mrk21/yaml-vim'
 Plug 'vim-pandoc/vim-pandoc'
 Plug 'vim-pandoc/vim-pandoc-syntax'
 Plug 'othree/html5.vim'

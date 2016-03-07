@@ -2,6 +2,27 @@ if exists('g:omniutil')
   finish
 endif
 let g:omniutil = {}
+function! g:omniutil.readYamlFile(path) abort
+  return g:omniutil.readYaml(join(readfile(expand(a:path)), "\n") . "\n")
+endfunction
+function! g:omniutil.readYaml(yaml_str) abort
+  if !executable('js-yaml')
+    throw 'plz install js-yaml'
+  endif
+  let l:json_str = system('js-yaml', a:yaml_str)
+  return g:omniutil.readJson(l:json_str)
+endfunction
+function! g:omniutil.readJsonFile(path) abort
+  return g:omniutil.readJson(join(readfile(expand(a:path))))
+endfunction
+function! g:omniutil.readJson(json_str) abort
+  let l:json_str = substitute(a:json_str, '[\r\n]', '', 'g')
+  for l:r in [['true', '1'], ['false', '0']]
+    let l:pat = '\("\)\@<!' . l:r[0] . '\("\)\@!'
+    let l:vim_str = substitute(l:json_str, l:pat, l:r[1], 'g')
+  endfor
+  return eval(l:vim_str)
+endfunction
 function! g:omniutil.getSyntaxStack(lnum, ...) abort "{{{
   let l:cnum = (a:0 == 1) ? a:1 : self.getFirstNonWhiteCnum(a:lnum)
   let l:stack = synstack(a:lnum, l:cnum + 1)
