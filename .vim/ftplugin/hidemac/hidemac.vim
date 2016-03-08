@@ -1,3 +1,4 @@
+runtime! scripts/omniutil.vim
 let g:hidemac_builtin = get(g:, 'hidemac_builtin', {})
 
 let s:chm_filenames = ['hidemac_html.chm', 'hmjre.chm']
@@ -238,7 +239,7 @@ function! s:load_dlls() abort"{{{
             \ 'word': l:word,
             \ 'menu': '(' . l:category_ja .') ' . l:desc
             \}
-      let l:data = []
+      let l:data = {}
     elseif l:category == 'function'
       if l:word =~ '^dllfunc'
         " 本当ゎ、複数のDLLを扱ぅとき引数パターンがちがぅんだけど、
@@ -450,7 +451,7 @@ function! s:get_cmd_statements() abort"{{{
             \ 'word' : l:word,
             \ 'menu' : '(文) ' . s:trim(l:desc)
             \})
-      let l:dict[l:word] = []
+      let l:dict[l:word] = {}
       let desc = ''
     endfor
   endfor
@@ -511,7 +512,7 @@ function! s:get_other_statements() abort"{{{
             \ 'word' : l:word,
             \ 'menu' : '(文) ' . l:desc
             \})
-        let l:dict[l:word] = []
+        let l:dict[l:word] = {}
       endfor
     endfor
   endfor
@@ -540,7 +541,12 @@ function! s:load_statements() abort"{{{
   let [l:cmd_candidates, l:cmd_data] = s:get_cmd_statements()
   let [l:other_candidates, l:other_data] = s:get_other_statements()
   let g:hidemac_builtin.statements.candidates = l:cmd_candidates + l:other_candidates
-  let g:hidemac_builtin.statements.data = extend(l:cmd_data, l:other_data)
+  let g:hidemac_builtin.statements.data = extend(
+        \ extend(l:cmd_data, l:other_data),
+        \ g:omniutil.readYamlFile(
+        \ 	globpath(&runtimepath, "ftplugin/hidemac/statements.yaml", 0, 1)[0]
+        \ )
+        \)
 endfunction"}}}
 function! s:statements() abort"{{{
   return g:hidemac_builtin.statements.candidates
@@ -1165,13 +1171,25 @@ function! s:gather_candidates(cur_line, cur_text) abort"{{{
         return []
       endif
       " 文の引数かく場面なんだけどまだ演算子とか関数とかゎかぃてなぃ系
+      let l:candidates = []
+      let l:args_text = substitute(l:ctx, '^' . l:statement_name, ' ', '')
+      let l:args = s:split_arguments(l:args_text)
       if has_key(s:special_statements, l:statement_name)
         " 特別な補完候補の用意がぁる
-        let l:args_text = substitute(l:ctx, '^' . l:statement_name, ' ', '')
-        let l:args = s:split_arguments(l:args_text)
-        return s:special_statements[l:statement_name](len(l:args) - 1, l:args)
+        let l:candidates += s:special_statements[l:statement_name](len(l:args) - 1, l:args)
       endif
-      return s:expressions()
+      if has_key(g:hidemac_builtin.statements.data[l:statement_name], 'types')
+        " 型で候補を追加する
+        let l:type = g:hidemac_builtin.statements.data[l:statement_name].types[len(l:args) - 1]
+        let l:type_map = {'num': '#', 'str': '$'}
+        if has_key(l:type_map, l:type)
+          let l:candidates += s:expressions(l:type_map[l:type])
+        endif
+      endif
+      if !empty(l:candidates)
+        return l:candidates
+      endif
+      return []
     endif
   endif
   return s:expressions()

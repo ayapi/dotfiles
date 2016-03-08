@@ -1,0 +1,14 @@
+left: &num1opt
+  types: [num]
+  str: '[ {n}]'
+right:
+  *num1opt
+down:
+  *num1opt
+up:
+  *num1opt
+nextpage:
+  *num1opt
+prevpage:
+  *num1opt
+
