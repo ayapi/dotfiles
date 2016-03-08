@@ -14,7 +14,7 @@ augroup save_indent_size
   autocmd BufEnter * call Org2TabIfTodoExists()
   autocmd BufWriteCmd * call Tab2OrgAndWrite()
 augroup END
-
+let s:noconvert_filetypes = ['vader']
 let s:indent_fallback = {
       \ '_': 4,
       \ 'javascript': 2,
@@ -22,7 +22,8 @@ let s:indent_fallback = {
       \ 'stylus': 2,
       \ 'python': 4,
       \ 'java': 4,
-      \ 'zsh': 2
+      \ 'zsh': 2,
+      \ 'vader': 2
       \}
 function! GetIndentFallback() abort
   if &filetype == '' || !has_key(s:indent_fallback, &filetype)
@@ -34,6 +35,11 @@ endfunction
 function! SaveIndentSize() abort
   if &diff || &filetype == "help" || &buftype != ''
     let b:noconvertindent = 1
+  elseif index(s:noconvert_filetypes, &filetype) >= 0
+    let b:noconvertindent = 1
+    let l:fallback = GetIndentFallback()
+    let &l:shiftwidth = l:fallback
+    let &l:tabstop = l:fallback
   elseif &shiftwidth == 16
     if &expandtab == 0
       " hard-tab detected by tpope/vim-sleuth
@@ -42,8 +48,8 @@ function! SaveIndentSize() abort
       setlocal tabstop=2
     else
       let l:fallback = GetIndentFallback()
-      setlocal shiftwidth=l:fallback
-      setlocal tabstop=l:fallback
+      let &l:shiftwidth = l:fallback
+      let &l:tabstop = l:fallback
     endif
   endif
 
@@ -144,4 +150,3 @@ function! Tab2OrgAndWrite() abort
   call writefile(writetxts, expand("<afile>"), '')
   setlocal nomodified
 endfunction
-

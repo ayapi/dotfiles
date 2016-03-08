@@ -33,6 +33,11 @@ if !has('win32')
   Plug 'junegunn/fzf', {'do': '$HOME/.vim/plugged/fzf/install'}
   Plug 'junegunn/fzf.vim'
 endif
+Plug 'junegunn/vader.vim'
+Plug 'vim-jp/vital.vim'
+Plug 'haya14busa/vital-safe-string'
+Plug 'haya14busa/vital-vimlcompiler'
+Plug 'haya14busa/vital-power-assert'
 Plug 'Shougo/neosnippet.vim'
 Plug 'Shougo/neco-vim',
       \ {'dir': '~/.vim/bundle-custom/neco-vim',
@@ -452,6 +457,11 @@ function! AppendLocList(loclist_bufnr, entries) abort
     call setpos(".", w:last_cursor)
   endif
 endfunction
+
+" ------------------------------------
+" Testing
+" ------------------------------------
+let g:__vital_power_assert_config = {'__debug__': 1}
 
 " ------------------------------------
 " keybinds
