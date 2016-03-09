@@ -711,10 +711,6 @@ function! s:get_context(line) abort"{{{
       break
     endif
     let l:sep_end = matchend(l:line, l:sep_pattern, l:i)
-    if len(l:str_ranges) == 0
-      let l:i = l:sep_end
-      continue
-    endif
     " echomsg 'matchstr:' . matchstr(l:line, l:sep_pattern, l:i)
     let l:match = 1
     for [qd_open, qd_close] in l:str_ranges
