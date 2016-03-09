@@ -556,7 +556,8 @@ function! s:functions(...) abort"{{{
     return copy(g:hidemac_builtin.functions.candidates)
   endif
   if a:1 =~ '[$#]'
-    return filter(copy(g:hidemac_builtin.functions.candidates), 'v:val.kind == a:1')
+    let l:type = '[' . a:1 . '?]'
+    return filter(copy(g:hidemac_builtin.functions.candidates), 'v:val.kind =~ l:type')
   endif
 endfunction"}}}
 function! s:keywords(...) abort"{{{
@@ -564,7 +565,8 @@ function! s:keywords(...) abort"{{{
     return copy(g:hidemac_builtin.keywords.candidates)
   endif
   if a:1 =~ '[$#]'
-    return filter(copy(g:hidemac_builtin.keywords.candidates), 'v:val.kind == a:1')
+    let l:type = '[' . a:1 . '?]'
+    return filter(copy(g:hidemac_builtin.keywords.candidates), 'v:val.kind =~ l:type')
   endif
 endfunction"}}}
 function! s:expressions(...) abort"{{{
