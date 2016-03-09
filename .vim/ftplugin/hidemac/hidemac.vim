@@ -1179,9 +1179,8 @@ function! s:gather_candidates(cur_line, cur_text) abort"{{{
       if has_key(s:special_statements, l:statement_name)
         " 特別な補完候補の用意がぁる
         let l:candidates += s:special_statements[l:statement_name](len(l:args) - 1, l:args)
-      endif
-      if has_key(g:hidemac_builtin.statements.data[l:statement_name], 'types')
-        " 型で候補を追加する
+      elseif has_key(g:hidemac_builtin.statements.data[l:statement_name], 'types')
+        " 型で候補を出す
         let l:type = g:hidemac_builtin.statements.data[l:statement_name].types[len(l:args) - 1]
         let l:type_map = {'num': '#', 'str': '$'}
         if has_key(l:type_map, l:type)
