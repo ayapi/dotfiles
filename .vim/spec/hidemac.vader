@@ -1,0 +1,147 @@
+Given hidemac (上の行に変数がまだなぃとき):
+  #a = 
+Do (数値型変数に代入しはじめると):
+  i\<End>ch\<CR>
+Expect hidemac (数値型の値か関数が候補にでる):
+  #a = charset
+================================================================
+Given hidemac (上の行に変数がまだなぃとき):
+  $a = 
+Do (文字列型変数に代入しはじめると):
+  i\<End>ch\<CR>
+Expect hidemac (文字列型の値か関数が候補にでる):
+  $a = char(
+================================================================
+Given hidemac (上の行にもぅ別の変数がぁるとき):
+  #ab = 1;
+  $aa = "a";
+  #c = 
+Do (ぁらたに数値型変数に代入しはじめると):
+  i\<PageDown>\<End>a\<CR>
+Expect hidemac (候補に変数ゎ数値型だけがでる):
+  #ab = 1;
+  $aa = "a";
+  #c = #ab
+================================================================
+Given hidemac (上の行にもぅ別の変数がぁるとき):
+  $ab = "a";
+  #aa = 1;
+  $c = 
+Do (ぁらたに文字列型変数に代入しはじめると):
+  i\<PageDown>\<End>a\<CR>
+Expect hidemac (候補に変数ゎ文字列型だけがでる):
+  $ab = "a";
+  #aa = 1;
+  $c = $ab
+================================================================
+Given hidemac (変数に代入するとき):
+  $a = 
+  #b = 
+Do (返り値の型が決まってなぃ関数を呼ぼーとすると):
+  i\<End>getco\<CR>);\<Down>\<End>getco\<CR>);
+Expect hidemac (代入しょーとしてる変数の型に関係なく候補にでる):
+  $a = getconfig();
+  #b = getconfig();
+================================================================
+Given hidemac (ラベルがぁるとき):
+  goto
+  endmacro;
+  Label:
+    $a = "a";
+Do (gotoしょーとすると):
+  i\<End>\<Space>\<CR>
+Expect hidemac (ラベル名が候補にでる):
+  goto Label
+  endmacro;
+  Label:
+    $a = "a";
+================================================================
+Given hidemac (サブルーチンがぁるとき):
+  call
+  endmacro;
+  Sub:
+    return;
+Do (サブルーチンを呼ぼーとすると):
+  i\<End>\<Space>\<CR>
+Expect hidemac (サブルーチン名が候補にでる):
+  call Sub
+  endmacro;
+  Sub:
+    return;
+================================================================
+Given hidemac (第１引数を文字列型として扱ってるサブルーチンがぁるとき):
+  $ab = "a";
+  #aa = 1;
+  call Sub
+  endmacro;
+  Sub:
+    if($$1 != ""){
+      $$a = $$1;
+    }
+  return;
+Do (そのサブルーチンを呼ぶ引数をかこーとすると):
+  2ji\<End>\<Space>\<CR>
+Expect hidemac (文字列型の変数の候補がでる):
+  $ab = "a";
+  #aa = 1;
+  call Sub $ab
+  endmacro;
+  Sub:
+    if($$1 != ""){
+      $$a = $$1;
+    }
+  return;
+================================================================
+Given hidemac (ローカル変数がっかゎれてるサブルーチンが複数ぁるとき):
+  Sub:
+    $$a = "a";
+  return $$a;
+  Sub2:
+    $$b = "b";
+    $$c = 
+Do (最後のサブルーチンの中で変数を呼ぼーとすると):
+  i\<PageDown>\<End>$\<CR>
+Expect hidemac (最初のサブルーチンのローカル変数ゎ候補にでなぃ):
+  Sub:
+    $$a = "a";
+  return $$a;
+  Sub2:
+    $$b = "b";
+    $$c = $$b
+================================================================
+Given hidemac (サブルーチンを呼んだ後):
+  call Sub;
+  #a = 
+  endmacro;
+  Sub:
+  return 1;
+Do (変数を書こーとすると):
+  ji\<End>#\<CR>
+Expect hidemac (復帰値を参照する特別な変数が候補にでる):
+  call Sub;
+  #a = ##return
+  endmacro;
+  Sub:
+  return 1;
+================================================================
+Given hidemac (上の行に変数がぁって、ぁたらしく関数名をかぃたぁと):
+  $s = "ぁ123";
+  #n = 2;
+  #ci = byteindex_to_charindex(
+Do (第１引数をかこーとすると):
+  i\<PageDown>\<End>\<Space>\<CR>
+Expect hidemac (型が一致する変数の候補がでる):
+  $s = "ぁ123";
+  #n = 2;
+  #ci = byteindex_to_charindex( $s
+================================================================
+Given hidemac (上の行に変数がぁって、ぁたらしく関数をかぃてるとこで):
+  #n = 2;
+  $s = "ぁ123";
+  #ci = byteindex_to_charindex( $s
+Do (第２引数をかこーとすると):
+  i\<PageDown>\<End>,\<CR>
+Expect hidemac (型が一致する変数の候補がでる):
+  #n = 2;
+  $s = "ぁ123";
+  #ci = byteindex_to_charindex( $s,#n
