@@ -604,7 +604,7 @@ function! s:variables(...) abort"{{{
     
     let l:i = 1
     while 1
-      let l:var = matchstr(l:line, l:type_pattern . '[a-zA-Z0-9_]\+\s*=[^;]\{-};', 0, l:i)
+      let l:var = matchstr(l:line, l:type_pattern . '\{1,2}[a-zA-Z0-9_]\+\s*=[^;]\{-};', 0, l:i)
       let l:i = l:i + 1
       if l:var == ''
         break
