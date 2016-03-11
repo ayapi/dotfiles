@@ -585,8 +585,8 @@ function! s:variables(...) abort"{{{
   let l:candidates = []
   let l:in_other_sub = 0
   let l:call_found = 0
-  for l:lnum in range(line('.') - 1, 1, -1)
-    let l:line = getline(l:lnum)
+  for l:lnum in range(s:line('.'), 1, -1)
+    let l:line = s:getline(l:lnum)
     
     if l:line =~ ':\s*$' "label
       if l:in_other_sub == 0
@@ -630,8 +630,8 @@ function! s:variables(...) abort"{{{
 endfunction"}}}
 function! s:labels() abort"{{{
   let l:candidates = []
-  for l:lnum in range(1, line('$'))
-    let l:line = getline(l:lnum)
+  for l:lnum in range(1, s:line('$'))
+    let l:line = s:getline(l:lnum)
     let l:label = matchstr(l:line, '^\s*\zs[a-zA-Z0-9_"]\+\ze:\s*$')
     if l:label != ''
       call add(l:candidates, {'word': l:label})
@@ -652,12 +652,12 @@ function! s:get_after_block(ctx) abort"{{{
   elseif a:ctx =~ '^}\s*$'
     " } ってだけかぃたとこ
     " 閉じたブロックの開始地点をみにぃく
-    let l:lnum = line('.') - 1
+    let l:lnum = s:line('.') - 1
     if l:lnum < 1
       return []
     endif
     for l:lnum in range(l:lnum, 1, -1)
-      let l:line = getline(l:lnum)
+      let l:line = s:getline(l:lnum)
       if l:line =~ '\s*{\s*' && l:line !~ '^\s*//'
         break
       endif
@@ -672,25 +672,116 @@ function! s:get_after_block(ctx) abort"{{{
 endfunction"}}}
 
 let s:str_patterns = {'''': '''.\{-}\(\\\)\@<!''', '"': '".\{-}\(\\\)\@<!"'}
-function! s:get_context(line) abort"{{{
-  let l:line = a:line
+function! s:remove_comments(lines, cur_lnum, cur_cnum) abort
+  let l:lines = a:lines
+  let l:prev_lines = deepcopy(l:lines)[: a:cur_lnum - 1]
+  let l:prev_lines[-1] = a:cur_cnum == 1 ? '' : l:prev_lines[-1][: a:cur_cnum - 2]
+  let l:byte_cur_pos = len(join(l:prev_lines, "\n"))
+  let l:content = join(l:lines, "\n")
+  let l:open_pattern = '\%(\%(\\\)\@<!["'']\|//\|/\*\)'
+  let l:close_pattern = extend(deepcopy(s:str_patterns), {'/*': '/\*\_.\{-}\*/', '//': '//.\{-}\ze\n'})
+  let l:i = 0
+  let l:in_comment = 0
+  while 1
+    if l:i >= len(l:content) - 1
+      break
+    endif
+    let l:open_start = match(l:content, l:open_pattern, l:i)
+    if l:open_start == -1
+      break
+    endif
+    let l:open_end = matchend(l:content, l:open_pattern, l:open_start)
+    let l:open_str = l:content[l:open_start : l:open_end - 1]
+    
+    " 文字列リテラルかコメント(文字列リテラルゎなにもしなくスキップ)
+    let l:close_end = matchend(l:content, l:close_pattern[l:open_str], l:open_start)
+    if l:close_end == -1
+      " 閉じられてなぃ
+      let l:close_end = len(l:content)
+    endif
+    if l:open_str == '/*' || l:open_str == '//'
+      if l:open_end <= l:byte_cur_pos && l:byte_cur_pos <= l:close_end
+        " コメントの中にカーソルがぁった
+        let l:in_comment = 1
+      endif
+      " コメントをけす
+      let l:before_comment_str = (l:open_start == 0 ? '' : l:content[: l:open_start - 1])
+      let l:after_comment_str = (l:close_end > len(l:content) - 1) ? '' : l:content[l:close_end :]
+      let l:content = l:before_comment_str . l:after_comment_str
+      " けしたぶんだけカーソル位置を計算しなぉす
+      if l:open_start <= l:byte_cur_pos
+        let l:byte_cur_pos -= (min([l:byte_cur_pos, l:close_end]) - l:open_start)
+      endif
+      let l:i = l:open_start
+    else
+      let l:i = l:close_end
+    endif
+  endwhile
+  let l:new_lines = split(l:content, "\n", 1)
+  if l:byte_cur_pos < 1
+    let l:new_lnum = 1
+    let l:new_cnum = 1
+  else
+    let l:new_prev_lines = split(l:content[: l:byte_cur_pos - 1], "\n", 1)
+    let l:new_lnum = len(l:new_prev_lines)
+    let l:new_cnum = empty(l:new_prev_lines) ? 1 : len(l:new_prev_lines[-1]) + 1
+  endif
+  
+  return { 'lines': l:new_lines,
+          \ 'lnum': l:new_lnum,
+          \ 'cnum': l:new_cnum,
+          \ 'in_comment': l:in_comment}
+endfunction
+
+function! s:line(lnum) abort
+  let l:symbol = {
+      \ '$': len(b:hidemac_buf.lines),
+      \ '.': b:hidemac_buf.lnum
+      \}
+  if has_key(l:symbol, a:lnum)
+    return l:symbol[a:lnum]
+  endif
+  return a:lnum
+endfunction
+function! s:getline(lnum, ...) abort
+  let l:lnum = s:line(a:lnum) - 1
+  if l:lnum < 0 || l:lnum > s:line('$')
+    return ''
+  endif
+  if a:0
+    let l:end = min([s:line(a:1), s:line('$')]) - 1
+    return deepcopy(b:hidemac_buf.lines[l:lnum : l:end])
+  endif
+  return deepcopy(b:hidemac_buf.lines[l:lnum])
+endfunction
+function! s:col(arg) abort
+  if a:arg == '.'
+    return b:hidemac_buf.cnum
+  elseif a:arg == '$'
+    return len(s:getline('.')) + 1
+  endif
+endfunction
+function! s:get_context() abort"{{{
+  let l:lines = s:getline(1, '.')
+  let l:lines[-1] = l:lines[-1][: s:col('.') - 2]
+  let l:content = join(l:lines, "\n")
   let l:str_ranges = []
   let l:i = 0
   while 1
-    if l:i >= len(l:line)
+    if l:i >= len(l:content)
       break
     endif
     " ダブルクオートかクオートがひらくとこをさがす
-    let l:q_open_pos = match(l:line, '\(\\\)\@<!["'']', l:i)
+    let l:q_open_pos = match(l:content, '\(\\\)\@<!["'']', l:i)
     if l:q_open_pos == -1
       break
     endif
     " 開ぃてたから、閉じるとこをさがす
-    let l:q = l:line[l:q_open_pos]
-    let l:q_close_pos = matchend(l:line, s:str_patterns[l:q], l:q_open_pos)
+    let l:q = l:content[l:q_open_pos]
+    let l:q_close_pos = matchend(l:content, s:str_patterns[l:q], l:q_open_pos)
     if l:q_close_pos == -1
       " 閉じてなぃっぽぃ
-      call add(l:str_ranges, [l:q_open_pos, len(l:line)+1])
+      call add(l:str_ranges, [l:q_open_pos, len(l:content)+1])
       break
     endif
     " 閉じられてた
@@ -699,32 +790,25 @@ function! s:get_context(line) abort"{{{
   endwhile
 
   let l:i = 0
-  let l:sep_pattern = '\(;\s*\|\(if\|while\)\s*([^)]\+)\s*{*\s*\|else\s{*\s*\)'
+  let l:sep_pattern = '\(;\s*\|\(if\|while\)\s*([^)]\+)\s*{*\s*\|else\s{*\s*\|}\s*\)'
   let l:head_position = 0
   while 1
-    if l:i >= len(l:line)
+    if l:i >= len(l:content)
       break
     endif
-    " echomsg l:line[l:i :]
-    let l:sep_start = match(l:line, l:sep_pattern, l:i)
+    let l:sep_start = match(l:content, l:sep_pattern, l:i)
     if l:sep_start == -1
       break
     endif
-    let l:sep_end = matchend(l:line, l:sep_pattern, l:i)
-    " echomsg 'matchstr:' . matchstr(l:line, l:sep_pattern, l:i)
+    let l:sep_end = matchend(l:content, l:sep_pattern, l:i)
     let l:match = 1
     for [qd_open, qd_close] in l:str_ranges
-      " echomsg 'qd_open :' . qd_open
-      " echomsg 'qd_close:' . qd_close
-      " echomsg 'sep_start:' . l:sep_start
-      " echomsg 'sep_end :' . l:sep_end
       if !(qd_close <= l:sep_start	|| l:sep_end <= qd_open
             \ || (l:sep_start <= qd_open && qd_close <= l:sep_end))
         let l:match = 0
         break
       endif
     endfor
-    " echomsg 'match:' . l:match
     if !l:match
       let l:i = qd_close + 1
       continue
@@ -733,8 +817,7 @@ function! s:get_context(line) abort"{{{
     let l:i = l:sep_end
   endwhile
 
-  " echomsg l:head_position . '/' . len(l:line)
-  return s:trim(l:line[l:head_position: ])
+  return substitute(s:trim(l:content[l:head_position: ]), "[\r\n]", '', 'g')
 endfunction"}}}
 function! s:stash_strings(line) abort"{{{
   let l:line = a:line
@@ -959,12 +1042,11 @@ function! s:special_functions.dllfunc(i, args) abort"{{{
       let l:i = l:i - 1
       let l:id_specified = 1
     endif
-    echomsg 'id_specified: ' . l:id_specified
   endif
   if !l:id_specified
     " loaddll文のdllをみっける
-    for l:lnum in range(line('.'), 1, -1) + range(line('$'), line('.') + 1, -1)
-      let l:line = getline(l:lnum)
+    for l:lnum in range(s:line('.'), 1, -1) + range(s:line('$'), s:line('.') + 1, -1)
+      let l:line = s:getline(l:lnum)
       let l:loaddll_arg = matchstr(l:line, 'loaddll\s\zs[^;]\{-}\ze;')
       if l:loaddll_arg != ''
         let l:dll_pattern = '"\zs[^\.]\{-}\ze\.dll"'
@@ -1094,8 +1176,8 @@ function! s:special_statements.call(i, args) abort"{{{
   " 呼ぼーとしてるサブルーチンをさがす
   let l:in_target_sub = 0
   let l:type = '?'
-  for l:lnum in range(1, line('$'))
-    let l:line = getline(l:lnum)
+  for l:lnum in range(1, s:line('$'))
+    let l:line = s:getline(l:lnum)
     if l:line =~ '^\s*' . l:args[0] . ':'
       let l:in_target_sub = 1
       continue
@@ -1114,8 +1196,8 @@ function! s:special_statements.call(i, args) abort"{{{
   endfor
   return s:expressions(l:type)
 endfunction"}}}
-function! s:gather_candidates(cur_line, cur_text) abort"{{{
-  let l:ctx = s:get_context(a:cur_line)
+function! s:gather_candidates() abort"{{{
+  let l:ctx = s:get_context()
   echomsg 'ctx: ' . l:ctx
   
   let l:ks = split(l:ctx, '[^a-zA-Z0-9_#$]\+', 1)
@@ -1211,15 +1293,23 @@ function! CompleteHidemac(findstart, base)"{{{
   if a:findstart
     let l:line = getline('.')
     let l:start = col('.') - 1
-    while l:start >= 0 && l:line[l:start - 1] =~ '\%(\k\|[$#_]\)'
+    while l:start > 0 && l:line[l:start - 1] =~ '\%(\k\|[$#_]\)'
       let l:start -= 1
     endwhile
     let b:cur_text = l:line[l:start :]
-    let b:cur_line = l:line[0: l:start - 1]
+    
+    let b:hidemac_buf	= s:remove_comments(getline(1, '$'), line('.'), l:start + 1)
+    if b:hidemac_buf.in_comment
+      return -1
+    endif
     return l:start
   endif
   
-  let l:candidates = s:gather_candidates(substitute(b:cur_line, '^\s\+', "", "g"), b:cur_text)
+  if b:hidemac_buf.in_comment
+    return []
+  endif
+  
+  let l:candidates = s:gather_candidates()
 
   if a:base == ""
     return l:candidates
