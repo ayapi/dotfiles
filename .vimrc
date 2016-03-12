@@ -918,8 +918,9 @@ endif
 
 " convert indent before paste, and select pasted text
 function! ConvertIndentPaste() abort
+  let l:after_indent = &expandtab ? repeat(' ', &shiftwidth) : "\t"
   let l:clipboard = getreg('+')
-  let l:converted = ConvertIndent(l:clipboard)
+  let l:converted = ConvertIndent(l:clipboard, l:after_indent)
   call setreg('j', l:converted, 'c')
   normal! "jgP
   if l:converted =~ '[\r?\n]'
