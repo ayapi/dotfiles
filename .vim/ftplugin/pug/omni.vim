@@ -175,7 +175,7 @@ function! s:gatherStatementNames(info) abort"{{{
 endfunction"}}}
 let s:doctypes = ['html', 'xml', 'transitional', 'strict', 'frameset', '1.1', 'basic', 'mobile']
 function! s:gatherDoctypeValues() abort"{{{
-  return copy(s:jade_doctypes)
+  return copy(s:doctypes)
 endfunction"}}}
 function! s:gatherMixinNames(info) abort"{{{
   let l:candidates = []
