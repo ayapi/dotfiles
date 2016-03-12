@@ -148,7 +148,7 @@ function! s:gatherElementNames(info) abort"{{{
     return l:provider.getElementNames()
   endif
   return l:provider.getElementNames(
-        \ s:getAncestorElements(a:info.lnum, a:info.cnum)[-1]
+        \ s:getAncestorElements(a:info.lnum, a:info.cnum)[0]
         \ )
 endfunction"}}}
 function! s:gatherAttributeNames(info) abort"{{{
