@@ -67,8 +67,8 @@ function! s:gather_candidates() abort
                             \)
     endif
     
-    let l:inner_brackets = matchstr(l:line, '\[\zs[^\]]\+\ze')
-    let l:pieces = split(l:inner_brackets, '=', 1)
+    let l:current_bracket_inner = split(l:line, '\]\?\[', 1)[1:][-1]
+    let l:pieces = split(l:current_bracket_inner, '=', 1)
     
     if len(l:pieces) == 2
       return g:html_candidates.getAttributeValues(

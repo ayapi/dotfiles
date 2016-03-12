@@ -38,6 +38,20 @@ Do (attribute value selectorかこーとすると):
 Expect stylus (属性の値の候補がでる):
   input[type=text
 ================================================================
+Given stylus (attribute selectorをもぅかぃてるとき):
+  input[type=text]
+Do (さらにattribute selectorかくと):
+  i\<End>[v\<CR>
+Expect stylus (また属性の名前の候補がでる):
+  input[type=text][value
+================================================================
+Given stylus (2っめのattribute selectorの名前をかぃたとき):
+  input[name=name][type
+Do (atribute value selectorかこーとすると):
+  i\<End>=\<CR>
+Expect stylus (2っめのattribute selectorに対応した属性の値の候補がでる):
+  input[name=name][type=text
+================================================================
 Given stylus (input要素をかぃたとき):
   input
     
