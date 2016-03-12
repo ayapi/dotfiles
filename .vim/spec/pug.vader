@@ -1,0 +1,128 @@
+================================================================
+Given pug (input要素のattribute syntaxかぃたとき):
+  input(
+Do:
+  i\<End>t\<CR>
+Expect pug (属性の名前が候補がでる):
+  input(type
+================================================================
+Given pug (input要素のattribute syntaxかぃたとき):
+  input(
+Do (改行しても):
+  i\<End>\<CR>\<Tab>t\<CR>
+Expect pug (属性の名前が候補がでる):
+  input(
+    type
+================================================================
+Given pug (input要素のtype属性をかぃたぁと):
+  input(type
+Do (値を直接かこーとすると):
+  i\<End>=t\<CR>
+Expect pug (属性の値が候補がクオートっきででる):
+  input(type="text"
+================================================================
+Given pug (input要素のtype属性をかぃたぁと):
+  input(type
+Do (クオートをかぃても):
+  i\<End>="\<CR>
+Expect pug (属性の値の候補がクオートなしででる):
+  input(type="text
+================================================================
+Given pug (mixinがぁるとき):
+  mixin test
+    div
+  
+Do (plus syntaxをかくと):
+  i\<PageDown>\<End>+\<CR>
+Expect pug (mixinの名前が候補がでる):
+  mixin test
+    div
+  +test
+================================================================
+Given pug (doctypeってかぃたぁと):
+  doctype
+Do:
+  i\<End>\<Space>\<CR>
+Expect pug (タイプの候補がでる):
+  doctype html
+================================================================
+Given pug (dl要素かぃたぁと):
+  html
+    body
+      dl
+        
+Do:
+  i\<PageDown>\<End>di\<CR>
+Expect pug (div要素の候補ゎでなぃ):
+  html
+    body
+      dl
+        di
+        
+================================================================
+Given pug (svg要素かぃたぁと):
+  svg
+    
+Do:
+  i\<PageDown>\<End>r\<CR>
+Expect pug (svg要素の候補がでる):
+  svg
+    rect
+================================================================
+Given pug (svg要素のぁとnested colon syntaxでも):
+  svg: 
+Do:
+  i\<End>r\<CR>
+Expect pug (svg要素の候補がでる):
+  svg: rect
+================================================================
+Given pug (mixinのblockがsvg要素の中にぁるとき):
+  mixin test
+    svg
+      block
+  +test
+    
+Do ():
+  i\<PageDown>\<End>r\<CR>
+Expect pug (svg要素の候補がでる):
+  mixin test
+    svg
+      block
+  +test
+    rect
+================================================================
+Given pug (stylus filterの中にぃるとき):
+  :stylus
+    body
+      
+Do:
+  i\<PageDown>\<End>dis\<CR>
+Expect pug (css propertyの候補がでる):
+  :stylus
+    body
+      display
+================================================================
+Given pug (style(type='text/stylus')の中にぃるとき):
+  style(type='text/stylus')
+    body
+      
+Do:
+  i\<PageDown>\<End>dis\<CR>
+Expect pug (css propertyの候補がでる):
+  style(type='text/stylus')
+    body
+      display
+================================================================
+Given pug (stylus filterがぁっても):
+  :stylus
+    body
+      display: block
+  
+Do (ブロックから抜けたら):
+  i\<PageDown>dis\<CR>
+Expect pug (css propertyの候補ゎでなぃ):
+  :stylus
+    body
+      display: block
+  dis
+  
