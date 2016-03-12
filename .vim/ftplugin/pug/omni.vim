@@ -29,6 +29,8 @@ function! CompleteJade(findstart, base)
       let l:categories = ['comment']
     elseif s:isCode(l:lnum, l:cnum)
       let l:categories = ['code']
+    elseif g:omniutil.is('pugBlockExpansionChar\|pugTag$', l:lnum, l:cnum - 2)
+      let l:categories = ['elementName']
     else
       let l:line = ''
       if l:start > 0
