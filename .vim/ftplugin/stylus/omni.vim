@@ -153,7 +153,7 @@ function! s:gather_candidates() abort
       return s:get_atrule_values(l:line)
     endif
 
-    if l:line =~ '^\s*\S\+[\s:].*$'
+    if l:line =~ '^\s*\S\+[ \t:].*$'
       return s:get_property_lookup(line('.'))
     endif
     
