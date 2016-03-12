@@ -1,0 +1,72 @@
+================================================================
+Given stylus (なにもかぃてなぃとき):
+  
+Do:
+  i\<End>ht\<CR>
+Expect stylus (html要素の候補がでる):
+  html
+================================================================
+Given stylus (プロパティ名をかぃたとき):
+  html
+    border-style 
+Do:
+  i\<PageDown>\<End>s\<CR>
+Expect stylus (プロパティの値の候補がでる):
+  html
+    border-style solid
+================================================================
+Given stylus (プロパティ名をかぃたとき):
+  html
+    padding-left 
+Do:
+  i\<PageDown>\<End>ab\<CR>
+Expect stylus (built-in functionの候補がでる):
+  html
+    padding-left abs(
+================================================================
+Given stylus (input要素かぃたとき):
+  input
+Do (attribute selectorかくと):
+  i\<End>[t\<CR>
+Expect stylus (属性の名前の候補がでる):
+  input[type
+================================================================
+Given stylus (input要素でtype属性かぃたとき):
+  input[type
+Do (attribute value selectorかこーとすると):
+  i\<End>=\<CR>
+Expect stylus (属性の値の候補がでる):
+  input[type=text
+================================================================
+Given stylus (input要素をかぃたとき):
+  input
+    
+Do (parent reference syntaxでattribute selectorかくと):
+  i\<PageDown>\<End>&[t\<CR>
+Expect stylus (input要素の属性の値の候補がでる):
+  input
+    &[type
+================================================================
+Given stylus (上の行にプロパティがもぅかぃてぁるとき):
+  form
+    width 100px
+    margin-left 
+Do (@ property lookup syntaxをかくと):
+  i\<PageDown>\<End>@\<CR>
+Expect stylus (上の行のプロパティが候補にでる):
+  form
+    width 100px
+    margin-left @width
+================================================================
+Given stylus (子セレクタをかぃてるとき):
+  form
+    width 100px
+    textarea
+      width 
+Do (@ property lookup syntaxをかくと):
+  i\<PageDown>\<End>@\<CR>
+Expect stylus (親のプロパティが候補にでる):
+  form
+    width 100px
+    textarea
+      width @width
