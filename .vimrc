@@ -903,7 +903,7 @@ snoremap <Del> x<BS>
 " i think it caused by the following commit
 " https://github.com/neovim/neovim/commit/49f04179888944943f0266cd77810e467f9d68ef
 if has('nvim')
-  source .vim/clipboard.vim
+  source ~/.vim/clipboard.vim
 endif
 
 " Prevent Vim from clearing the clipboard on exit
