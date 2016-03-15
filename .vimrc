@@ -491,41 +491,46 @@ inoremap <C-\> <Nop>
 " else
 "   <C-e> end completion-mode
 
-inoremap <silent> <expr> <C-Space> '<C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>" : "\<lt>C-e>"<CR>'
+inoremap <silent> <C-Space> <C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>" : "\<lt>C-e>"<CR>
 " <C-Space> is <Nul> in vim
-inoremap <silent> <expr> <Nul> '<C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>" : "\<lt>C-e>"<CR>'
+inoremap <silent> <Nul> <C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>" : "\<lt>C-e>"<CR>
 
 " alphabet keys and dot, space
 for k in add(
   \split('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._!"#$%&(=-~^\@[+*:<,?/`','\zs'),
   \'<Space>'
   \)
-  exec "inoremap <expr> ".k." '<C-g>u".k."<C-x><C-u><C-p><C-r>=pumvisible() ? \"\\<lt>Down>\" : \"\\<lt>C-e>\"<CR>'"
+  execute 'inoremap <silent> ' . k . ' <C-g>u' . k
+        \ . '<C-x><C-u><C-p><C-r>=pumvisible()'
+        \ . ' ? "\<lt>Down>" : "\<lt>C-e>"<CR>'
 endfor
 
 " single quote
-inoremap <silent> <expr> ' '<C-g>u''<C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>" : "\<lt>C-e>"<CR>'
+inoremap <silent> ' <C-g>u'<C-x><C-u><C-p><C-r>=pumvisible() ? "\<lt>Down>" : "\<lt>C-e>"<CR>
 
 " [continue popup on backspace]
-inoremap <silent> <expr> <BS> '<BS><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+inoremap <silent> <BS> <C-g>u<BS><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>
 
 " [close completion popup menu]
 " pipe
-inoremap <silent> <expr> \| "<C-g>u\|<C-r>=pumvisible() ? \"\<lt>C-e>\" : \"\"<CR>"
+inoremap <silent> \| <C-r>=pumvisible() ? "\<lt>C-e>" : ""<CR><C-g>u\|
 
 " other symbols
 for k in split('{>);}]','\zs')
-  exec "inoremap <expr> ".k." '<C-g>u".k."<C-r>=pumvisible() ? \"\\<lt>C-e>\" : \"\"<CR>'"
+  execute 'inoremap <silent><expr>' . k
+        \ . ' (pumvisible() ? "\<lt>C-e>" : "") . '
+        \ . '"\<C-g>u' . k . '"'
 endfor
 
 " <C-CR>
-inoremap <silent><expr> <F23> '<C-g>u<C-r>=pumvisible() ? "\<lt>C-e>\<lt>CR>" : "\<lt>CR>"<CR>'
+inoremap <silent> <F23> <C-r>=pumvisible() ? "\<lt>C-e>" : ""<CR><C-g>u<CR>
 
 " for other insert-mode keybinds
 " close completion popup menu before key
 function! IMapWithClosePopup(before, after, ...)
   let silent = (a:0 == 1 ? "" : "<silent> ")
-  exec "inoremap ".silent."<expr> ".a:before." pumvisible() ? \"\\<C-e>".a:after."\" : \"".a:after."\""
+  execute 'inoremap ' . silent . '<expr> ' . a:before
+        \ . ' (pumvisible() ? "\<lt>C-e>" : "") . "' . a:after . '"'
 endfunction
 
 " <CR> ----------------------------
