@@ -615,6 +615,8 @@ if which ghq > /dev/null 2>&1; then
   fpath=($GOPATH/src/github.com/motemen/ghq/zsh ${fpath})
 fi
 
+export PATH=$HOME/.composer/vendor/bin:$PATH
+
 alias gpgimp='gpg --keyserver http://pgp.mit.edu --recv-key'
 alias pacupg='sudo snp "pacman -Syu; pacmrr; pacnews"'
 alias aurupg='snp "yaourt -Syua; sudo pacmrr; sudo pacnews"'
