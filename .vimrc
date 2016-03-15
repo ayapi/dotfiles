@@ -19,6 +19,8 @@ if has('vim_starting')
   end
 endif
 
+let g:eclim_filetypes = ['scala', 'java', 'php', 'ruby']
+
 call plug#begin('~/.vim/plugged')
 Plug 'junegunn/vim-plug', {'dir': '~/.vim/plugged/vim-plug/autoload'}
 Plug 'vim-jp/vimdoc-ja'
@@ -42,10 +44,12 @@ Plug 'Shougo/neosnippet.vim'
 Plug 'Shougo/neco-vim',
       \ {'dir': '~/.vim/bundle-custom/neco-vim',
       \ 'frozen': 1, 'for': 'vim'}
+Plug 'dansomething/vim-eclim' , {'for': g:eclim_filetypes}
 Plug 'ternjs/tern_for_vim',
       \ {'do': 'npm install', 'for': 'javascript'}
 Plug 'davidhalter/jedi-vim',
       \ {'do': 'git submodule update --init', 'for': 'python'}
+Plug 'shawncplus/phpcomplete.vim'
 Plug 'othree/yajs.vim', {'for': 'javascript'}
 Plug 'othree/es.next.syntax.vim', {'for': 'javascript'}
 Plug 'digitaltoad/vim-pug', {'for': 'pug'}
@@ -295,7 +299,7 @@ function! MatchCandidates(candidates, cur_text) abort
 endfunction
 function! MixComplete(findstart, base)
   if a:findstart
-  return call(&omnifunc, [a:findstart, a:base])
+    return call(&omnifunc, [a:findstart, a:base])
   endif
 
   let l:matches = []
@@ -349,6 +353,48 @@ augroup setomniafterfiletype
   autocmd!
   autocmd FileType stylus setlocal omnifunc=CompleteStylus
   autocmd FileType pug setlocal omnifunc=CompleteJade
+augroup END
+
+let g:EclimCompletionMethod = 'omnifunc'
+let g:EclimProjectProblemsUpdateOnSave = 1
+function! EclimComplete(findstart, base)
+  if &filetype == 'php'
+    let l:compfunc='phpcomplete#CompletePHP'
+  else
+    let l:compfunc = 'syntaxcomplete#Complete'
+  endif
+  
+  if eclim#PingEclim(0) && index(g:eclim_filetypes, &filetype) >= 0
+    let l:compfunc='eclim#' . &filetype . '#complete#CodeComplete'
+  endif
+  return call(l:compfunc, [a:findstart, a:base])
+endfunction
+
+function! s:start_eclimd() abort
+  if !has('nvim') || eclim#PingEclim(0) || exists('g:eclimd_will_start')
+    return
+  endif
+  let l:eclipse_project_dir = ''
+  let l:dirstack = split(expand("<afile>:p:h"), '/')
+  let l:dirstack_len = len(l:dirstack)
+  for l:i in range(l:dirstack_len - 1, 0, -1)
+    let l:dir = '/' . join(l:dirstack[0: l:i], '/')
+    let l:project_file_path = l:dir . '/.project'
+    if filereadable(l:project_file_path)
+      let l:eclipse_project_dir = l:dir
+      break
+    endif
+  endfor
+  if l:eclipse_project_dir == ""
+    return
+  endif
+  let g:eclimd_will_start = 1
+  call system('$ECLIPSE_HOME/eclimd 2>&1 1>/dev/null &')
+endfunction
+
+augroup eclim
+  autocmd!
+  autocmd FileType java,php call s:start_eclimd() | setlocal omnifunc=EclimComplete
 augroup END
 
 " ------------------------------------

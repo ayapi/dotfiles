@@ -616,6 +616,9 @@ if which ghq > /dev/null 2>&1; then
 fi
 
 export PATH=$HOME/.composer/vendor/bin:$PATH
+export ECLIPSE_HOME=/usr/lib/eclipse
+alias eclimd=$ECLIPSE_HOME/eclimd
+alias eclim=$ECLIPSE_HOME/eclim
 
 alias gpgimp='gpg --keyserver http://pgp.mit.edu --recv-key'
 alias pacupg='sudo snp "pacman -Syu; pacmrr; pacnews"'
