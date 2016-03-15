@@ -54,6 +54,7 @@ Plug 'othree/yajs.vim', {'for': 'javascript'}
 Plug 'othree/es.next.syntax.vim', {'for': 'javascript'}
 Plug 'digitaltoad/vim-pug', {'for': 'pug'}
 Plug 'wavded/vim-stylus', {'for': ['stylus', 'pug']}
+Plug 'tobyS/vmustache' | Plug 'tobyS/pdv', {'for': 'php'}
 Plug 'jwalton512/vim-blade'
 Plug 'alunny/pegjs-vim', {'for': 'pegjs'}
 Plug 'elzr/vim-json', {'for': 'json'}
