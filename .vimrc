@@ -54,6 +54,7 @@ Plug 'othree/yajs.vim', {'for': 'javascript'}
 Plug 'othree/es.next.syntax.vim', {'for': 'javascript'}
 Plug 'digitaltoad/vim-pug', {'for': 'pug'}
 Plug 'wavded/vim-stylus', {'for': ['stylus', 'pug']}
+Plug 'jwalton512/vim-blade'
 Plug 'alunny/pegjs-vim', {'for': 'pegjs'}
 Plug 'elzr/vim-json', {'for': 'json'}
 Plug 'mrk21/yaml-vim'
@@ -144,7 +145,8 @@ let g:rainbow_conf = {
     \       },
     \       'html': 0,
     \       'css': 0,
-    \       'json': 0
+    \       'json': 0,
+    \       'blade': 0
     \   }
     \}
 
