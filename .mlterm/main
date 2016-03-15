@@ -175,7 +175,7 @@ input_method = uim
 
 # tabsize = 8
 
-# logsize = 128
+logsize = 8192
 
 # word_separators = " ,.:;/@"
 
