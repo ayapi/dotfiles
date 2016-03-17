@@ -774,9 +774,16 @@ function! s:filter_already_used_args(candidates, prev_args) abort "{{{
   return filter(a:candidates,
         \ 'match(a:prev_args, "^" . v:val.word) < 0')
 endfunction "}}}
-function! s:get_syntax_groups() abort
+function! s:get_syntax_groups() abort "{{{
   return s:get_syntax_groups_include_recurse(join(getline(1, '$'), "\n"))
-endfunction
+        \ + s:get_global_syntax_groups()
+endfunction "}}}
+function! s:get_global_syntax_groups() abort "{{{
+  if s:check_global_candidates('syngroups')
+    let s:global_candidates_list.syngroups = s:get_syngrouplist()
+  endif
+  return copy(s:global_candidates_list.syngroups)
+endfunction "}}}
 function! s:get_syntax_groups_include_recurse(content) abort "{{{
   let l:candidates = s:get_syntax_groups_from_content(a:content)
   let l:already_read_runtime_files = []
@@ -1319,7 +1326,22 @@ function! s:make_cache_autocmds() "{{{
 
   return reverse(autocmds)
 endfunction"}}}
-
+function! s:get_syngrouplist() abort "{{{
+  let l:candidates = []
+  
+  redir => l:redir
+  silent! syntax
+  redir END
+  
+  for line in split(l:redir, '\n')[1:]
+    let l:word = matchstr(line, '^\w*')
+    if l:word == ''
+      continue
+    endif
+    call add(l:candidates, {'word': l:word, 'menu': '(SyntaxGroup)'})
+  endfor
+  return l:candidates
+endfunction "}}}
 function! s:get_cmdlist() "{{{
   " Get command list.
   redir => redir
