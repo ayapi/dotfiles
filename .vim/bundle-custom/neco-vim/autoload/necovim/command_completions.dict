@@ -165,7 +165,7 @@ ha[rdcopy]
 helpf[ind]
 helpg[rep]      
 helpt[ags]      dir
-hi[ghlight]     highlight
+hi[ghlight]     highlight_args
 hid[e]          command
 his[tory]       
 i[nsert]

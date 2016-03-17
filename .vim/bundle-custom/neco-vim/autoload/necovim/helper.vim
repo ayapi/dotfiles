@@ -185,7 +185,7 @@ function! necovim#helper#command(cur_text, complete_str) "{{{
     " echomsg command
     " echomsg cur_text
     
-    if index(['autocmd_args', 'syntax_args'], completion_name) < 0
+    if index(['autocmd_args', 'syntax_args', 'highlight_args'], completion_name) < 0
           \ && a:cur_text =~ '[[(,{]\|`=[^`]*$'
       " Expression.
       let list = necovim#helper#expression(
@@ -318,9 +318,6 @@ endfunction"}}}
 function! necovim#helper#help(cur_text, complete_str) "{{{
   return []
 endfunction"}}}
-function! necovim#helper#highlight(cur_text, complete_str) "{{{
-  return []
-endfunction"}}}
 function! necovim#helper#let(cur_text, complete_str) "{{{
   if a:cur_text !~ '='
     return necovim#helper#var(a:cur_text, a:complete_str)
@@ -373,6 +370,115 @@ function! necovim#helper#option(cur_text, complete_str) "{{{
   endif
 endfunction"}}}
 function! necovim#helper#shellcmd(cur_text, complete_str) "{{{
+  return []
+endfunction"}}}
+function! necovim#helper#highlight_args(cur_text, complete_str) "{{{
+  let args = s:split_args(a:cur_text, a:complete_str)
+  let i = len(args) - 1
+  let l:default = {'word': 'default', 'menu': 'グループに対して既にハイライトかリンクが指定されている場合に無視させる'}
+  let l:subcmds = [
+        \ {'word': 'clear', 'menu': '全てのハイライトをデフォルトに戻す'},
+        \ {'word': 'link', 'menu': '複数の構文グループに対して同じハイライトを適用させる'}
+        \ ]
+  let l:has_default = 0
+  if i >= 2
+    if args[1] == 'default'
+      let l:has_default = 1
+      unlet args[1]
+      let i -= 1
+    endif
+  endif
+  if i == 1
+    let l:candidates = l:subcmds
+    if !l:has_default
+      call add(l:candidates, l:default)
+    endif
+    return l:candidates + s:get_global_highlight_groups() + s:get_syntax_groups()
+  endif
+  if args[1] == 'clear'
+    if i > 2
+      return []
+    endif
+    return s:get_global_highlight_groups() + s:get_syntax_groups()
+  elseif args[1] == 'link'
+    if i == 2
+      return s:get_syntax_groups()
+    elseif i == 3
+      return s:get_global_highlight_groups() + s:get_syntax_groups()
+    endif
+    return []
+  endif
+  if args[i - 1] =~ '[,=]$' && args[i] == ''
+    unlet args[i]
+    let i -= 1
+  endif
+  " let l:keys"{{{
+  let l:keys = [{'word': 'term=', 'menu': 'ターミナルで使われる属性'},
+        \ {'word': 'start=', 'menu': 'テキストの前に書き込むエスケープシーケンス'},
+        \ {'word': 'end=', 'menu': 'テキストの後に書き込むエスケープシーケンス'},
+        \ {'word': 'cterm='},
+        \ {'word': 'ctermfg=', 'menu': 'ターミナルで使われる文字色'},
+        \ {'word': 'ctermbg=', 'menu': 'ターミナルで使われる背景色'},
+        \ {'word': 'gui=', 'menu': 'GUIモードで使われる属性'},
+        \ {'word': 'font=', 'menu': 'Vimを実行しているシステム上で使われるフォント名'},
+        \ {'word': 'guifg=', 'menu': 'GUIモードで使われる文字色'},
+        \ {'word': 'guibg=', 'menu': 'GUIモードで使われる背景色'},
+        \ {'word': 'guisp=','menu': 'GUIモードで使われる波線の色'}]"}}}
+  let l:key_arg = matchstr(args[i], '^\%(' . join(map(copy(l:keys), 'v:val.word[:-2]'), '\|') .'\)=')
+  if l:key_arg == ''
+    let l:filtered_keys = s:filter_already_used_args(l:keys, args[2:])
+    if i == 2
+      return l:filtered_keys
+            \ + [{'word': 'NONE', 'menu': 'ハイライトグループに対するハイライトを無効にする'}]
+    endif
+    return l:filtered_keys
+  endif
+  if l:key_arg =~ '^\%(term\|cterm\|gui\)='
+    " let l:attr_values = "{{{
+    let l:attr_values = [
+          \ {'word': 'bold', 'menu': '太字'},
+          \ {'word': 'underline', 'menu': '下線'},
+          \ {'word': 'undercurl', 'menu': '必ずしも使用できるとは限らない'},
+          \ {'word': 'reverse', 'menu': '反転'},
+          \ {'word': 'inverse', 'menu':	'反転。reverseと同じ'},
+          \ {'word': 'italic', 'menu': '斜体'},
+          \ {'word': 'standout', 'menu': '強調'}
+          \ ]"}}}
+    let l:prev_values = split(substitute(args[i], '^' . l:key_arg, '', ''), '\s*,\s*')
+    if a:complete_str == ''
+      call add(l:prev_values, '')
+    endif
+    if len(l:prev_values) == 1
+      return l:attr_values
+            \ + [{'word': 'NONE', 'menu': '属性を使用しない(リセットする)'}]
+    endif
+    if index(l:prev_values, 'NONE') >= 0
+      return []
+    endif
+    return s:filter_already_used_args(l:attr_values, l:prev_values)
+  elseif l:key_arg =~ '^\%(start\|stop\)='
+    " TODO return options t_** (help term.txt)
+    return []
+  elseif l:key_arg =~ 'cterm[fb]g='
+    " let l:term_colors = "{{{
+    let l:term_colors = ['NONE', 'background', 'foreground', 'Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'Brown', 'DarkYellow', 'LightGray', 'LightGrey', 'Gray', 'Grey', 'DarkGray', 'DarkGrey', 'Blue', 'LightBlue', 'Green', 'LightGreen', 'Cyan', 'LightCyan', 'Red', 'LightRed', 'Magenta', 'LightMagenta', 'Yellow', 'LightYellow', 'White']"}}}
+    return map(l:term_colors, '{"word": v:val, "menu": "(TermColor)"}')
+  elseif l:key_arg =~ 'gui\%([fb]g\|sp\)='
+    let l:color_names = ['NONE', 'background', 'foreground']
+    let l:rgb_file = globpath(&runtimepath, 'autoload/necovim/rgb.txt', 0, 1)
+    if empty(l:rgb_file)
+      return []
+    endif
+    let l:lines = readfile(l:rgb_file[0])
+    for l:line in l:lines[1:]
+      let _ = split(l:line)
+      if len(_) > 4
+        continue
+      endif
+      call add(l:color_names, _[3])
+    endfor
+    return map(l:color_names, '{"word": v:val, "menu": "(GUIColor)"}')
+  endif
   return []
 endfunction"}}}
 function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
@@ -774,6 +880,12 @@ function! s:filter_already_used_args(candidates, prev_args) abort "{{{
   return filter(a:candidates,
         \ 'match(a:prev_args, "^" . v:val.word) < 0')
 endfunction "}}}
+function! s:get_global_highlight_groups() abort"{{{
+  if s:check_global_candidates('higroups')
+    let s:global_candidates_list.higroups = s:get_higrouplist()
+  endif
+  return copy(s:global_candidates_list.higroups)
+endfunction"}}}
 function! s:get_syntax_groups() abort "{{{
   return s:get_syntax_groups_include_recurse(join(getline(1, '$'), "\n"))
         \ + s:get_global_syntax_groups()
@@ -1339,6 +1451,22 @@ function! s:get_syngrouplist() abort "{{{
       continue
     endif
     call add(l:candidates, {'word': l:word, 'menu': '(SyntaxGroup)'})
+  endfor
+  return l:candidates
+endfunction "}}}
+function! s:get_higrouplist() abort "{{{
+  let l:candidates = []
+  
+  redir => l:redir
+  silent! highlight
+  redir END
+  
+  for line in split(l:redir, '\n')[1:]
+    let l:word = matchstr(line, '^\w*')
+    if l:word == ''
+      continue
+    endif
+    call add(l:candidates, {'word': l:word, 'menu': '(HighlightGroup)'})
   endfor
   return l:candidates
 endfunction "}}}

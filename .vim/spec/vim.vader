@@ -54,3 +54,137 @@ Do:
   i\<End>\<Space>se\<CR>\<Space>\<CR>
 Expect vim (コマンドの候補がでる):
   autocmd grpname BufNewFile * nested set aleph
+================================================================
+Given vim (highlight文かぃたぁと):
+  highlight 
+Do:
+  i\<End>d\<CR>
+Expect vim (defaultが候補にでる):
+  highlight default
+================================================================
+Given vim (highlight文でdefaultかぃたぁと):
+  highlight default
+Do:
+  i\<End>\<Space>\<CR>
+Expect vim (clearが最初の候補にでる):
+  highlight default clear
+================================================================
+Given vim (highlight文でdefaultかぃたぁと):
+  highlight default
+Do:
+  i\<End>\<Space>d\<CR>
+Expect vim (defaultゎ候補にでなぃ):
+  highlight default Directory
+================================================================
+Given vim (highlight文でかぃたぁと):
+  highlight 
+Do:
+  i\<End>N\<CR>
+Expect vim (ハイライトグループでぁるNonTextが候補にでる):
+  highlight NonText
+================================================================
+Given vim (highlight文clearかぃたぁと):
+  highlight clear 
+Do:
+  i\<End>N\<CR>
+Expect vim (ハイライトグループでぁるNonTextが候補にでる):
+  highlight clear NonText
+================================================================
+Given vim (highlight文clearでグループかぃたぁと):
+  highlight clear NonText
+Do:
+  i\<End>\<Space>\<CR>
+Expect vim (候補ゎなにもでなぃ):
+  highlight clear NonText 
+  
+================================================================
+Given vim (syntaxをかぃてて更にhighlight文linkかぃたぁと):
+  syntax keyword Ayapi ayapi
+  highlight link
+Do:
+  i\<PageDown>\<End>\<Space>\<CR>
+Expect vim (直前にかぃたsyntax group名が候補にでる):
+  syntax keyword Ayapi ayapi
+  highlight link Ayapi
+================================================================
+Given vim (highlight文linkのfromグループ名をかぃたぁと):
+  highlight link Ayapi 
+Do:
+  i\<End>N\<CR>
+Expect vim (直前にかぃたsyntax group名が候補にでる):
+  highlight link Ayapi NonText
+================================================================
+Given vim (highlight文linkのtoグループ名をかぃたぁと):
+  highlight link Ayapi NonText
+Do:
+  i\<End>\<Space>\<CR>
+Expect vim (候補ゎなにもでなぃ):
+  highlight link Ayapi NonText 
+  
+================================================================
+Given vim (highlight文でグループ名かぃたぁと):
+  highlight Ayapi 
+Do:
+  i\<End>N\<CR>
+Expect vim (NONEが候補にでる):
+  highlight Ayapi NONE
+================================================================
+Given vim (highlight文でグループ名かぃたぁと):
+  highlight Ayapi 
+Do:
+  i\<End>t\<CR>
+Expect vim (term=が候補にでる):
+  highlight Ayapi term=
+================================================================
+Given vim (highlight文でグループに属性設定の引数名をかぃたぁと):
+  highlight Ayapi cterm=
+Do:
+  i\<End>N\<CR>
+Expect vim (NONEが候補にでる):
+  highlight Ayapi cterm=NONE
+================================================================
+Given vim (highlight文でグループに属性設定の値にNONEをかぃたぁと):
+  highlight Ayapi cterm=NONE
+Do (カンマをかぃても):
+  i\<End>,\<CR>
+Expect vim (候補になにもでなぃ):
+  highlight Ayapi cterm=NONE,
+  
+================================================================
+Given vim (highlight文でグループに属性設定の値にNONEじゃなぃのをかぃたぁと):
+  highlight Ayapi cterm=bold
+Do (カンマをかくと):
+  i\<End>,\<CR>
+Expect vim (値の候補がでる):
+  highlight Ayapi cterm=bold,underline
+================================================================
+Given vim (highlight文でグループに属性設定の値にboldをかぃたぁと):
+  highlight Ayapi cterm=bold
+Do (カンマをかぃても):
+  i\<End>,bo\<CR>
+Expect vim (boldの候補ゎでなぃ):
+  highlight Ayapi cterm=bold,bo
+  
+================================================================
+Given vim (highlight文でグループに属性設定の値にboldをかぃたぁと):
+  highlight Ayapi cterm=bold
+Do (カンマをかぃても):
+  i\<End>,No\<CR>
+Expect vim (NONEの候補ゎでなぃ):
+  highlight Ayapi cterm=bold,No
+  
+================================================================
+Given vim (highlight文でもぅ引数をかぃたぁと):
+  highlight Ayapi font=ayapi
+Do (続けて引数をかこーとすると):
+  i\<End>\<Space>\<CR>
+Expect vim (引数の名前の候補がでる):
+  highlight Ayapi font=ayapi term=
+================================================================
+Given vim (highlight文でもぅ引数をかぃたぁと):
+  highlight Ayapi font=ayapi
+Do (続けて引数をかこーとすると):
+  i\<End>\<Space>fo\<CR>
+Expect vim (前にかぃた引数の名前の候補ゎでなぃ):
+  highlight Ayapi font=ayapi fo
+  
