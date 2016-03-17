@@ -499,7 +499,7 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
     endif
     if index(args, 'ccomment') >= 0
       let l:comment_groups = filter(
-            \ s:get_local_syntax_groups(),
+            \ s:get_syntax_groups(),
             \ 'v:val.word =~ "Comment"'
             \ )
       return l:comment_groups + s:filter_already_used_args(l:line_cmds, args[2:])
@@ -535,7 +535,7 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
   endif
   if i == 2
     if index(['keyword', 'match', 'region'], subcmd) >= 0 "{{{
-      return s:get_local_syntax_groups() "}}}
+      return s:get_syntax_groups() "}}}
     elseif subcmd == 'cluster' "{{{
       return s:get_local_syntax_clusters() "}}}
     elseif subcmd == 'case' "{{{
@@ -557,7 +557,7 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
     endif "}}}
   endif
   if subcmd == 'clear'
-    return s:get_local_syntax_groups() + s:get_local_syntax_clusters('@')
+    return s:get_syntax_groups() + s:get_local_syntax_clusters('@')
   elseif index(['keyword', 'match', 'region', 'cluster'], subcmd) >= 0
     let l:grp_ptn = '\(matchgroup\|contains\|containedin\|nextgroup\|add\|remove\)='
     let l:key_arg = ''
@@ -601,7 +601,7 @@ function! necovim#helper#syntax_args(cur_text, complete_str) abort "{{{
               \ ]"}}}
       endif
       return l:candidates
-            \ + s:get_local_syntax_groups()
+            \ + s:get_syntax_groups()
             \ + s:get_local_syntax_clusters('@')
     endif
     if subcmd == 'cluster'
@@ -774,13 +774,40 @@ function! s:filter_already_used_args(candidates, prev_args) abort "{{{
   return filter(a:candidates,
         \ 'match(a:prev_args, "^" . v:val.word) < 0')
 endfunction "}}}
-function! s:get_local_syntax_groups() abort "{{{
-  let l:grps = []
-  let l:lines = join(getline(1, '$'), "\n")
+function! s:get_syntax_groups() abort
+  return s:get_syntax_groups_include_recurse(join(getline(1, '$'), "\n"))
+endfunction
+function! s:get_syntax_groups_include_recurse(content) abort "{{{
+  let l:candidates = s:get_syntax_groups_from_content(a:content)
+  let l:already_read_runtime_files = []
   let l:count = 1
   while 1
-    let l:grp = matchstr(l:lines,
-          \ 'sy\%[ntax]\s\+\%(keyword\|match\|region\)\s\+\zs\w\+\ze',
+    let l:file = matchstr(a:content,
+          \ 'sy\%[ntax]\s\+include\s\+@*\k\+\s\+\zs.\{-}\ze\n',
+          \ 0,
+          \ l:count)
+    if l:file == ''
+      break
+    endif
+    let l:runtime_files = globpath(&runtimepath, l:file, 0, 1, 1)
+    for l:runtime_file in l:runtime_files
+      if index(l:already_read_runtime_files, l:runtime_file) >= 0
+        continue
+      endif
+      let l:content = join(readfile(l:runtime_file, 'b'), "\n")
+      let l:candidates += s:get_syntax_groups_include_recurse(l:content)
+      call add(l:already_read_runtime_files, l:runtime_file)
+    endfor
+    let l:count += 1
+  endwhile
+  return l:candidates
+endfunction "}}}
+function! s:get_syntax_groups_from_content(content) abort "{{{
+  let l:grps = []
+  let l:count = 1
+  while 1
+    let l:grp = matchstr(a:content,
+          \ 'sy\%[ntax]\s\+\%(keyword\|match\|region\)\s\+\zs\k\+\ze\s',
           \ 0,
           \ l:count)
     if l:grp == ''
