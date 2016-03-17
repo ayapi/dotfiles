@@ -1,0 +1,56 @@
+================================================================
+Given vim (autocmdをかぃたぁと):
+  autocmd
+Do:
+  i\<End>\<Space>\<CR>,F\<CR>
+Expect vim (autocmdの候補がでる):
+  autocmd BufNewFile,FileReadPre
+================================================================
+Given vim (autocmdでaugroupをかぃたぁと):
+  autocmd grpname
+Do:
+  i\<End>\<Space>\<CR>,F\<CR>
+Expect vim (イベント名の候補がでる):
+  autocmd grpname BufNewFile,FileReadPre
+================================================================
+Given vim (autocmdでaugroupなしでパターンかぃたぁと):
+  autocmd BufNewFile *
+Do:
+  i\<End>\<Space>nes\<CR>
+Expect vim (nestedの候補がでる):
+  autocmd BufNewFile * nested
+================================================================
+Given vim (autocmdでaugroupぁりでパターンかぃたぁと):
+  autocmd grpname BufNewFile *
+Do:
+  i\<End>\<Space>nes\<CR>
+Expect vim (nestedの候補がでる):
+  autocmd grpname BufNewFile * nested
+================================================================
+Given vim (autocmdでaugroupなしでパターンかぃたぁと):
+  autocmd BufNewFile *
+Do:
+  i\<End>\<Space>se\<CR>\<Space>\<CR>
+Expect vim (コマンドの候補がでる):
+  autocmd BufNewFile * set aleph
+================================================================
+Given vim (autocmdでaugroupぁりでパターンかぃたぁと):
+  autocmd grpname BufNewFile *
+Do:
+  i\<End>\<Space>se\<CR>\<Space>\<CR>
+Expect vim (コマンドの候補がでる):
+  autocmd grpname BufNewFile * set aleph
+================================================================
+Given vim (autocmdでaugroupなしでnestedかぃたぁと):
+  autocmd BufNewFile * nested
+Do:
+  i\<End>\<Space>se\<CR>\<Space>\<CR>
+Expect vim (コマンドの候補がでる):
+  autocmd BufNewFile * nested set aleph
+================================================================
+Given vim (autocmdでaugroupぁりでnestedかぃたぁと):
+  autocmd grpname BufNewFile * nested
+Do:
+  i\<End>\<Space>se\<CR>\<Space>\<CR>
+Expect vim (コマンドの候補がでる):
+  autocmd grpname BufNewFile * nested set aleph

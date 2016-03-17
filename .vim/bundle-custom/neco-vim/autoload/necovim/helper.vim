@@ -96,17 +96,25 @@ function! necovim#helper#autocmd_args(cur_text, complete_str) "{{{
   if !has_key(s:internal_candidates_list, 'autocmds')
     let s:internal_candidates_list.autocmds = s:make_cache_autocmds()
   endif
-
+  
   let args_count = len(args)
   let has_group = 0
   if args_count >= 3
-    let augroup_names = map(copy(s:get_augrouplist()), 'v:val.word')
-    if index(augroup_names, args[1]) >= 0
-      let args_count -= 1
-      let has_group = 1
+    if args[-1] == '' && args[-2] =~ ',$'
+      let args = args[0: -2]
+      let args_count = len(args)
+    endif
+  
+    let has_group = 1
+    let autocmd_names = map(copy(s:internal_candidates_list.autocmds), 'v:val.word')
+    if index(autocmd_names, substitute(args[1], ',.*$', '', '')) >= 0
+      let has_group = 0
     endif
   endif
-
+  if has_group
+    let args_count -= 1
+  endif
+  
   let list = []
   if args_count == 2
     let list += copy(s:internal_candidates_list.autocmds) +
@@ -119,11 +127,15 @@ function! necovim#helper#autocmd_args(cur_text, complete_str) "{{{
             \   a:cur_text, a:complete_str)
     endif
   else
-    let command = args[3] =~ '^*' ?
-          \ join(args[4:]) : join(args[3:])
+    let command = join(args[3 + has_group :], ' ')
+    if args_count >= 5 && args[3 + has_group] == 'nested'
+      let command = join(args[4 + has_group :], ' ')
+    endif
     let list += necovim#helper#command(
           \ command, a:complete_str)
-    let list += s:make_completion_list(['nested'])
+    if args_count == 4
+      let list += s:make_completion_list(['nested'])
+    endif
   endif
 
   return list
