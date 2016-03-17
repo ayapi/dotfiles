@@ -356,8 +356,6 @@ function! necovim#helper#option(cur_text, complete_str) "{{{
 
   if a:cur_text =~ '\<set\%[local]\s\+\%(filetype\|ft\)='
     return necovim#helper#filetype(a:cur_text, a:complete_str)
-  elseif a:cur_text =~ '\<set\%[local]\s\+.\+='
-    return necovim#helper#expression(a:cur_text, a:complete_str)
   else
     return copy(s:internal_candidates_list.options)
   endif
