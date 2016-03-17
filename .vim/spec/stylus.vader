@@ -35,8 +35,15 @@ Given stylus (input要素でtype属性かぃたとき):
   input[type
 Do (attribute value selectorかこーとすると):
   i\<End>=\<CR>
-Expect stylus (属性の値の候補がでる):
-  input[type=text
+Expect stylus (属性の値の候補がクオートっきででる):
+  input[type='text'
+================================================================
+Given stylus (input要素でtype属性かぃたとき):
+  input[type
+Do (attribute value selectorのクオートをかくと):
+  i\<End>="\<CR>
+Expect stylus (属性の値の候補がクオートなしででる):
+  input[type="text
 ================================================================
 Given stylus (attribute selectorをもぅかぃてるとき):
   input[type=text]
@@ -49,8 +56,15 @@ Given stylus (2っめのattribute selectorの名前をかぃたとき):
   input[name=name][type
 Do (atribute value selectorかこーとすると):
   i\<End>=\<CR>
-Expect stylus (2っめのattribute selectorに対応した属性の値の候補がでる):
-  input[name=name][type=text
+Expect stylus (2っめのattribute selectorに対応した属性の値の候補がクオートっきででる):
+  input[name=name][type='text'
+================================================================
+Given stylus (2っめのattribute selectorの名前をかぃたとき):
+  input[name=name][type
+Do (atribute value selectorのクオートをかくと):
+  i\<End>="\<CR>
+Expect stylus (2っめのattribute selectorに対応した属性の値の候補がクオートっきででる):
+  input[name=name][type="text
 ================================================================
 Given stylus (input要素をかぃたとき):
   input
