@@ -12,21 +12,9 @@ function! VimScriptOmniComplete(findstart, base)
         \ [substitute(l:input, '^\s\+', "", "g") . a:base, a:base])
 
   if a:base == ""
-    return l:candidates
-  endif
-
-  let l:matches = []
-  for k in l:candidates
-    if strpart(k.word, 0, strlen(a:base)) ==# a:base
-      call add(l:matches, k)
-    endif
-  endfor
-  
-  if len(l:matches) == 0
-    return l:candidates
-  endif
-
-  return l:matches
+		return l:candidates
+	endif
+	return MatchCandidates(l:candidates, a:base)
 endfunction
 
 setlocal omnifunc=VimScriptOmniComplete
