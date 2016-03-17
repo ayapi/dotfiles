@@ -44,6 +44,7 @@ Plug 'Shougo/neosnippet.vim'
 Plug 'Shougo/neco-vim',
       \ {'dir': '~/.vim/bundle-custom/neco-vim',
       \ 'frozen': 1, 'for': 'vim'}
+Plug 'Valodim/vim-zsh-completion'
 Plug 'dansomething/vim-eclim' , {'for': g:eclim_filetypes}
 Plug 'ternjs/tern_for_vim',
       \ {'do': 'npm install', 'for': 'javascript'}
@@ -307,7 +308,9 @@ function! MixComplete(findstart, base)
 
   let l:matches = []
   let l:omni_matches = call(&omnifunc, [0, a:base])
-  if type(l:omni_matches) == 3
+  if type(l:omni_matches) == type({}) && has_key(l:omni_matches, 'words')
+    let l:matches += l:omni_matches.words
+  elseif type(l:omni_matches) == type([])
     let l:matches += l:omni_matches
   endif
 
