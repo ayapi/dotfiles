@@ -18,6 +18,9 @@ setopt rcquotes
     echo 'error initializing.' >&2
     exit 2
 } =( <<< '
+source "${ZDOTDIR:-${HOME}}/.zim/modules/completion/init.zsh"
+fpath=( "$HOME/.zfunctions" $fpath )
+
 # no prompt!
 PROMPT=
 
@@ -43,6 +46,8 @@ zstyle '':completion:*'' list-grouped false
 zstyle '':completion:*'' insert-tab false
 # no list separator, this saves some stripping later on
 zstyle '':completion:*'' list-separator ''''
+
+source "$HOME/.zcompcustom"
 
 # we use zparseopts
 zmodload zsh/zutil

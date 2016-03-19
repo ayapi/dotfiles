@@ -656,8 +656,4 @@ source ~/.zshrc.local
 autoload -U compinit
 compinit
 
-compdef -d rm
-
-__git_remote_repositories() {
-}
-
+source $HOME/.zcompcustom
