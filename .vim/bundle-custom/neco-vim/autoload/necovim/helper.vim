@@ -1126,7 +1126,7 @@ function! s:make_cache_options() "{{{
   let l:descriptions = {}
   let l:quickref_helpfiles = [
         \ expand(findfile('doc/quickref.txt', &runtimepath)),
-        \ expand("~/.vim/bundle/.neobundle/doc/quickref.jax")]
+        \ expand(findfile('doc/quickref.jax', &runtimepath)]
   for quickref_helpfile in l:quickref_helpfiles
     if !filereadable(quickref_helpfile)
       continue
@@ -1230,7 +1230,7 @@ endfunction"}}}
 function! s:make_cache_features() "{{{
   let features = []
   let helpfiles = [
-        \ expand("~/.vim/bundle/.neobundle/doc/eval.jax"),
+        \ expand(findfile('doc/eval.jax', &runtimepath)),
         \ expand(findfile('doc/eval.txt', &runtimepath))]
   for helpfile in helpfiles
     if !filereadable(helpfile)
@@ -1323,7 +1323,7 @@ function! s:make_cache_functions() "{{{
     endif
   endfor
 
-  let l:helpfile = expand("~/.vim/bundle/.neobundle/doc/eval.jax")
+  let l:helpfile = expand(findfile('doc/eval.jax', &runtimepath))
   if !filereadable(l:helpfile)
     return l:functions
   endif
@@ -1387,7 +1387,7 @@ endfunction"}}}
 function! s:make_cache_commands() "{{{
   let helpfiles = [
         \ expand(findfile('doc/index.txt', &runtimepath)),
-        \ expand("~/.vim/bundle/.neobundle/doc/index.jax")]
+        \ expand(findfile('doc/index.jax', &runtimepath))]
   for helpfile in helpfiles
     if !filereadable(helpfile)
       continue
@@ -1415,7 +1415,7 @@ endfunction"}}}
 function! s:make_cache_autocmds() "{{{
   let helpfiles = [
         \ expand(findfile('doc/autocmd.txt', &runtimepath)),
-        \ expand("~/.vim/bundle/.neobundle/doc/autocmd.jax")]
+        \ expand(findfile('doc/autocmd.jax', &runtimepath))]
   for helpfile in helpfiles
     if !filereadable(helpfile)
       continue
@@ -1536,7 +1536,7 @@ endfunction"}}}
 function! s:make_cache_vimvariables() "{{{
   let helpfiles = [
         \ expand(findfile('doc/eval.txt', &runtimepath)),
-        \ expand("~/.vim/bundle/.neobundle/doc/eval.jax")]
+        \ expand(findfile('doc/eval.jax', &runtimepath))]
   for helpfile in helpfiles
     if !filereadable(helpfile)
       continue
