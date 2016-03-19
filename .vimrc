@@ -44,7 +44,9 @@ Plug 'Shougo/neosnippet.vim'
 Plug 'Shougo/neco-vim',
       \ {'dir': '~/.vim/bundle-custom/neco-vim',
       \ 'frozen': 1, 'for': 'vim'}
-Plug 'Valodim/vim-zsh-completion'
+Plug 'Valodim/vim-zsh-completion',
+      \ {'dir': '~/.vim/bundle-custom/vim-zsh-completion',
+      \ 'frozen': 1, 'for': 'zsh'}
 Plug 'dansomething/vim-eclim' , {'for': g:eclim_filetypes}
 Plug 'ternjs/tern_for_vim',
       \ {'do': 'npm install', 'for': 'javascript'}
