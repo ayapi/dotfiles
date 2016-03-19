@@ -71,13 +71,13 @@ function! s:gather_candidates() abort
     let l:pieces = split(l:current_bracket_inner, '=', 1)
     
     if len(l:pieces) == 2
-			let l:attr_values = g:html_candidates.getAttributeValues(
-						\ matchstr(l:pieces[0], '^[a-zA-Z-]\+'),
-						\ l:maybe_element)
+      let l:attr_values = g:html_candidates.getAttributeValues(
+            \ matchstr(l:pieces[0], '^[a-zA-Z-]\+'),
+            \ l:maybe_element)
       if l:pieces[1] =~ '^["'']'
-				return l:attr_values
-			endif
-			return map(l:attr_values, '"''" . v:val . "''"')
+        return l:attr_values
+      endif
+      return map(l:attr_values, '"''" . v:val . "''"')
     else
       return g:html_candidates.getAttributeNames(l:maybe_element)
     endif
