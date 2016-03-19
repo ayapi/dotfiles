@@ -2,6 +2,6 @@
 " Maintainer: Valodim Skywalker <valodim@mugenguild.com>
 " Last Updated: 03 Oct 2013
 
-set omnifunc=zsh_completion#Complete
+setlocal omnifunc=zsh_completion#Complete
 
 " vim: set et ts=4:
