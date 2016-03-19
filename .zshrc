@@ -463,7 +463,7 @@ source /etc/profile.d/fzf.zsh
 # ref. https://github.com/junegunn/fzf/issues/337
 fzf-file-include-hidden-widget() {
   local selected
-  selected=( $(ag --hidden --ignore .git -l 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
+  selected=( $(ag --path-to-agignore=~/.agignore --hidden -u --skip-vcs-ignores --silent -l 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
   LBUFFER="${LBUFFER}$selected"
   zle redisplay
 }
@@ -471,7 +471,7 @@ zle -N fzf-file-include-hidden-widget
 
 fzf-file-from-root-include-hidden-widget() {
   local selected
-  selected=( $(ag --hidden --ignore .git -l '^(?=.)' / 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
+  selected=( $(ag --path-to-agignore=~/.agignore --hidden -u --skip-vcs-ignores .git -l '^(?=.)' / 2> /dev/null | fzf -q "${LBUFFER//$/\\$}") )
   LBUFFER="${LBUFFER}$selected"
   zle redisplay
 }
