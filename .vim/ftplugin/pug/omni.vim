@@ -6,6 +6,7 @@ function! CompleteJade(findstart, base)
   let l:cnum = col('.')
   
   if a:findstart
+    let b:jade_completion_cache = {}
     let l:synstack = g:omniutil.getSyntaxStack(l:lnum, l:cnum - 1)
     if !empty(l:synstack)
       if l:synstack[0] =~ 'pugStylus\(Block\|Filter\)'
@@ -98,6 +99,7 @@ function! CompleteJade(findstart, base)
 
   let l:candidates = s:gatherCandidates(b:jade_completion_info)
   unlet! b:jade_completion_info
+  unlet! b:jade_completion_cache
   
   " echomsg string(l:candidates)
   " echomsg a:base
@@ -252,10 +254,13 @@ function! s:getAttributeNames(lnum, cnum) abort"{{{
   return l:attrs
 endfunction"}}}
 function! s:getAncestors(lnum, cnum) abort"{{{
+  if has_key(b:jade_completion_cache, 'ancestors')
+    return b:jade_completion_cache.ancestors
+  endif
   let l:lnum = a:lnum
   let l:cnum = a:cnum
   let l:indent = indent(l:lnum) + 1
-  let l:ascentors = []
+  let l:ancestors = []
   
   while l:lnum > 0
     let l:current_indent = indent(l:lnum)
@@ -277,13 +282,13 @@ function! s:getAncestors(lnum, cnum) abort"{{{
             " mixin
             let l:mixin_block_lnum = s:findMixinBlock(l:name[1:], l:lnum)
             if l:mixin_block_lnum >= 0
-              let l:ascentors += s:getAncestors(
+              let l:ancestors += s:getAncestors(
                     \ l:mixin_block_lnum - 1,
                     \ getline(l:mixin_block_lnum - 1) - 1
                     \ )
             endif
           endif
-          call add(l:ascentors, l:name)
+          call add(l:ancestors, l:name)
           let l:name = ''
         endif
         let l:cnum -= 1
@@ -292,7 +297,9 @@ function! s:getAncestors(lnum, cnum) abort"{{{
     endif
     let l:lnum = g:omniutil.getPrevLnum(l:lnum)
   endwhile
-  return map(l:ascentors, 'substitute(v:val, "[#\\.].\\+$", "", "g")')
+  call map(l:ancestors, 'substitute(v:val, "[#\\.].\\+$", "", "g")')
+  let b:jade_completion_cache.ancestors = l:ancestors
+  return l:ancestors
 endfunction"}}}
 function! s:getAncestorElements(lnum, cnum) abort"{{{
   let l:ancestors = s:getAncestors(a:lnum, a:cnum)
