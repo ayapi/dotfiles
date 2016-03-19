@@ -264,11 +264,12 @@ function! s:getAncestors(lnum, cnum) abort"{{{
   
   while l:lnum > 0
     let l:current_indent = indent(l:lnum)
+    let l:first_non_white_cnum = g:omniutil.getFirstNonWhiteCnum(l:lnum)
     if l:current_indent < l:indent
+          \ && !g:omniutil.isComment(l:lnum, l:first_non_white_cnum)
       let l:name = ''
       let l:line = getline(l:lnum)
       let l:cnum = len(l:line)
-      let l:first_non_white_cnum = g:omniutil.getFirstNonWhiteCnum(l:lnum)
       while l:cnum >= l:first_non_white_cnum
         let l:char = l:line[l:cnum - 1]
         if l:char !~ '\s' && g:omniutil.is(
@@ -295,7 +296,7 @@ function! s:getAncestors(lnum, cnum) abort"{{{
       endwhile
       let l:indent = l:current_indent
     endif
-    let l:lnum = g:omniutil.getPrevLnum(l:lnum)
+    let l:lnum = prevnonblank(l:lnum - 1)
   endwhile
   call map(l:ancestors, 'substitute(v:val, "[#\\.].\\+$", "", "g")')
   let b:jade_completion_cache.ancestors = l:ancestors

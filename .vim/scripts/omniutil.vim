@@ -33,7 +33,7 @@ function! g:omniutil.getSyntaxStack(lnum, ...) abort "{{{
 endfunction "}}}
 function! g:omniutil.getFirstNonWhiteCnum(lnum) abort "{{{
   let l:line = getline(a:lnum)
-  return match(l:line, '[^ \t]')
+  return match(l:line, '\S')
 endfunction "}}}
 function! g:omniutil.isComment(lnum, ...) abort "{{{
   return call(self.is, ['Comment', a:lnum] + a:000, self)
