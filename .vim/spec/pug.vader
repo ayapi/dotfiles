@@ -126,3 +126,26 @@ Expect pug (css propertyの候補ゎでなぃ):
       display: block
   dis
   
+================================================================
+Given pug (id名を持っ要素をかぃてからstylus filterブロックにぃるとき):
+  #idname.klassname
+  :stylus
+    
+Do:
+  i\<PageDown>\<End>#idn\<CR>
+Expect pug (id名の候補がでる):
+  #idname.klassname
+  :stylus
+    #idname
+================================================================
+Given pug (class名を持っ要素をかぃてからstylus filterブロックにぃるとき):
+  #idname.klassname
+  :stylus
+    
+Do:
+  i\<PageDown>\<End>.k\<CR>
+Expect pug (class名の候補がでる):
+  #idname.klassname
+  :stylus
+    .klassname
+================================================================

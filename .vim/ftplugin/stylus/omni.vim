@@ -113,6 +113,16 @@ function! s:gather_candidates() abort
       return s:get_ids_and_classes_from_visible_buffers()
             \ + g:html_candidates.getElementNames()
             \ + copy(s:prop_names)
+    elseif l:line =~ '#$' "id selector
+      let l:candidates = s:get_ids_and_classes_from_visible_buffers()
+      call filter(l:candidates, 'v:val =~ "^#"')
+      call map(l:candidates, 'v:val[1:]')
+      return l:candidates
+    elseif l:line =~ '\.$' "class selector
+      let l:candidates = s:get_ids_and_classes_from_visible_buffers()
+      call filter(l:candidates, 'v:val =~ "^\\."')
+      call map(l:candidates, 'v:val[1:]')
+      return l:candidates
     elseif l:line =~ '[+>]\S*$'
       return g:html_candidates.getElementNames()
     else
@@ -214,7 +224,7 @@ function! s:get_ids_and_classes_from_visible_buffers() abort
   for l:win_nr in range(1, winnr('$'))
     let l:buf_nr = winbufnr(l:win_nr)
     let l:buf_name = bufname(l:buf_nr)
-    if l:buf_name !~ '\.jade$'
+    if getbufvar(l:buf_nr, '&filetype', '') != 'pug'
       continue
     endif
     let l:list += GetIdsAndClassesFromJade(
