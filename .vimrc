@@ -641,31 +641,23 @@ inoremap <silent><expr><Tab> pumvisible()
       \ ? "\<C-y>\<C-r>=ExpandSnip()\<CR>"
       \ : "\<C-r>=JumpSnipOrTab()\<CR>"
 
-function! IndentOrJump() range abort
-  " <C-v> normal-mode -> visual-mode
-  " gv    restore selection
-  " <C-g> visual-mode -> select-mode
-  execute "normal! \<C-v>gv\<C-g>"
-  
-  if a:firstline != a:lastline
-    " multi-line selection, indent
-    " <C-v> normal-mode -> visual-mode
-    " V     visual-mode -> visual-line-mode
-    " >     right-shift
-    " gv    restore selection
-    " <C-g> visual-line-mode -> select-line-mode
-    execute "normal! \<C-v>V>gv\<C-g>"
-  else
-    call JumpSnipOrTab()
-  endif
-endfunction
-
-" [indent selection lines || jump tabstop from placeholder selection]
-snoremap <silent><Tab> <C-g>:call IndentOrJump()<CR>
+" [indent selection lines]
+" <C-g>      select-mode -> visual-mode
+" <Esc>      visual-mode -> normal-mode
+" `<         move cursor to first char in last selection
+" g^         move cursor to first visible char on current line
+" v          start visual selection
+" `>         move cursor to last char in last selection
+" >          right shift selection
+" `<g^v`>    to follow selection, repeat once again
+" "=&sw<CR>l move cursor one 'shiftwidth' rightwards
+" o          move cursor to first char in current selection
+" <C-g>      visual-mode -> select-mode
+snoremap <silent> <Tab> <C-g><Esc>`<g^v`>>`<g^v`>"=&sw<CR>lo<C-g>
 
 " [deindent selection lines]
-snoremap <silent> <S-tab> <C-v>V<gv<C-g>
-inoremap <silent> <S-tab> <C-o><<<C-g>u
+snoremap <silent> <S-tab> <C-g><Esc>`<g^v`><`<g^v`>"=&sw<CR>ho<C-g>
+inoremap <silent> <S-tab> <C-o>g^<C-o><<<C-g>u
 
 
 " <Esc> ---------------------------
