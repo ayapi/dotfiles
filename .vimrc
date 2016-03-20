@@ -914,10 +914,10 @@ snoremap <silent> <S-End> <C-g>:call GoEnd("gvg$")<CR><C-g>
 " when leaving select-mode
 snoremap <silent> <Down> <Esc>gj
 snoremap <silent> <Up> <Esc>gk
-snoremap <silent><expr> <Home> "\<C-G>v".GetGoHomeCmd()
-snoremap <silent> <End> <C-g>v:call GoEnd("g$")<CR>
-snoremap <silent><expr> <kHome> "\<C-G>v".GetGoHomeCmd()
-snoremap <silent> <kEnd> <C-g>v:call GoEnd("g$")<CR>
+snoremap <silent><expr> <Home> "\<C-G>v`<".GetGoHomeCmd()
+snoremap <silent> <End> <C-g>v:call GoEnd("`>g$")<CR>
+snoremap <silent><expr> <kHome> "\<C-G>v`<".GetGoHomeCmd()
+snoremap <silent> <kEnd> <C-g>v:call GoEnd("`>g$")<CR>
 
 " [scroll page up/down]
 " on 1st page, <PageUp> should move cursor to 1st line.
