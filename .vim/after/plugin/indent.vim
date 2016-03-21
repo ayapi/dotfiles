@@ -21,6 +21,8 @@ let s:indent_fallback = {
       \ 'jade': 2,
       \ 'stylus': 2,
       \ 'python': 4,
+      \ 'php': 4,
+      \ 'blade': 4,
       \ 'java': 4,
       \ 'zsh': 2,
       \ 'vader': 2
