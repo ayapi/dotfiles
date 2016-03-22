@@ -18,7 +18,8 @@ fun! zsh_completion#Complete(findstart, base)
         " get below is just '0'. I don't know why, it just does. So I'm saving
         " it here myself as a workaround. If anyone knows how to fix this or
         " what I'm doing wrong, I'd be happy to hear it.
-        let s:base = l:line[l:pos :]
+        let s:base = l:line[l:pos : col('.') - 1]
+        let s:line = substitute(l:line[: l:pos - 1], '^\s*', '', '')
 
         return l:pos
     else
@@ -27,10 +28,13 @@ fun! zsh_completion#Complete(findstart, base)
         if len(l:srcfile) == 0
             return -1
         endif
-
-        let s:out = system(l:srcfile . ' ' . shellescape(getline(".") . s:base) . ' ' . (col('.')+strlen(s:base)-1))
+    
+        let l:cmd = [l:srcfile,
+                \ shellescape(s:line . s:base),
+                \ strlen(s:line . s:base) - 1]
+        let l:out = system(join(l:cmd, ' '))
         let l:result = []
-        for item in split(s:out, '\r\n')
+        for item in split(l:out, '\r\n')
             let l:pieces = split(item, ' -- ')
             if len(l:pieces) > 1
                 call add(l:result, { 'word': l:pieces[0], 'menu': l:pieces[1] })
