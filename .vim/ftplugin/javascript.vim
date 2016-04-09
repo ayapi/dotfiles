@@ -1,4 +1,5 @@
 "let tern#is_show_argument_hints_enabled=1
+let g:tern_request_timeout = 30
 
 setlocal iskeyword-=.
 setlocal dictionary=~/.vim/dicts/javascript.dict
