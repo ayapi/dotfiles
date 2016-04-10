@@ -491,8 +491,24 @@ fzf-file-from-root-include-hidden-widget() {
 }
 zle -N fzf-file-from-root-include-hidden-widget
 
+fzf-file-git-untracked-and-unstaged() {
+  local selected
+  local char=${LBUFFER[$#LBUFFER]}
+  local query=""
+  local lbuffer="${LBUFFER}"
+  if [ "$char" != " " ]; then
+    query=${${(z)lbuffer}[-1]}
+    lbuffer=${LBUFFER[1,($#LBUFFER - $#query)]}
+  fi
+  selected=( $({git ls-files --modified --exclude-standard; git ls-files --others --exclude-standard} | fzf -q "$query") )
+  LBUFFER="$lbuffer$selected"
+  zle redisplay
+}
+zle -N fzf-file-git-untracked-and-unstaged
+
 bindkey '^F' fzf-file-include-hidden-widget
 bindkey '^_' fzf-file-from-root-include-hidden-widget
+bindkey '^U' fzf-file-git-untracked-and-unstaged
 bindkey '^D' fzf-cd-widget
 bindkey '^R' fzf-history-widget
 
