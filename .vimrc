@@ -658,7 +658,7 @@ inoremap <silent><expr><Tab> pumvisible()
 
 " [indent selection lines]
 " <C-g>      select-mode -> visual-mode
-" <Esc>      visual-mode -> normal-mode
+" v          visual-mode -> normal-mode
 " `<         move cursor to first char in last selection
 " g^         move cursor to first visible char on current line
 " v          start visual selection
@@ -668,7 +668,9 @@ inoremap <silent><expr><Tab> pumvisible()
 " "=&sw<CR>l move cursor one 'shiftwidth' rightwards
 " o          move cursor to first char in current selection
 " <C-g>      visual-mode -> select-mode
-snoremap <silent> <Tab> <C-g><Esc>`<g^v`>>`<g^v`>"=&sw<CR>lo<C-g>
+smap <silent><expr> <Tab> neosnippet#jumpable()
+      \ ? "\<Plug>(neosnippet_jump)"
+      \ : "\<C-g>v`<g^v`>>`<g^v`>\"=&sw\<CR>lo\<C-g>"
 
 " [deindent selection lines]
 snoremap <silent> <S-tab> <C-g><Esc>`<g^v`><`<g^v`>"=&sw<CR>ho<C-g>
@@ -1276,9 +1278,7 @@ function! JumpToLine()
   execute "normal! ".lineno."G"
 endfunction
 
-noremap  <C-g> <C-c>:call JumpToLine()<CR>
 inoremap <C-g> <C-o>:call JumpToLine()<CR>
-snoremap <C-g> <C-g>v:call JumpToLine()<CR>
 nnoremap <C-g> :call JumpToLine()<CR>
 
 " toggle gutter
