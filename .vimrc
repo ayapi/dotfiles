@@ -492,6 +492,32 @@ augroup vertguide
   endif
 augroup END
 
+
+" -------------------------------------
+" Line Color Change on Loclist/Quickfix
+" -------------------------------------
+
+function! ToggleLineColor() abort
+  if &buftype == 'quickfix'
+    for l:nr in range(winnr('$'))
+      call setwinvar(l:nr, "&cursorline", 0)
+    endfor
+    highlight cursorline ctermbg=237 guibg=#3a3a3a
+    setlocal cursorline
+  else
+    highlight cursorline ctermbg=none guibg=NONE
+    for l:nr in range(winnr('$'))
+      call setwinvar(l:nr, "&cursorline", 1)
+    endfor
+  endif
+endfunction
+
+augroup linecolor
+  autocmd!
+  autocmd BufReadPost,BufNewFile,BufEnter * call ToggleLineColor()
+augroup END
+
+
 " ------------------------------------
 " Neovim remote
 " ------------------------------------
