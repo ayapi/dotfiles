@@ -374,6 +374,21 @@ function! EclimComplete(findstart, base)
   
   if eclim#PingEclim(0) && index(g:eclim_filetypes, &filetype) >= 0
     let l:compfunc='eclim#' . &filetype . '#complete#CodeComplete'
+    
+    " cancel completion before eclim gathers global candidates
+    " cuz its very slow
+    if &filetype == 'php'
+      let l:pattern = '\%(new\s\+\|\s\+\\\)$'
+      if a:findstart
+        if getline('.')[0: col('.') - 2] =~ l:pattern
+          return -1
+        endif
+      else
+        if getline('.') . a:base =~ l:pattern
+          return []
+        endif
+      endif
+    endif
   endif
   return call(l:compfunc, [a:findstart, a:base])
 endfunction
