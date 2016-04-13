@@ -361,23 +361,29 @@ augroup setomniafterfiletype
   autocmd!
   autocmd FileType stylus setlocal omnifunc=CompleteStylus
   autocmd FileType pug setlocal omnifunc=CompleteJade
+  autocmd FileType blade setlocal omnifunc=CompleteBlade
 augroup END
 
 let g:EclimCompletionMethod = 'omnifunc'
 let g:EclimProjectProblemsUpdateOnSave = 1
 function! EclimComplete(findstart, base)
-  if &filetype == 'php'
+  let l:filetype = &filetype
+  if l:filetype == 'blade'
+    let l:filetype = 'php'
+  endif
+  
+  if l:filetype == 'php'
     let l:compfunc='phpcomplete#CompletePHP'
   else
     let l:compfunc = 'syntaxcomplete#Complete'
   endif
   
-  if eclim#PingEclim(0) && index(g:eclim_filetypes, &filetype) >= 0
-    let l:compfunc='eclim#' . &filetype . '#complete#CodeComplete'
+  if eclim#PingEclim(0) && index(g:eclim_filetypes, l:filetype) >= 0
+    let l:compfunc='eclim#' . l:filetype . '#complete#CodeComplete'
     
     " cancel completion before eclim gathers global candidates
     " cuz its very slow
-    if &filetype == 'php'
+    if l:filetype == 'php'
       let l:pattern = '\%(new\s\+\|\s\+\\\)$'
       if a:findstart
         if getline('.')[0: col('.') - 2] =~ l:pattern
@@ -427,7 +433,7 @@ augroup END
 set noautoindent
 augroup indentexpr
   autocmd!
-  autocmd FileType stylus,pug setlocal indentexpr=
+  autocmd FileType stylus,pug,blade setlocal indentexpr=
   autocmd FileType stylus setlocal autoindent
 augroup END
 
