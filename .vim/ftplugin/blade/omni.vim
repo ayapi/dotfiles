@@ -1,3 +1,5 @@
+runtime! ftplugin/php/expand.vim
+
 runtime! scripts/omniutil.vim
 let g:blade_comp = {}
 
