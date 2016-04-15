@@ -21,7 +21,7 @@ function! s:getCurrentPhpCode(lnum, cnum) abort
       let l:cnum = len(l:line) - 1
     endif
   endwhile
-  return substitute(l:php, '^{[{!]* ', '', '')
+  return substitute(l:php, '^{[{! -]*', '', '')
 endfunction
 
 function! s:findStartPhp() abort
@@ -108,7 +108,7 @@ function! CompleteBlade(findstart, base) abort
     endif
     
     if a:findstart
-      let b:phpcode = s:getCurrentPhpCode(l:lnum, l:cnum - 1)
+      let b:phpcode = s:getCurrentPhpCode(l:lnum, l:cnum - 2)
       return s:findStartPhp()
     endif
     
@@ -126,6 +126,10 @@ function! CompleteBlade(findstart, base) abort
     endif
     
     return call('htmlcomplete#CompleteTags', [a:findstart, a:base])
+  endif
+  
+  if g:omniutil.isComment(l:lnum, l:cnum - 1)
+    return []
   endif
     
   let l:candidates = []
