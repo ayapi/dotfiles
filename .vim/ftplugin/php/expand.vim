@@ -7,7 +7,8 @@ function! s:menu2Snip(argstxt) abort
   let l:argstxt = substitute(l:argstxt, '^.\{-}(\(.\{-}\)).*$', '\1', '')
   
   let l:args = split(l:argstxt, ',\s*')
-  return join(map(l:args, '"${" . (v:key + 1) . ":" . v:val ."}"'), ', ')
+  let l:snip = join(map(l:args, '"${" . (v:key + 1) . ":" . v:val ."}"'), ', ')
+  return substitute(l:snip, '|', '\\|', 'g')
 endfunction
 
 function! ExpandPhp() abort
