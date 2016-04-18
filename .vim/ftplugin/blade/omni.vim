@@ -9,7 +9,7 @@ function! s:getCurrentPhpCode(lnum, cnum) abort
   let l:line = getline(l:lnum)
   let l:cnum = a:cnum
   while 1
-    if !g:omniutil.is('blade\(Echo\|Php\)', l:lnum, l:cnum)
+    if !g:omniutil.is('blade\(Echo\|PhpParenBlock\)', l:lnum, l:cnum)
       break
     endif
     let l:php = l:line[l:cnum] . l:php
@@ -104,7 +104,7 @@ function! CompleteBlade(findstart, base) abort
   let l:lnum = line('.')
   let l:cnum = col('.')
   
-  if g:omniutil.is('blade\(Echo\|Php\)', l:lnum, l:cnum - 1)
+  if g:omniutil.is('blade\(Echo\|PhpParenBlock\)', l:lnum, l:cnum - 1)
     if !eclim#PingEclim(0)
       return call('EclimComplete', [a:findstart, a:base])
     endif
