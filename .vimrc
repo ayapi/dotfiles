@@ -384,7 +384,7 @@ function! EclimComplete(findstart, base)
     " cancel completion before eclim gathers global candidates
     " cuz its very slow
     if l:filetype == 'php'
-      let l:pattern = '\%(new\s\+\|\s\+\\\)$'
+      let l:pattern = '\%(new\s\+\|[^a-zA-Z0-9]\\\)$'
       if a:findstart
         if getline('.')[0: col('.') - 2] =~ l:pattern
           return -1
