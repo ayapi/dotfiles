@@ -457,7 +457,7 @@ export FZF_DEFAULT_OPTS="
 # followings are invalid. fzf cant handle these keys
 # ctrl-right:forward-word,ctrl-left:backward-word,ctrl-del:kill-word,ctrl-v:yank
 
-source /etc/profile.d/fzf.zsh
+source /etc/profile.d/fzf-extras.zsh
 
 # file search including hidden files(dotfiles)
 # ref. https://github.com/junegunn/fzf/issues/337
