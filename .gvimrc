@@ -1,6 +1,7 @@
 set background=dark
 colorscheme molokai
 source ~/.vim/highlight.vim
+highlight Normal guifg=white guibg=black
 
 highlight Cursor guifg=black guibg=white
 highlight iCursor guifg=white guibg=white
