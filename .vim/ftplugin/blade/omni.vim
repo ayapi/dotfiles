@@ -3,6 +3,64 @@ runtime! ftplugin/php/expand.vim
 runtime! scripts/omniutil.vim
 let g:blade_comp = {}
 
+function! s:getDirectives() abort
+  if !has_key(g:blade_comp, 'directives')
+    let l:dictfiles = globpath(&runtimepath, 'ftplugin/blade/directives.dict', 1)
+    if !empty(l:dictfiles)
+      let g:blade_comp.directives = readfile(l:dictfiles)
+    endif
+  endif
+  return copy(g:blade_comp.directives)
+endfunction
+
+function! s:getPairDirectiveNames() abort
+  if !has_key(g:blade_comp, 'pair_directive_names')
+    let l:directives = s:getDirectives()
+    let l:pair_directive_names = []
+    for l:directive in l:directives
+      if l:directive !~ '^@end'
+        continue
+      endif
+      let l:directive_name = substitute(l:directive, '@end\(.\+\)$', '\1', '')
+      call add(l:pair_directive_names, l:directive_name)
+    endfor
+    let g:blade_comp.pair_directive_names = l:pair_directive_names
+  endif
+  return copy(g:blade_comp.pair_directive_names)
+endfunction
+
+function! s:getCloseDirective() abort
+  let l:directive_names = s:getPairDirectiveNames()
+  let l:stack = []
+  let l:lnum = line('.')
+  let l:cnum = col('.') - 2
+  let l:lines = getline(1, l:lnum - 1)
+  let l:curline = getline(l:lnum)[: l:cnum]
+  call add(l:lines, l:curline)
+  let l:code = join(l:lines, "\n")
+  let l:i = 1
+  while 1
+    let l:directive = matchstr(l:code, '@[a-z]\+', 0, l:i)
+    if l:directive == ''
+      break
+    endif
+    let l:directive_name = substitute(l:directive, '^@', '', '')
+    if l:directive_name =~ 'end'
+      let l:idx = index(l:stack, substitute(l:directive_name, '^end', '', ''))
+      if l:idx >= 0
+        call remove(l:stack, l:idx)
+      endif
+    endif
+    if index(l:directive_names, l:directive_name) >= 0
+      call insert(l:stack, l:directive_name)
+    endif
+    let l:i += 1
+  endwhile
+  call uniq(l:stack)
+  call map(l:stack, '"@end" . v:val')
+  return l:stack
+endfunction
+
 function! s:getCurrentPhpCode(lnum, cnum) abort
   let l:php = ''
   let l:lnum = a:lnum
@@ -135,15 +193,10 @@ function! CompleteBlade(findstart, base) abort
   endif
     
   let l:candidates = []
-  if a:base =~ '^@'
-    if !has_key(g:blade_comp, 'directives')
-      let l:dictfiles = globpath(&runtimepath, 'ftplugin/blade/directives.dict', 1)
-      if !empty(l:dictfiles)
-        let g:blade_comp.directives = readfile(l:dictfiles)
-      endif
-    endif
-    
-    let l:candidates = g:blade_comp.directives
+  if a:base =~ '^@end'
+    let l:candidates = s:getCloseDirective()
+  elseif a:base =~ '^@'
+    let l:candidates = s:getDirectives()
   else
     return call('htmlcomplete#CompleteTags', [a:findstart, a:base])
   endif
