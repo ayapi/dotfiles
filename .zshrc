@@ -646,6 +646,8 @@ if which ghq > /dev/null 2>&1; then
   fpath=($GOPATH/src/github.com/motemen/ghq/zsh ${fpath})
 fi
 
+export PATH=$HOME/.phpenv/shims:$PATH
+eval "$(phpenv init - zsh)"
 export PATH=$HOME/.composer/vendor/bin:$PATH
 export ECLIPSE_HOME=/usr/lib/eclipse
 alias eclimd=$ECLIPSE_HOME/eclimd
