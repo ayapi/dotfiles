@@ -221,6 +221,9 @@ function! s:get_property_lookup(lnum) abort
 endfunction
 function! s:get_ids_and_classes_from_visible_buffers() abort
   let l:list = []
+  if !has('nvim')
+    return l:list
+  endif
   for l:win_nr in range(1, winnr('$'))
     let l:buf_nr = winbufnr(l:win_nr)
     let l:buf_name = bufname(l:buf_nr)
