@@ -12,7 +12,7 @@ if [[ -n "$VIM" ]]; then
   export TERM="mlterm-256color"
 fi
 
-export TERMINFO=~/.terminfo
+export TERMINFO=${ZDOTDIR:-${HOME}}/.terminfo
 
 ulimit -c unlimited
 stty -ixon -ixoff
@@ -25,11 +25,11 @@ alias zmv='noglob zmv -W'
 
 plugins=()
 
-eval $(dircolors ~/.dircolors)
+eval $(dircolors ${ZDOTDIR:-${HOME}}/.dircolors)
 zle_highlight=(region:bg=238 isearch:bg=065)
 
 autoload zkbd
-source ~/.zkbd/$TERM-:0.0 # may be different - check where zkbd saved yours
+source ${ZDOTDIR:-${HOME}}/.zkbd/$TERM-:0.0 # may be different - check where zkbd saved yours
 
 [[ -n ${key[Backspace]} ]] && bindkey "${key[Backspace]}" backward-delete-char
 [[ -n ${key[Insert]} ]] && bindkey "${key[Insert]}" overwrite-mode
@@ -193,14 +193,14 @@ zle -N shift-end
 zle -N shift-ctrl-left
 zle -N shift-ctrl-right
 
-bindkey "^[[1;2D" shift-left
-bindkey "^[[1;2C" shift-right
-bindkey "^[[1;2A" shift-up
-bindkey "^[[1;2B" shift-down
-bindkey "^[[1;2H" shift-home
-bindkey "^[[1;2F" shift-end
-bindkey "^[[1;6D" shift-ctrl-left
-bindkey "^[[1;6C" shift-ctrl-right
+bindkey "${key[ShiftLeft]}" shift-left
+bindkey "${key[ShiftRight]}" shift-right
+bindkey "${key[ShiftUp]}" shift-up
+bindkey "${key[ShiftDown]}" shift-down
+bindkey "${key[ShiftHome]}" shift-home
+bindkey "${key[ShiftEnd]}" shift-end
+bindkey "${key[ControlShiftLeft]}" shift-ctrl-left
+bindkey "${key[ControlShiftRight]}" shift-ctrl-right
 
 
 arrow() {
@@ -234,8 +234,8 @@ bindkey "${key[Up]}" k_up
 bindkey "${key[Down]}" k_down
 bindkey "${key[Home]}" k_home
 bindkey "${key[End]}" k_end
-bindkey "^[[1;5D" k_ctrl_left
-bindkey "^[[1;5C" k_ctrl_right
+bindkey "${key[ControlLeft]}" k_ctrl_left
+bindkey "${key[ControlRight]}" k_ctrl_right
 
 #beep for test
 # beeptest() {
@@ -298,7 +298,7 @@ ctrl-bs() {
   zle delete-region
 }
 zle -N ctrl-bs
-bindkey "^H" ctrl-bs
+bindkey "${key[ControlBackspace]}" ctrl-bs
 
 # <C-Del>
 ctrl-del() {
@@ -307,7 +307,7 @@ ctrl-del() {
   zle delete-region
 }
 zle -N ctrl-del
-bindkey "^[[3;5~" ctrl-del
+bindkey "${key[ControlDelete]}" ctrl-del
 bindkey "^[[3^" ctrl-del
 
 # copy/paste
@@ -457,8 +457,13 @@ export FZF_DEFAULT_OPTS="
 # followings are invalid. fzf cant handle these keys
 # ctrl-right:forward-word,ctrl-left:backward-word,ctrl-del:kill-word,ctrl-v:yank
 
-source /usr/share/fzf/key-bindings.zsh
-source /etc/profile.d/fzf-extras.zsh
+if [[ -s "/usr/share/fzf/key-bindings.zsh" ]]; then
+  source /usr/share/fzf/key-bindings.zsh
+fi
+
+if [[ -s "/etc/profile.d/fzf-extras.zsh" ]]; then
+  source /etc/profile.d/fzf-extras.zsh
+fi
 
 # file search including hidden files(dotfiles)
 # ref. https://github.com/junegunn/fzf/issues/337
@@ -582,9 +587,13 @@ add-zsh-hook preexec uim_off
 
 alias keycode="xev | awk -F'[ )]+' '/^KeyPress/ { a[NR+2] } NR in a { printf \"%-3s %s\n\", \$5, \$8 }'"
 alias ls='ls -a --group-directories-first --color=auto'
-alias vim='/usr/bin/nvim'
-alias ovim='/usr/bin/vim'
-alias vimdiff='nvim -d'
+
+if which nvim > /dev/null 2>&1; then
+  alias vim='/usr/bin/nvim'
+  alias ovim='/usr/bin/vim'
+  alias vimdiff='nvim -d'
+fi
+
 
 # aliases from prezto utility (some arranged by ayapi)
 
@@ -632,7 +641,9 @@ alias du='du -kh'
 
 alias ag='ag --path-to-agignore=~/.agignore --hidden --silent'
 
-export NVM_DIR="/home/ayapi/.nvm"
+if [ -z "$NVM_DIR" ]; then
+  export NVM_DIR="$HOME/.nvm"
+fi
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
 export NODE_PATH=${NVM_PATH}_modules
@@ -647,7 +658,10 @@ if which ghq > /dev/null 2>&1; then
 fi
 
 export PATH=$HOME/.phpenv/shims:$PATH
-eval "$(phpenv init - zsh)"
+if which phpenv > /dev/null 2>&1; then
+  eval "$(phpenv init - zsh)"
+fi
+
 export PATH=$HOME/.composer/vendor/bin:$PATH
 export ECLIPSE_HOME=/usr/lib/eclipse
 alias eclimd=$ECLIPSE_HOME/eclimd
@@ -684,9 +698,13 @@ function font-install(){
 }
 alias font-install=font-install
 
-source ~/.zshrc.local
+if [[ -s "${ZDOTDIR:-${HOME}}/.zshrc.local" ]]; then
+  source ~/.zshrc.local
+fi
 
 autoload -U compinit
 compinit
 
-source $HOME/.zcompcustom
+if [[ -s "${ZDOTDIR:-${HOME}}/.zcompcustom" ]]; then
+  source $HOME/.zcompcustom
+fi
