@@ -3,4 +3,6 @@
 /.vim/plugged
 /.mlterm/msg.log
 /.mlterm/challenge
+/clink/.history
+/clink/clink.log
 node_modules
