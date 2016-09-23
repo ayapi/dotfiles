@@ -1,0 +1,3 @@
+[submodule "clink\\completions"]
+	path = clink\\completions
+	url = git@github.com:vladimir-kotikov/clink-completions.git
