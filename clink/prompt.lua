@@ -32,7 +32,7 @@ function ayapi_prompt_filter()
     color.color_text(' ' .. name .. ' ', color.WHITE ,color.MAGENTA),
     color.color_text(' ' .. pwd .. ' ', color.WHITE, color.BLACK),
     color.color_text(' ' .. datetime .. ' ', color.BLACK ,color.WHITE),
-    "\n "
+    "\n > "
   }
   
   if (branch ~= '') then
