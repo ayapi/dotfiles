@@ -1,34 +1,25 @@
 local color = require('color');
 
 function ayapi_prompt_filter()
-  local p = io.popen("tput cols & cd & echo %USERNAME%@%COMPUTERNAME%^|%USERPROFILE%^|%HOMEDRIVE% & git branch 2>nul")
-  
-  local cols = p:read('*l') - 1
-  local cwd = p:read('*l')
-  local envs_str = p:read('*l')
-  local envs = {}
-  for v in string.gmatch(envs_str, '[^|]+') do
-    table.insert(envs, v)
-  end
-  
-  local name = envs[1]
+  local cwd = clink.get_cwd()
+  local name = clink.get_env('USERNAME') .. '@' .. clink.get_env('COMPUTERNAME')
   local datetime = os.date("%y-%m-%d %H:%M:%S")
-  local home = envs[2]
-  local root = envs[3] .. "\\"
+  local home = clink.get_env('USERPROFILE')
+  local root = clink.get_env('HOMEDRIVE') .. "\\"
   
   cwd = string.gsub(cwd, home, '~', 1)
   cwd = string.gsub(cwd, root, '/', 1)
   cwd = string.gsub(cwd, '\\', '/')
   
   local branch = ""
-  
-  for line in p:lines() do
+  for line in io.popen("git branch 2>nul"):lines() do
     branch = line:match("%* (.+)$")
     if branch then
       break
     end
   end
   
+  local cols = clink.get_screen_info().window_width
   local used_cols = 2 + string.len(name) + 2 + string.len(datetime) + 2
   if (branch ~= '') then
     used_cols = used_cols + string.len(branch) + 2
