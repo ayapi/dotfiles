@@ -3,7 +3,12 @@ local color = require('color');
 function ayapi_prompt_filter()
   local name = os.getenv("USERNAME") .. '@' .. os.getenv("COMPUTERNAME")
   local datetime = os.date("%Y-%m-%d %H:%M:%S")
+  local home = os.getenv("USERPROFILE")
+  local root = os.getenv("HOMEDRIVE") .. "\\"
   local pwd = io.popen("cd"):read('*l')
+  pwd = string.gsub(pwd, home, '~', 1)
+  pwd = string.gsub(pwd, root, '/', 1)
+  pwd = string.gsub(pwd, '\\', '/')
   local branch = ""
   
   for line in io.popen("git branch 2>nul"):lines() do
