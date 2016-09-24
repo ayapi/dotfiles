@@ -1,0 +1,29 @@
+Windows Registry Editor Version 5.00
+
+; Monokai Color Scheme for Command Prompt
+
+[HKEY_CURRENT_USER\Console]
+; BLACK   DGRAY
+"ColorTable00"=dword:001E1D1B
+"ColorTable08"=dword:00808080
+; BLUE    LBLUE
+"ColorTable01"=dword:00986C26
+"ColorTable09"=dword:00F07070
+; GREEN   LGREEN
+"ColorTable02"=dword:002EE2A6
+"ColorTable10"=dword:002EE2A6
+; CYAN    LCYAN
+"ColorTable03"=dword:00FF81AE
+"ColorTable11"=dword:00EFD966
+; RED     LRED
+"ColorTable04"=dword:004400FF
+"ColorTable12"=dword:007226F9
+; MAGENTA LMAGENTA
+"ColorTable05"=dword:00B10CAC
+"ColorTable13"=dword:00E13AD6
+; YELLOW  LYELLOW
+"ColorTable06"=dword:0075bff4
+"ColorTable14"=dword:0074DBE6
+; LGRAY   WHITE
+"ColorTable07"=dword:00CCCCCC
+"ColorTable15"=dword:00F8F8F2
