@@ -1,6 +1,12 @@
 set show-all-if-ambiguous on
 set completion-query-items 0
 set page-completions off
+set expand-tilde on
+
+M-C-e: expand-env-vars
+M-~: tilde-expand
+M-T: clink-completion-shim
+"\t": '\M-\C-e\M-~\M-T'
 
 "\e`X": kill-word
 M-r: reload-lua-state
