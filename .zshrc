@@ -674,6 +674,11 @@ if which phpenv > /dev/null 2>&1; then
   eval "$(phpenv init - zsh)"
 fi
 
+export PATH="$HOME/.rbenv/bin:$PATH"
+if which rbenv > /dev/null 2>&1; then
+  eval "$(rbenv init - zsh)"
+fi
+
 export PATH=$HOME/.composer/vendor/bin:$PATH
 export ECLIPSE_HOME=/usr/lib/eclipse
 alias eclimd=$ECLIPSE_HOME/eclimd
