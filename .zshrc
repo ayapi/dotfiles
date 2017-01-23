@@ -25,7 +25,14 @@ alias zmv='noglob zmv -W'
 
 plugins=()
 
-eval $(dircolors ${ZDOTDIR:-${HOME}}/.dircolors)
+if which dircolors > /dev/null 2>&1; then
+  eval $(dircolors ${ZDOTDIR:-${HOME}}/.dircolors)
+fi
+
+if which gdircolors > /dev/null 2>&1; then
+  eval $(gdircolors ${ZDOTDIR:-${HOME}}/.dircolors)
+fi
+
 zle_highlight=(region:bg=238 isearch:bg=065)
 
 autoload zkbd
@@ -586,7 +593,12 @@ add-zsh-hook preexec uim_off
 
 
 alias keycode="xev | awk -F'[ )]+' '/^KeyPress/ { a[NR+2] } NR in a { printf \"%-3s %s\n\", \$5, \$8 }'"
-alias ls='ls -a --group-directories-first --color=auto'
+
+if which gls > /dev/null 2>&1; then
+  alias ls='gls -a --group-directories-first --color=auto'
+else
+  alias ls='ls -a --group-directories-first --color=auto'
+fi
 
 if which nvim > /dev/null 2>&1; then
   alias vim='/usr/bin/nvim'
