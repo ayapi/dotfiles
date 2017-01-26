@@ -320,20 +320,33 @@ bindkey "^[[3^" ctrl-del
 # copy/paste
 cb_copy() {
   zle copy-region-as-kill
-  print -rn $CUTBUFFER | xsel -ib
+  if which xsel > /dev/null 2>&1; then
+    print -rn $CUTBUFFER | xsel -ib
+  elif which pbcopy > /dev/null 2>&1; then
+    print -rn $CUTBUFFER | pbcopy
+  fi
 }
 zle -N cb_copy
 
 cb_cut() {
   zle kill-region
-  print -rn $CUTBUFFER | xsel -ib
+  if which xsel > /dev/null 2>&1; then
+    print -rn $CUTBUFFER | xsel -ib
+  elif which pbcopy > /dev/null 2>&1; then
+    print -rn $CUTBUFFER | pbcopy
+  fi
 }
 zle -N cb_cut
 
 cb_paste() {
   killring=("$CUTBUFFER", "{(@)killring[1,-2]}")
-  CUTBUFFER=$(xsel -ob < /dev/null 2> /dev/null)
-  zle yank
+  if which xsel > /dev/null 2>&1; then
+    CUTBUFFER=$(xsel -ob < /dev/null 2> /dev/null)
+    zle yank
+  elif which pbcopy > /dev/null 2>&1; then
+    CUTBUFFER=$(pbpaste < /dev/null 2> /dev/null)
+    zle yank
+  fi
 }
 zle -N cb_paste
 
