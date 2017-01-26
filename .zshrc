@@ -496,7 +496,7 @@ fzf-file-include-hidden-widget() {
     query=${${(z)lbuffer}[-1]}
     lbuffer=${LBUFFER[1,($#LBUFFER - $#query)]}
   fi
-  selected=( $(ag --hidden --skip-vcs-ignores --path-to-agignore=~/.agignore --ignore=.git --silent -l 2> /dev/null | fzf -q "$query") )
+  selected=( $(ag --hidden --skip-vcs-ignores --path-to-ignore=~/.agignore --ignore=.git --silent -l 2> /dev/null | fzf -q "$query") )
   LBUFFER="$lbuffer$selected"
   zle redisplay
 }
@@ -511,7 +511,7 @@ fzf-file-from-root-include-hidden-widget() {
     query=${${(z)lbuffer}[-1]}
     lbuffer=${LBUFFER[1,($#LBUFFER - $#query)]}
   fi
-  selected=( $(ag --hidden --skip-vcs-ignores --path-to-agignore=~/.agignore --ignore=.git -l '^(?=.)' / 2> /dev/null | fzf -q "$query") )
+  selected=( $(ag --hidden --skip-vcs-ignores --path-to-ignore=~/.agignore --ignore=.git -l '^(?=.)' / 2> /dev/null | fzf -q "$query") )
   LBUFFER="$lbuffer$selected"
   zle redisplay
 }
@@ -664,7 +664,7 @@ alias type='type -a'
 alias df='df -kh'
 alias du='du -kh'
 
-alias ag='ag --path-to-agignore=~/.agignore --hidden --silent'
+alias ag='ag --path-to-ignore=~/.agignore --hidden --silent'
 
 if [ -z "$NVM_DIR" ]; then
   export NVM_DIR="$HOME/.nvm"
