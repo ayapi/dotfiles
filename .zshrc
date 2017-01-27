@@ -733,12 +733,6 @@ if [[ -s "${ZDOTDIR:-${HOME}}/.zshrc.local" ]]; then
   source ~/.zshrc.local
 fi
 
-autoload -U compinit
-compinit
-
-if [[ -s "${ZDOTDIR:-${HOME}}/.zcompcustom" ]]; then
-  source $HOME/.zcompcustom
-fi
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -s "$HOME/google-cloud-sdk/path.zsh.inc" ]; then
@@ -749,3 +743,11 @@ fi
 if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then
   source "$HOME/google-cloud-sdk/completion.zsh.inc"
 fi
+
+autoload -U compinit
+compinit
+
+if [[ -s "${ZDOTDIR:-${HOME}}/.zcompcustom" ]]; then
+  source $HOME/.zcompcustom
+fi
+
