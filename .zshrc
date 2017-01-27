@@ -607,6 +607,7 @@ add-zsh-hook preexec uim_off
 
 alias keycode="xev | awk -F'[ )]+' '/^KeyPress/ { a[NR+2] } NR in a { printf \"%-3s %s\n\", \$5, \$8 }'"
 
+unalias gls
 if which gls > /dev/null 2>&1; then
   alias ls='gls -a --group-directories-first --color=auto'
 else
