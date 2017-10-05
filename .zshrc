@@ -1,5 +1,15 @@
-if [[ -s ${ZDOTDIR:-${HOME}}/.zim/init.zsh ]]; then
-  source ${ZDOTDIR:-${HOME}}/.zim/init.zsh
+
+
+#
+# User configuration sourced by interactive shells
+#
+
+# Change default zim location 
+export ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
+
+# Source zim
+if [[ -s ${ZIM_HOME}/init.zsh ]]; then
+  source ${ZIM_HOME}/init.zsh
 fi
 
 fpath=( "$HOME/.zfunctions" $fpath )
