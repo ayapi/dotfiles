@@ -5,4 +5,6 @@
 /.mlterm/challenge
 /clink/.history
 /clink/clink.log
+/.config/xfce4/desktop
+/.config/xfce4/terminal
 node_modules
