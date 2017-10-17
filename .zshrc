@@ -755,10 +755,11 @@ if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then
   source "$HOME/google-cloud-sdk/completion.zsh.inc"
 fi
 
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 autoload -U compinit
 compinit
 
 if [[ -s "${ZDOTDIR:-${HOME}}/.zcompcustom" ]]; then
   source $HOME/.zcompcustom
 fi
-
