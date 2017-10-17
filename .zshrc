@@ -690,6 +690,7 @@ export GOPATH=$HOME/.go
 export PATH=$HOME/.go/bin:$PATH
 
 if which ghq > /dev/null 2>&1; then
+  export GHQ_ROOT="$HOME/.ghq"
   fpath=($GOPATH/src/github.com/motemen/ghq/zsh ${fpath})
 fi
 
