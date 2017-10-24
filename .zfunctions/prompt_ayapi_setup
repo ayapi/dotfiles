@@ -50,11 +50,15 @@ prompt_ayapi_build_prompt() {
   local zero='%([BSUbfksu]|([FB]|){*})'
   local _head_len=${#${(S%%)_head//$~zero/}}
   ((_head_len = _head_len + 1))
+  
+  local _git_info='${(e)git_info[prompt]}'
+  local _git_info_len=${#${(S%%)_git_info//$~zero/}}
+  ((_git_info_len = _git_info_len + 1))
 
   # current working directory
   # i want to see long path always
   local _cwd_max_len
-  ((_cwd_max_len = $_prompt_ayapi_cols - 12 - $_head_len))
+  ((_cwd_max_len = $_prompt_ayapi_cols - 3 - $_git_info_len - $_head_len))
   
   print -n "%K{black}"
   print -n "%F{white}"
@@ -68,9 +72,13 @@ prompt_ayapi_build_prompt() {
 
   # clock
   print -n "%K{white}"
-  print -n "%F{black}"
-  print -n " %D{%H:%M:%S}"
+  print -n "%F{black} "
+  print -n $_git_info
   print -n " %k%f"
+  
+  # print -n "%F{white}"
+  # print -n " %D{%H:%M:%S}"
+  # print -n "%f"
   
   # if [[ -n "$git_info" ]]; then
   #   prompt_ayapi_start_segment green black '${(e)git_info[ref]}${(e)git_info[status]}'
@@ -146,6 +154,14 @@ prompt_ayapi_setup() {
   # Add hook for calling git-info before each command.
   add-zsh-hook preexec prompt_ayapi_preexec
   add-zsh-hook precmd prompt_ayapi_precmd
+  
+  zstyle ':zim:git-info:branch' format '%b'
+  zstyle ':zim:git-info:commit' format '%c...'
+  zstyle ':zim:git-info:dirty' format '*'
+  zstyle ':zim:git-info:ahead' format '↑'
+  zstyle ':zim:git-info:behind' format '↓'
+  zstyle ':zim:git-info:keys' format \
+    'prompt' '%b%c%D%A%B'
 
   # Define prompts.
   PROMPT='
