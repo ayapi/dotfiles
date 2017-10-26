@@ -495,6 +495,8 @@ if [[ -s "/etc/profile.d/fzf-extras.zsh" ]]; then
   source /etc/profile.d/fzf-extras.zsh
 fi
 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # file search including hidden files(dotfiles)
 # ref. https://github.com/junegunn/fzf/issues/337
 fzf-file-include-hidden-widget() {
