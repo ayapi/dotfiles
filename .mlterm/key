@@ -1,10 +1,6 @@
 Control+BackSpace="^H"
-Control+Prior=PAGE_UP
-Control+Next=PAGE_DOWN
-UNUSED=SCROLL_UP
-UNUSED=SCROLL_DOWN
-Shift+Prior=UNUSED
-Shift+Next=UNUSED
+Shift+Prior=PAGE_UP
+Shift+Next=PAGE_DOWN
 Shift+F1=UNUSED
 Shift+F2=UNUSED
 
