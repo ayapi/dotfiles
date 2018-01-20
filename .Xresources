@@ -33,9 +33,9 @@ xterm*locale: true
 xterm*utf8: 1
 
 
-xterm*faceName: AyapiGothic:pixelsize=12:antialias=false
+xterm*faceName: AyapiGothic:pixelsize=14:antialias=false
 !xterm*faceName: GohuFont:size=11:antialias=false
-xterm*faceNameDoublesize: AyapiGothic:pixelsize=12:antialias=false
+xterm*faceNameDoublesize: AyapiGothic:pixelsize=14:antialias=false
 !xterm*faceSize: 9
 xterm*allowBoldFonts: false
 
