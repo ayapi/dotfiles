@@ -3,7 +3,7 @@
   name = ayapi
 [core]
   quotepath = false
-  editor = nvim
+  editor = micro
   excludesfile = /home/ayapi/.gitignore_global
 [merge]
   tool = hrdiff
