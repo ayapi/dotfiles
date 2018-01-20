@@ -315,7 +315,9 @@ ctrl-bs() {
   zle delete-region
 }
 zle -N ctrl-bs
-bindkey "${key[ControlBackspace]}" ctrl-bs
+if [ -n "${key[ControlBackspace]}" ]; then
+  bindkey "${key[ControlBackspace]}" ctrl-bs
+fi
 
 # <C-Del>
 ctrl-del() {
