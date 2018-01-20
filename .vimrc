@@ -159,7 +159,7 @@ set number
 set numberwidth=1
 let g:gitgutter_realtime = 1
 let g:gitgutter_eager = 1
-let g:gitgutter_sign_column_always = 1
+set signcolumn=yes
 let g:gitgutter_max_signs = 9999
 let g:gitgutter_diff_args = '--ignore-all-space'
 set cursorline
