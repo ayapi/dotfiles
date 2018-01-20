@@ -1,4 +1,5 @@
 compdef -d rm
+compdef -d ps
 
 __git_remote_repositories() {
 }
