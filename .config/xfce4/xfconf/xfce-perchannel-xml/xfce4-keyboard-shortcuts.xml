@@ -123,14 +123,14 @@
       <property name="&lt;Super&gt;d" type="string" value="show_desktop_key"/>
       <property name="&lt;Shift&gt;&lt;Super&gt;ISO_Left_Tab" type="string" value="left_workspace_key"/>
       <property name="&lt;Super&gt;Tab" type="string" value="right_workspace_key"/>
-      <property name="&lt;Shift&gt;&lt;Super&gt;KP_1" type="string" value="move_window_workspace_1_key"/>
-      <property name="&lt;Shift&gt;&lt;Super&gt;KP_2" type="string" value="move_window_workspace_2_key"/>
-      <property name="&lt;Shift&gt;&lt;Super&gt;KP_3" type="string" value="move_window_workspace_3_key"/>
-      <property name="&lt;Shift&gt;&lt;Super&gt;KP_4" type="string" value="move_window_workspace_4_key"/>
-      <property name="&lt;Super&gt;KP_1" type="string" value="workspace_1_key"/>
-      <property name="&lt;Super&gt;KP_2" type="string" value="workspace_2_key"/>
-      <property name="&lt;Super&gt;KP_3" type="string" value="workspace_3_key"/>
-      <property name="&lt;Super&gt;KP_4" type="string" value="workspace_4_key"/>
+      <property name="&lt;Shift&gt;&lt;Super&gt;numbersign" type="string" value="move_window_workspace_3_key"/>
+      <property name="&lt;Shift&gt;&lt;Super&gt;exclam" type="string" value="move_window_workspace_1_key"/>
+      <property name="&lt;Shift&gt;&lt;Super&gt;quotedbl" type="string" value="move_window_workspace_2_key"/>
+      <property name="&lt;Shift&gt;&lt;Super&gt;dollar" type="string" value="move_window_workspace_4_key"/>
+      <property name="&lt;Super&gt;1" type="string" value="workspace_1_key"/>
+      <property name="&lt;Super&gt;2" type="string" value="workspace_2_key"/>
+      <property name="&lt;Super&gt;4" type="string" value="workspace_4_key"/>
+      <property name="&lt;Super&gt;3" type="string" value="workspace_3_key"/>
     </property>
   </property>
   <property name="providers" type="array">
