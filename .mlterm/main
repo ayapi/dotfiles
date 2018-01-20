@@ -171,7 +171,7 @@ blink_cursor = true
 # use_xim = true
   
 # (xim,uim,scim,m17n-lib,ibus,none)
-input_method = uim
+input_method = fcitx
 
 # tabsize = 8
 
