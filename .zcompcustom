@@ -1,5 +1,6 @@
 compdef -d rm
 compdef -d ps
+compdef -d rake
 
 __git_remote_repositories() {
 }
