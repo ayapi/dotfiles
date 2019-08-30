@@ -698,6 +698,11 @@ if which ghq > /dev/null 2>&1; then
   fpath=($GOPATH/src/github.com/motemen/ghq/zsh ${fpath})
 fi
 
+export PATH=$HOME/.anyenv/bin:$PATH
+if which anyenv > /dev/null 2>&1; then
+  eval "$(anyenv init - zsh)"
+fi
+
 export PATH=$HOME/.phpenv/shims:$PATH
 if which phpenv > /dev/null 2>&1; then
   eval "$(phpenv init - zsh)"
